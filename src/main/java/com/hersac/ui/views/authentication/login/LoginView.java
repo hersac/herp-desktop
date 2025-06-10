@@ -27,8 +27,11 @@ public class LoginView extends JPanel {
     private static final Font FONT_BUTTON = new Font("Roboto", Font.BOLD, 12);
 
     public LoginView(AuthenticationController authController) {
-
         this.authController = authController;
+        initUI();
+    }
+
+    public void initUI() {
 
         setLayout(new GridLayout(1, 2));
 

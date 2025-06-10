@@ -1,31 +1,15 @@
 package com.hersac.ui.views;
 
-import com.hersac.core.modules.authentication.servicios.AuthenticationServices;
-import com.hersac.core.modules.authentication.servicios.impl.AuthenticationServiceImpl;
-import com.hersac.core.modules.usuarios.entities.repositories.UsuarioRepository;
-import com.hersac.core.modules.usuarios.entities.repositories.impl.UsuarioRepositoryImpl;
-import com.hersac.core.modules.usuarios.services.UsuariosServices;
-import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
-import com.hersac.ui.controllers.authentication.AuthenticationController;
+import com.hersac.core.di.DIContainer;
 import com.hersac.ui.views.authentication.login.LoginView;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class AppViews extends JFrame {
-    private EntityManager entityManager;
 
-    public AppViews() {
-        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("persistenciaHerp");
-        entityManager = entityManagerFactory.createEntityManager();
+    public AppViews(DIContainer container) {
 
-        UsuarioRepository usuarioRepository = new UsuarioRepositoryImpl(entityManager);
-        UsuariosServices usuariosServices = new UsuariosServicesImpl(usuarioRepository);
-        AuthenticationServices authServices = new AuthenticationServiceImpl(usuariosServices);
-        AuthenticationController authController = new AuthenticationController(authServices);
 
         setTitle("HERP");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -36,7 +20,7 @@ public class AppViews extends JFrame {
 
         CardLayout vistaContent = new CardLayout();
         JPanel bg = new JPanel(vistaContent);
-        LoginView loginView = new LoginView(authController);
+        LoginView loginView = container.getLoginView();
         loginView.setOpaque(true);
 
         bg.add(loginView);
