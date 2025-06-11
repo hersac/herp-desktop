@@ -3,6 +3,8 @@ package com.hersac.ui.views.authentication.login;
 import com.hersac.core.modules.authentication.entities.RequestEntity;
 import com.hersac.core.modules.authentication.entities.ResponseEntity;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
+import com.hersac.ui.views.authentication.login.interfaces.LoginListener;
+import com.hersac.ui.views.globals.enums.ColorsTheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,12 +16,14 @@ import java.net.URL;
 public class LoginView extends JPanel {
 
     private final AuthenticationController authController;
+    private LoginListener loginListener;
+    private String token;
 
-    private static final Color COLOR_FONDO = Color.decode("#1D2B53");
-    private static final Color COLOR_PRIMARY = Color.decode("#FF004D");
-    private static final Color COLOR_PRIMARY_LIGHT = Color.decode("#FF2969");
-    private static final Color COLOR_TEXT_PLACEHOLDER = Color.decode("#D6D6D6");
-    private static final Color COLOR_LINK = Color.decode("#FAEF5D");
+    private static final Color COLOR_FONDO = ColorsTheme.BACKGROUND.get();
+    private static final Color COLOR_PRIMARY = ColorsTheme.PRIMARY.get();
+    private static final Color COLOR_PRIMARY_LIGHT = ColorsTheme.PRIMARY_LIGTH.get();
+    private static final Color COLOR_TEXT_PLACEHOLDER = ColorsTheme.TEXT_SECONDARY.get();
+    private static final Color COLOR_SECUNDARY = ColorsTheme.SECONDARY.get();
     private static final Font FONT_TITLE = new Font("Roboto", Font.BOLD, 18);
     private static final Font FONT_SUBTITLE = new Font("Roboto", Font.BOLD, 14);
     private static final Font FONT_INPUT = new Font("Roboto", Font.PLAIN, 12);
@@ -58,7 +62,7 @@ public class LoginView extends JPanel {
         panel.setBackground(COLOR_FONDO);
 
         JLabel tituloLogin = buildLabel("HERP", FONT_TITLE, COLOR_PRIMARY, SwingConstants.CENTER);
-        JLabel subtituloLogin = buildLabel("El ERP que tu negocio necesita", FONT_SUBTITLE, COLOR_LINK, SwingConstants.CENTER);
+        JLabel subtituloLogin = buildLabel("El ERP que tu negocio necesita", FONT_SUBTITLE, COLOR_SECUNDARY, SwingConstants.CENTER);
 
         JPanel titulosContent = new JPanel();
         titulosContent.setLayout(new BoxLayout(titulosContent, BoxLayout.Y_AXIS));
@@ -80,10 +84,13 @@ public class LoginView extends JPanel {
 
             RequestEntity request = new RequestEntity(correo, contrasena);
             ResponseEntity response = authController.login(request);
+
             if (response == null) {
                 return;
             }
-            System.out.println("Esta es la respuesta: " + response.toString());
+
+            token = response.getToken();
+            handleLogin();
         });
 
         JPanel loginFormContent = new JPanel(new GridLayout(4, 1));
@@ -259,5 +266,17 @@ public class LoginView extends JPanel {
                 }
             }
         };
+    }
+
+    public void setLoginListener(LoginListener loginListener) {
+        this.loginListener = loginListener;
+    }
+
+    private void handleLogin() {
+        if (token != null && token != "") {
+            if (loginListener != null) {
+                loginListener.onLoginSuccess(token);
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.hersac.core.modules.usuarios.entities.repositories.impl.UsuarioReposi
 import com.hersac.core.modules.usuarios.services.UsuariosServices;
 import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
+import com.hersac.ui.controllers.usuarios.UsuariosController;
 import com.hersac.ui.views.authentication.login.LoginView;
 import jakarta.persistence.EntityManager;
 
@@ -23,6 +24,13 @@ public class DIContainer {
         AuthenticationServices authenticationServices = new AuthenticationServiceImpl(usuariosServices);
 
         return new AuthenticationController(authenticationServices);
+    }
+
+    public UsuariosController getUsuariosController() {
+        UsuarioRepository usuarioRepository = new UsuarioRepositoryImpl(entityManager);
+        UsuariosServices usuariosServices = new UsuariosServicesImpl(usuarioRepository);
+
+        return  new UsuariosController(usuariosServices);
     }
 
     public LoginView getLoginView() {

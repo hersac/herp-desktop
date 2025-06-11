@@ -6,7 +6,11 @@ import com.hersac.core.modules.usuarios.services.UsuariosServices;
 import java.util.List;
 
 public class UsuariosController {
-    private UsuariosServices usuariosServices;
+    private final UsuariosServices usuariosServices;
+
+    public UsuariosController(UsuariosServices usuariosServices) {
+        this.usuariosServices = usuariosServices;
+    }
 
     public List<UsuarioEntity> buscarTodos() {
         return usuariosServices.buscarTodos();

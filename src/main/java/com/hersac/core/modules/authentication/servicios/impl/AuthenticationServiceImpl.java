@@ -20,11 +20,7 @@ public class AuthenticationServiceImpl implements AuthenticationServices {
     }
 
     public ResponseEntity login(RequestEntity request) {
-        System.out.println("Esta es la request: " + request.toString());
-
         UsuarioEntity usuario = usuariosServices.buscarPorCorreo(request.getCorreo());
-
-        System.out.println("Usuario: " + usuario.toString());
 
         validarUsuario(usuario, request);
 
@@ -33,13 +29,9 @@ public class AuthenticationServiceImpl implements AuthenticationServices {
         usuarioSesion.setNombre(usuario.getNombre());
         usuarioSesion.setCorreo(usuario.getCorreo());
 
-        System.out.println("Usuario Session: " + usuarioSesion.toString());
-
         ResponseEntity response = new ResponseEntity();
         response.setUsuarioSession(usuarioSesion);
         response.setToken(UUID.randomUUID().toString());
-
-        System.out.println("Este es el response: " + response.toString());
 
         return response;
     }
