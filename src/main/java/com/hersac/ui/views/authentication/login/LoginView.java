@@ -5,6 +5,7 @@ import com.hersac.core.modules.authentication.entities.ResponseEntity;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
 import com.hersac.ui.views.authentication.login.interfaces.LoginListener;
 import com.hersac.ui.views.globals.enums.ColorsTheme;
+import lombok.Data;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -268,12 +269,12 @@ public class LoginView extends JPanel {
         };
     }
 
-    public void setLoginListener(LoginListener loginListener) {
+    public void addLoginListener(LoginListener loginListener) {
         this.loginListener = loginListener;
     }
 
     private void handleLogin() {
-        if (token != null && token != "") {
+        if (token != null && !token.isEmpty()) {
             if (loginListener != null) {
                 loginListener.onLoginSuccess(token);
             }

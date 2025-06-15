@@ -8,6 +8,7 @@ public enum ColorsTheme {
     SECONDARY(new Color(250, 239, 93)),
     TERTIARY(new Color(126, 37, 83)),
     BACKGROUND(new Color(29, 43, 83)),
+    BACKGROUND_LIGHT(new Color(54, 70, 117)),
     TEXT_PRIMARY(new Color(251, 251, 251)),
     TEXT_SECONDARY(new Color(214, 214, 214)),
     SUCCESS(new Color(76, 175, 80)),

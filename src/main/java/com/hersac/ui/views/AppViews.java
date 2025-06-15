@@ -27,7 +27,7 @@ public class AppViews extends JFrame {
         LoginView loginView = container.getLoginView();
         bg.add(loginView, BorderLayout.CENTER);
 
-        loginView.setLoginListener(token -> {
+        loginView.addLoginListener(token -> {
             if (token != null) {
                 bg.removeAll();
 
