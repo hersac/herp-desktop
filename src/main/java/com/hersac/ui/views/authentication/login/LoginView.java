@@ -4,7 +4,7 @@ import com.hersac.core.modules.authentication.entities.RequestEntity;
 import com.hersac.core.modules.authentication.entities.ResponseEntity;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
 import com.hersac.ui.views.authentication.login.interfaces.LoginListener;
-import com.hersac.ui.views.globals.enums.ColorsTheme;
+import com.hersac.ui.globals.enums.ColorsTheme;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

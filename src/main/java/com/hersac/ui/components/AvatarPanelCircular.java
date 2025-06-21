@@ -1,4 +1,4 @@
-package com.hersac.ui.views.components;
+package com.hersac.ui.components;
 
 import javax.swing.*;
 import java.awt.*;

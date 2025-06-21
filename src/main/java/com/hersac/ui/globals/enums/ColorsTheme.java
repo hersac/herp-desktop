@@ -1,4 +1,4 @@
-package com.hersac.ui.views.globals.enums;
+package com.hersac.ui.globals.enums;
 
 import java.awt.*;
 

@@ -1,6 +1,6 @@
-package com.hersac.ui.views.components;
+package com.hersac.ui.components;
 
-import com.hersac.ui.views.globals.enums.ColorsTheme;
+import com.hersac.ui.globals.enums.ColorsTheme;
 import org.kordamp.ikonli.swing.FontIcon;
 
 import javax.swing.*;

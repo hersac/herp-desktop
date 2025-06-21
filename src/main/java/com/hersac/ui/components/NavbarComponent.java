@@ -1,6 +1,7 @@
-package com.hersac.ui.views.components;
+package com.hersac.ui.components;
 
-import com.hersac.ui.views.globals.enums.ColorsTheme;
+import com.hersac.ui.globals.enums.ColorsTheme;
+import com.hersac.ui.listeners.NavigationListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class NavbarComponent extends JPanel {
+
+    private NavigationListener navigationListener;
 
     private static final Color COLOR_FONDO = ColorsTheme.BACKGROUND.get();
     private static final Color COLOR_TEXTO = ColorsTheme.TEXT_PRIMARY.get();
@@ -31,17 +34,16 @@ public class NavbarComponent extends JPanel {
 
         Font fuenteEtiqueta = new Font("Roboto", Font.PLAIN, 11);
 
-        panelMenuFijo.add(crearEtiqueta("Módulos", fuenteEtiqueta, new String[]{"Comercial", "Financiero", "Usuarios"}));
-        panelMenuFijo.add(crearEtiqueta("Compañía", fuenteEtiqueta, new String[]{"Perfil", "Configuración"}));
-        panelMenuFijo.add(crearEtiqueta("Terceros", fuenteEtiqueta, null));
+        panelMenuFijo.add(crearEtiqueta("Módulos", fuenteEtiqueta, new String[]{"Comercial", "Financiero", "Usuarios"}, null));
+        panelMenuFijo.add(crearEtiqueta("Compañía", fuenteEtiqueta, new String[]{"Perfil", "Configuración"}, null));
+        panelMenuFijo.add(crearEtiqueta("Terceros", fuenteEtiqueta, null, null));
 
         add(panelMenuFijo, BorderLayout.WEST);
         add(panelMenuDinamico, BorderLayout.CENTER);
 
         construirMenu(fuenteEtiqueta);
     }
-
-    private JLabel crearEtiqueta(String texto, Font fuente, String[] subOpciones) {
+    private JLabel crearEtiqueta(String texto, Font fuente, String[] subOpciones, String navigationKey) {
         JLabel etiqueta = new JLabel(texto, SwingConstants.CENTER);
         etiqueta.setFont(fuente);
         etiqueta.setForeground(COLOR_TEXTO);
@@ -51,8 +53,16 @@ public class NavbarComponent extends JPanel {
 
         agregarEfectoHover(etiqueta);
 
-        boolean tieneSubOpciones = subOpciones != null && subOpciones.length > 0;
+        if (navigationKey != null && navigationListener != null) {
+            etiqueta.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    navigationListener.onNavigate(navigationKey);
+                }
+            });
+        }
 
+        boolean tieneSubOpciones = subOpciones != null && subOpciones.length > 0;
         if (tieneSubOpciones) {
             JPopupMenu menuEmergente = crearMenuEmergente(subOpciones, fuente);
             agregarEscuchadorMenu(etiqueta, menuEmergente);
@@ -70,6 +80,7 @@ public class NavbarComponent extends JPanel {
 
         return etiqueta;
     }
+
 
     private void agregarEfectoHover(JLabel etiqueta) {
         etiqueta.addMouseListener(new MouseAdapter() {
@@ -120,27 +131,31 @@ public class NavbarComponent extends JPanel {
 
         switch (moduloSeleccionado) {
             case "Comercial" -> {
-                panelMenuDinamico.add(crearEtiqueta("Clientes", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Ventas", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Compras", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Inventario", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Reportes", fuenteEtiqueta, new String[]{"Ventas", "Compras", "Inventario"}));
+                panelMenuDinamico.add(crearEtiqueta("Clientes", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Ventas", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Compras", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Inventario", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Reportes", fuenteEtiqueta, new String[]{"Ventas", "Compras", "Inventario"}, null));
             }
             case "Financiero" -> {
-                panelMenuDinamico.add(crearEtiqueta("CxC", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("CxP", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Movimientos", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Bancos", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Reportes", fuenteEtiqueta, new String[]{"Flujo de caja", "Estado de resultados", "Balance General"}));
+                panelMenuDinamico.add(crearEtiqueta("CxC", fuenteEtiqueta, null,null));
+                panelMenuDinamico.add(crearEtiqueta("CxP", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Movimientos", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Bancos", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Reportes", fuenteEtiqueta, new String[]{"Flujo de caja", "Estado de resultados", "Balance General"}, null));
             }
             case "Usuarios" -> {
-                panelMenuDinamico.add(crearEtiqueta("Gestión Usuarios", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Roles y permisos", fuenteEtiqueta, null));
-                panelMenuDinamico.add(crearEtiqueta("Auditoría", fuenteEtiqueta, null));
+                panelMenuDinamico.add(crearEtiqueta("Gestión usuarios", fuenteEtiqueta, null, "gestion-usuarios"));
+                panelMenuDinamico.add(crearEtiqueta("Roles y permisos", fuenteEtiqueta, null, "roles-permisos"));
+                panelMenuDinamico.add(crearEtiqueta("Auditoría", fuenteEtiqueta, null, "auditorias"));
             }
         }
 
         panelMenuDinamico.revalidate();
         panelMenuDinamico.repaint();
+    }
+
+    public void setNavigationListener(NavigationListener listener) {
+        this.navigationListener = listener;
     }
 }
