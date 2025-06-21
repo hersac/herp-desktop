@@ -5,7 +5,6 @@ import com.hersac.core.modules.authentication.entities.ResponseEntity;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
 import com.hersac.ui.views.authentication.login.interfaces.LoginListener;
 import com.hersac.ui.views.globals.enums.ColorsTheme;
-import lombok.Data;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
