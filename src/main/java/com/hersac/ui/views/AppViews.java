@@ -48,7 +48,7 @@ public class AppViews extends JFrame {
                     contenido.removeAll();
 
                     switch (destino) {
-                        case "gestion-usuarios" -> contenido.add(new GestionUsuarios(), BorderLayout.CENTER);
+                        case "gestion-usuarios" -> contenido.add(new GestionUsuarios(container), BorderLayout.CENTER);
                         case "roles-permisos" -> contenido.add(new RolesPermisos(), BorderLayout.CENTER);
                         case "auditorias" -> contenido.add(new Auditorias(), BorderLayout.CENTER);
                     }

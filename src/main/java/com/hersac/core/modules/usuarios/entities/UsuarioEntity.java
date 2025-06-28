@@ -1,5 +1,7 @@
 package com.hersac.core.modules.usuarios.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hersac.core.modules.roles.entities.RolEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,4 +30,12 @@ public class UsuarioEntity {
 
     @Column(name = "esta_activo", nullable = false)
     private Boolean estaActivo = true;
+
+    @Column(name = "rol_id", nullable = false)
+    private Long rolId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rol_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // evita error con LAZY
+    private RolEntity rol;
 }

@@ -1,16 +1,110 @@
 package com.hersac.ui.views.usuarios.gestion;
 
-import javax.swing.*;
+import com.hersac.core.di.DIContainer;
+import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
+import com.hersac.ui.controllers.usuarios.UsuariosController;
+import com.hersac.ui.globals.enums.ColorsTheme;
+import com.hersac.ui.views.usuarios.gestion.forms.FiltrosForm;
+import com.hersac.ui.views.usuarios.gestion.listeners.UsuariosListeners;
+import com.hersac.ui.views.usuarios.gestion.tablas.UsuariosTable;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
 
-public class GestionUsuarios extends JPanel {
-    public GestionUsuarios() {
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+
+public class GestionUsuarios extends JPanel implements UsuariosListeners {
+
+    private final UsuariosController usuariosController;
+    private final UsuariosTable tablaUsuariosTable = new UsuariosTable();
+
+    public GestionUsuarios(DIContainer diContainer) {
+        this.usuariosController = diContainer.getUsuariosController();
+
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
-        setPreferredSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(new Dimension(800, 600));
 
         JLabel titleLabel = new JLabel("Gestión de Usuarios");
-        titleLabel.setFont(new java.awt.Font("Roboto", java.awt.Font.BOLD, 24));
+        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
         titleLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+        FiltrosForm filtrosForm = new FiltrosForm();
+
+        JButton registrarBtn = new JButton("Registrar Usuario");
+        FontIcon iconVer = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
+        registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
+        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
+        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        registrarBtn.setIcon(iconVer);
+
+        JTextField searchField = new JTextField(25);
+        searchField.setMaximumSize(new Dimension(400, 30));
+        searchField.setAlignmentX(CENTER_ALIGNMENT);
+
+        JPanel panelBtn = new JPanel();
+        panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
+        panelBtn.setOpaque(false);
+        panelBtn.setPreferredSize(new Dimension(800, 40));
+        panelBtn.setMaximumSize(new Dimension(800, 40));
+        panelBtn.add(searchField);
+        panelBtn.add(Box.createHorizontalGlue());
+        panelBtn.add(registrarBtn);
+
+        JPanel panelBtnExpansible = new JPanel();
+        panelBtnExpansible.setLayout(new BoxLayout(panelBtnExpansible, BoxLayout.X_AXIS));
+        panelBtnExpansible.setOpaque(false);
+        panelBtnExpansible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBtnExpansible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBtnExpansible.add(Box.createHorizontalGlue());
+        panelBtnExpansible.add(panelBtn);
+        panelBtnExpansible.add(Box.createHorizontalGlue());
+
+        tablaUsuariosTable.setAlignmentX(CENTER_ALIGNMENT);
+        tablaUsuariosTable.setMinimumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        tablaUsuariosTable.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        tablaUsuariosTable.setMaximumSize(new Dimension(800, Integer.MAX_VALUE));
+
+        add(Box.createRigidArea(new Dimension(0, 10)));
         add(titleLabel);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        add(filtrosForm);
+        add(Box.createRigidArea(new Dimension(0, 100)));
+        add(panelBtnExpansible);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        add(tablaUsuariosTable);
+        add(Box.createVerticalGlue());
+
+        List<UsuarioEntity> listaUsuarios = obtenerUsuarios();
+        tablaUsuariosTable.setUsuarios(listaUsuarios);
+    }
+
+    @Override
+    public void onVerUsuario(UsuarioEntity usuario) {
+        JOptionPane.showMessageDialog(this,
+            "Detalles de usuario:\n\nNombre: " + usuario.getNombre() + "\nCorreo: " + usuario.getCorreo(),
+            "Ver Usuario", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    @Override
+    public void onToggleEstado(UsuarioEntity usuario) {
+        System.out.println("Usuario " + usuario.getNombre() + " ahora está " + (usuario.getEstaActivo() ? "activo" : "inactivo"));
+        // Aquí podrías guardar el nuevo estado en la base de datos usando el controller
+    }
+
+    @Override
+    public void onEliminarUsuario(UsuarioEntity usuario) {
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "¿Seguro que deseas eliminar al usuario " + usuario.getNombre() + "?",
+            "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            System.out.println("Eliminado: " + usuario.getNombre());
+            // Eliminar desde el controller y recargar tabla
+        }
+    }
+
+    private List<UsuarioEntity> obtenerUsuarios() {
+        return usuariosController.buscarTodos();
     }
 }
