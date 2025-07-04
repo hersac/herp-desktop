@@ -1,4 +1,4 @@
-package com.hersac.core.modules.roles.entities;
+package com.hersac.core.modules.permisos.entities;
 
 import java.time.LocalDateTime;
 
@@ -16,17 +16,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "permisos")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class RolEntity {
+public class PermisoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "rol_id")
-    private Long rolId;
+    @Column(name = "permiso_id")
+    private Long permisoId;
 
     @Column(name = "nombre", nullable = false, unique = true)
     private String nombre;

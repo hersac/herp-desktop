@@ -2,13 +2,29 @@ package com.hersac.core.di;
 
 import com.hersac.core.modules.authentication.servicios.AuthenticationServices;
 import com.hersac.core.modules.authentication.servicios.impl.AuthenticationServiceImpl;
+import com.hersac.core.modules.departamentos.entities.repositories.DepartamentoRepository;
+import com.hersac.core.modules.departamentos.entities.repositories.impl.DepartamentoRepositoryImpl;
+import com.hersac.core.modules.departamentos.services.DepartamentosServices;
+import com.hersac.core.modules.departamentos.services.impl.DepartamentosServicesImpl;
+import com.hersac.core.modules.permisos.entities.repositories.PermisoRepository;
+import com.hersac.core.modules.permisos.entities.repositories.impl.PermisoRepositoryImpl;
+import com.hersac.core.modules.permisos.services.PermisosService;
+import com.hersac.core.modules.permisos.services.impl.PermisosServiceImpl;
+import com.hersac.core.modules.rolespermisos.entities.repositories.RolPermisoRepository;
+import com.hersac.core.modules.rolespermisos.entities.repositories.impl.RolPermisoRepositoryImpl;
+import com.hersac.core.modules.rolespermisos.services.RolesPermisosService;
+import com.hersac.core.modules.rolespermisos.services.impl.RolesPermisosServicesImpl;
 import com.hersac.core.modules.usuarios.entities.repositories.UsuarioRepository;
 import com.hersac.core.modules.usuarios.entities.repositories.impl.UsuarioRepositoryImpl;
 import com.hersac.core.modules.usuarios.services.UsuariosServices;
 import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
+import com.hersac.ui.controllers.departamentos.DepartamentosController;
+import com.hersac.ui.controllers.permisos.PermisosController;
+import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
 import com.hersac.ui.controllers.usuarios.UsuariosController;
 import com.hersac.ui.views.authentication.login.LoginView;
+
 import jakarta.persistence.EntityManager;
 
 public class DIContainer {
@@ -30,7 +46,21 @@ public class DIContainer {
         UsuarioRepository usuarioRepository = new UsuarioRepositoryImpl(entityManager);
         UsuariosServices usuariosServices = new UsuariosServicesImpl(usuarioRepository);
 
-        return  new UsuariosController(usuariosServices);
+        return new UsuariosController(usuariosServices);
+    }
+
+    public DepartamentosController getDepartamentosController() {
+        DepartamentoRepository departamentoRepository = new DepartamentoRepositoryImpl(entityManager);
+        DepartamentosServices departamentosServices = new DepartamentosServicesImpl(departamentoRepository);
+
+        return new DepartamentosController(departamentosServices);
+    }
+
+    public RolesPermisosController getRolesPermisosController() {
+        RolPermisoRepository rolPermisoRepository = new RolPermisoRepositoryImpl(entityManager);
+        RolesPermisosService rolesPermisosService = new RolesPermisosServicesImpl(rolPermisoRepository);
+
+        return new RolesPermisosController(rolesPermisosService);
     }
 
     public LoginView getLoginView() {
