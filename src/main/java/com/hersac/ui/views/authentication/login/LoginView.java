@@ -49,7 +49,7 @@ public class LoginView extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Component clickedComponent = getComponentAt(e.getPoint());
-                if (!(clickedComponent instanceof JTextField) && !(clickedComponent instanceof JPasswordField)) {
+                if (!(clickedComponent instanceof JTextField)) {
                     requestFocusInWindow();
                 }
             }
@@ -72,13 +72,33 @@ public class LoginView extends JPanel {
         titulosContent.add(tituloLogin);
         titulosContent.add(subtituloLogin);
 
-        JTextField correoField = buildTextField("hello@example.com");
+        JPanel loginFormContent = buildLoginFormContent();
+
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(titulosContent);
+        panel.add(loginFormContent);
+        panel.add(Box.createVerticalStrut(10));
+
+        return panel;
+    }
+
+    private JPanel buildLoginFormContent() {
+        JTextField correoField = buildTextField();
+        correoField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (Character.isUpperCase(c)) {
+                    e.setKeyChar(Character.toLowerCase(c));
+                }
+            }
+        });
         seleccionarInputText(correoField);
 
-        JPasswordField contrasenaField = buildPasswordField("******");
+        JPasswordField contrasenaField = buildPasswordField();
         seleccionarInputPass(contrasenaField);
 
-        JLabel submitBtn = buildSubmitButton("Acceder", () -> {
+        JLabel submitBtn = buildSubmitButton(() -> {
             String correo = correoField.getText();
             String contrasena = new String(contrasenaField.getPassword());
 
@@ -100,12 +120,7 @@ public class LoginView extends JPanel {
         loginFormContent.add(Box.createVerticalStrut(10));
         loginFormContent.add(submitBtn);
 
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(titulosContent);
-        panel.add(loginFormContent);
-        panel.add(Box.createVerticalStrut(10));
-
-        return panel;
+        return loginFormContent;
     }
 
     private JPanel buildPanelDerecho() {
@@ -122,8 +137,8 @@ public class LoginView extends JPanel {
         return label;
     }
 
-    private JTextField buildTextField(String placeholder) {
-        JTextField field = new JTextField(placeholder);
+    private JTextField buildTextField() {
+        JTextField field = new JTextField("hello@example.com");
         field.setOpaque(false);
         field.setFont(FONT_INPUT);
         field.setForeground(COLOR_TEXT_PLACEHOLDER);
@@ -134,8 +149,8 @@ public class LoginView extends JPanel {
         return field;
     }
 
-    private JPasswordField buildPasswordField(String placeholder) {
-        JPasswordField field = new JPasswordField(placeholder);
+    private JPasswordField buildPasswordField() {
+        JPasswordField field = new JPasswordField("******");
         field.setOpaque(false);
         field.setFont(FONT_PASSWORD);
         field.setForeground(COLOR_TEXT_PLACEHOLDER);
@@ -146,8 +161,8 @@ public class LoginView extends JPanel {
         return field;
     }
 
-    private JLabel buildSubmitButton(String text, Runnable onClick) {
-        JLabel btn = new JLabel(text);
+    private JLabel buildSubmitButton(Runnable onClick) {
+        JLabel btn = new JLabel("Acceder");
         btn.setHorizontalAlignment(SwingConstants.CENTER);
         btn.setFont(FONT_BUTTON);
         btn.setForeground(Color.WHITE);
