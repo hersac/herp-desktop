@@ -10,6 +10,10 @@ import com.hersac.core.modules.permisos.entities.repositories.PermisoRepository;
 import com.hersac.core.modules.permisos.entities.repositories.impl.PermisoRepositoryImpl;
 import com.hersac.core.modules.permisos.services.PermisosService;
 import com.hersac.core.modules.permisos.services.impl.PermisosServiceImpl;
+import com.hersac.core.modules.roles.entities.repositories.RolRepository;
+import com.hersac.core.modules.roles.entities.repositories.impl.RolRepositoryImpl;
+import com.hersac.core.modules.roles.services.RolesServices;
+import com.hersac.core.modules.roles.services.impl.RolesServicesImpl;
 import com.hersac.core.modules.rolespermisos.entities.repositories.RolPermisoRepository;
 import com.hersac.core.modules.rolespermisos.entities.repositories.impl.RolPermisoRepositoryImpl;
 import com.hersac.core.modules.rolespermisos.services.RolesPermisosService;
@@ -21,6 +25,7 @@ import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
 import com.hersac.ui.controllers.departamentos.DepartamentosController;
 import com.hersac.ui.controllers.permisos.PermisosController;
+import com.hersac.ui.controllers.roles.RolesController;
 import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
 import com.hersac.ui.controllers.usuarios.UsuariosController;
 import com.hersac.ui.views.authentication.login.LoginView;
@@ -61,6 +66,20 @@ public class DIContainer {
         RolesPermisosService rolesPermisosService = new RolesPermisosServicesImpl(rolPermisoRepository);
 
         return new RolesPermisosController(rolesPermisosService);
+    }
+
+    public RolesController getRolesController() {
+        RolRepository rolPermisoRepository = new RolRepositoryImpl(entityManager);
+        RolesServices rolesPermisosService = new RolesServicesImpl(rolPermisoRepository);
+
+        return new RolesController(rolesPermisosService);
+    }
+
+    public PermisosController getPermisosController() {
+        PermisoRepository permisoRepository = new PermisoRepositoryImpl(entityManager);
+        PermisosService permisosService = new PermisosServiceImpl(permisoRepository);
+
+        return new PermisosController(permisosService);
     }
 
     public LoginView getLoginView() {

@@ -1,0 +1,154 @@
+package com.hersac.ui.views.usuarios.rolesPermisos.tablas;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
+
+import com.hersac.core.modules.roles.entities.RolEntity;
+import com.hersac.ui.views.usuarios.rolesPermisos.listeners.RolesPermisosListener;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
+
+public class RolesPermisosTable extends JPanel {
+    private JTable table;
+    private DefaultTableModel model;
+    private RolesPermisosListener listener;
+
+    public RolesPermisosTable() {
+        setLayout(new BorderLayout());
+        model = new DefaultTableModel(new Object[]{"ID", "Nombre", "Descripción", "Activo", "Acciones"}, 0) {
+            public boolean isCellEditable(int row, int column) { return column == 4; }
+        };
+        table = new JTable(model);
+        table.setRowHeight(40);
+        table.getColumnModel().getColumn(4).setCellRenderer(new AccionesRenderer());
+        table.getColumnModel().getColumn(4).setCellEditor(new AccionesEditor());
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int column = table.columnAtPoint(e.getPoint());
+                int row = table.rowAtPoint(e.getPoint());
+                if (column == 4 && row >= 0 && table.isCellEditable(row, column)) {
+                    table.editCellAt(row, column);
+                    table.getEditorComponent().requestFocusInWindow();
+                }
+            }
+        });
+        add(new JScrollPane(table), BorderLayout.CENTER);
+    }
+
+    public void setRoles(List<RolEntity> lista) {
+        model.setRowCount(0);
+        for (RolEntity rol : lista) {
+            model.addRow(new Object[]{
+                rol.getRolId(),
+                rol.getNombre(),
+                rol.getDescripcion(),
+                rol.getEstaActivo() != null && rol.getEstaActivo() ? "Sí" : "No",
+                rol
+            });
+        }
+    }
+
+    public void setActionListener(RolesPermisosListener listener) {
+        this.listener = listener;
+    }
+
+    private class AccionesRenderer implements javax.swing.table.TableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value instanceof RolEntity rol) {
+                JPanel panel = crearPanelAcciones(rol);
+                panel.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                return panel;
+            }
+            return new JLabel("");
+        }
+    }
+
+    private class AccionesEditor extends AbstractCellEditor implements javax.swing.table.TableCellEditor {
+        private final JPanel panel;
+        private RolEntity rol;
+
+        public AccionesEditor() {
+            panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            panel.setOpaque(false);
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            if (value instanceof RolEntity) {
+                rol = (RolEntity) value;
+                panel.removeAll();
+                boolean activo = Boolean.TRUE.equals(rol.getEstaActivo());
+                JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver rol", new Color(60, 130, 200), e -> {
+                    if (listener != null) listener.mostrarModalEditarRol(rol);
+                    fireEditingStopped();
+                });
+                JButton btnToggle = crearBotonAccion(
+                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                        activo ? "Inactivar" : "Activar",
+                        activo ? new Color(0, 180, 0) : Color.RED,
+                        e -> {
+                            rol.setEstaActivo(!rol.getEstaActivo());
+                            model.setValueAt(rol.getEstaActivo() ? "Sí" : "No", row, 3);
+                            model.setValueAt(rol, row, 4);
+                            if (listener != null) listener.editarRol(rol);
+                            fireEditingStopped();
+                        });
+                JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED, e -> {
+                    if (listener != null) listener.eliminarRol(rol);
+                    fireEditingStopped();
+                });
+                panel.add(btnVer);
+                panel.add(btnToggle);
+                panel.add(btnEliminar);
+            }
+            return panel;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return rol;
+        }
+    }
+
+    private JPanel crearPanelAcciones(RolEntity rol) {
+        boolean activo = Boolean.TRUE.equals(rol.getEstaActivo());
+        JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver rol", new Color(60, 130, 200));
+        JButton btnToggle = crearIconoBoton(
+                activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                activo ? "Inactivar" : "Activar",
+                activo ? new Color(0, 180, 0) : Color.RED);
+        JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        panel.setOpaque(false);
+        panel.add(btnVer);
+        panel.add(btnToggle);
+        panel.add(btnEliminar);
+        return panel;
+    }
+
+    private JButton crearIconoBoton(FontAwesomeSolid icono, String tooltip, Color color) {
+        FontIcon icon = FontIcon.of(icono, 18, color);
+        JButton button = new JButton(icon);
+        button.setToolTipText(tooltip);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setContentAreaFilled(false);
+        button.setOpaque(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setPreferredSize(new Dimension(36, 36));
+        return button;
+    }
+
+    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener action) {
+        JButton button = crearIconoBoton(icono, tooltip, color);
+        button.addActionListener(action);
+        return button;
+    }
+}
