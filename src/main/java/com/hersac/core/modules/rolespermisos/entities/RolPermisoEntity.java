@@ -46,6 +46,6 @@ public class RolPermisoEntity {
 
     @Override
     public String toString() {
-        return permiso != null ? permiso.getNombre() : "Permiso no asignado";
+        return rol != null ? rol.getNombre() : "Rol no asignado";
     }
 }

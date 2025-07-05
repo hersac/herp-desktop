@@ -3,9 +3,10 @@ package com.hersac.ui.views.usuarios.gestion;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -36,14 +37,20 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
 
     private JFrame frame = new JFrame("Registrar Usuario");
     private final UsuariosController usuariosController;
-    private final DepartamentosController departamentosCotroller;
-    private final RolesPermisosController rolesPemisosController;
+    private final DepartamentosController departamentosController;
+    private final RolesPermisosController rolesPermisosController;
     private final UsuariosTable tablaUsuariosTable = new UsuariosTable();
+
+    private List<UsuarioEntity> listaCompletaUsuarios;
+    private FiltrosForm filtrosForm;
+    private JTextField searchField;
 
     public GestionUsuarios(DIContainer diContainer) {
         this.usuariosController = diContainer.getUsuariosController();
-        this.departamentosCotroller = diContainer.getDepartamentosController();
-        this.rolesPemisosController = diContainer.getRolesPermisosController();
+        this.departamentosController = diContainer.getDepartamentosController();
+        this.rolesPermisosController = diContainer.getRolesPermisosController();
+
+        this.tablaUsuariosTable.setActionListener(this);
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
@@ -53,7 +60,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
         titleLabel.setAlignmentX(CENTER_ALIGNMENT);
 
-        FiltrosForm filtrosForm = new FiltrosForm();
+        filtrosForm = new FiltrosForm();
 
         JButton registrarBtn = new JButton("Registrar Usuario");
         FontIcon iconVer = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
@@ -62,16 +69,17 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
         registrarBtn.setIcon(iconVer);
 
-        List<DepartamentoEntity> departamentos = obtenerDepartamentos();
-        List<RolPermisoEntity> roles = obtenerRoles();
-
-        ejecutarAccion(registrarBtn, () -> {
-            new RegistrarUsuario(frame, departamentos, roles, this);
-        });
-
-        JTextField searchField = new JTextField(25);
+        searchField = new JTextField(25);
         searchField.setMaximumSize(new Dimension(400, 30));
         searchField.setAlignmentX(CENTER_ALIGNMENT);
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                filtrarUsuarios();
+            }
+        });
+
+        filtrosForm.setOnFiltrosCambiados(this::filtrarUsuarios);
 
         JPanel panelBtn = new JPanel();
         panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
@@ -94,7 +102,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         tablaUsuariosTable.setAlignmentX(CENTER_ALIGNMENT);
         tablaUsuariosTable.setMinimumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         tablaUsuariosTable.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        tablaUsuariosTable.setMaximumSize(new Dimension(800, Integer.MAX_VALUE));
+        tablaUsuariosTable.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
 
         add(Box.createRigidArea(new Dimension(0, 10)));
         add(titleLabel);
@@ -107,29 +115,33 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         add(Box.createVerticalGlue());
 
         List<UsuarioEntity> listaUsuarios = obtenerUsuarios();
+        this.listaCompletaUsuarios = listaUsuarios;
         tablaUsuariosTable.setUsuarios(listaUsuarios);
+
+        // Acción botón registrar
+        List<DepartamentoEntity> departamentos = obtenerDepartamentos();
+        filtrosForm.setDepartamentos(departamentos);
+        List<RolPermisoEntity> roles = obtenerRoles();
+        ejecutarAccion(registrarBtn, () -> {
+            new RegistrarUsuario(frame, departamentos, roles, this, null);
+        });
     }
 
     private void ejecutarAccion(JButton panel, Runnable accion) {
-        panel.addMouseListener(new MouseAdapter() {
+        panel.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(java.awt.event.MouseEvent e) {
                 accion.run();
             }
 
             @Override
-            public void mouseEntered(MouseEvent e) {
+            public void mouseEntered(java.awt.event.MouseEvent e) {
                 panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 panel.setBackground(ColorsTheme.PRIMARY_LIGTH.get());
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
-                super.mouseReleased(e);
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
+            public void mouseExited(java.awt.event.MouseEvent e) {
                 panel.setBackground(ColorsTheme.PRIMARY.get());
             }
         });
@@ -138,10 +150,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     @Override
     public void crearUsuario(UsuarioEntity usuario) {
         usuariosController.crear(usuario);
-
-        List<UsuarioEntity> listaActualizada = obtenerUsuarios();
-        tablaUsuariosTable.setUsuarios(listaActualizada);
-
+        actualizarTabla();
         JOptionPane.showMessageDialog(this,
                 "Usuario creado exitosamente:\n\nNombre: " + usuario.getNombre() + "\nCorreo: " + usuario.getCorreo(),
                 "Usuario Creado", JOptionPane.INFORMATION_MESSAGE);
@@ -149,16 +158,19 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
 
     @Override
     public void verUsuario(UsuarioEntity usuario) {
-        JOptionPane.showMessageDialog(this,
-                "Detalles de usuario:\n\nNombre: " + usuario.getNombre() + "\nCorreo: " + usuario.getCorreo(),
-                "Ver Usuario", JOptionPane.INFORMATION_MESSAGE);
+        List<DepartamentoEntity> departamentos = obtenerDepartamentos();
+        List<RolPermisoEntity> roles = obtenerRoles();
+        new RegistrarUsuario(frame, departamentos, roles, this, usuario);
     }
 
     @Override
     public void actualizarUsuario(UsuarioEntity usuario) {
-        System.out.println(
-                "Usuario " + usuario.getNombre() + " ahora está " + (usuario.getEstaActivo() ? "activo" : "inactivo"));
-        // Aquí podrías guardar el nuevo estado en la base de datos usando el controller
+        usuariosController.actualizar(usuario.getUsuarioId(), usuario);
+        actualizarTabla();
+        JOptionPane.showMessageDialog(this,
+                "Usuario actualizado exitosamente:\n\nNombre: " + usuario.getNombre() + "\nCorreo: "
+                        + usuario.getCorreo(),
+                "Usuario Actualizado", JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Override
@@ -167,9 +179,67 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
                 "¿Seguro que deseas eliminar al usuario " + usuario.getNombre() + "?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
-            System.out.println("Eliminado: " + usuario.getNombre());
-            // Eliminar desde el controller y recargar tabla
+            usuariosController.eliminar(usuario.getUsuarioId());
+            actualizarTabla();
+            JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente.",
+                    "Eliminación exitosa", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    private void actualizarTabla() {
+        this.listaCompletaUsuarios = obtenerUsuarios();
+        filtrarUsuarios();
+    }
+
+    private void filtrarUsuarios() {
+        final String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
+        final String estado = filtrosForm.getEstadoSeleccionado();
+        final String departamento = filtrosForm.getDepartamentoSeleccionado();
+        final String desde = filtrosForm.getFechaDesde();
+        final String hasta = filtrosForm.getFechaHasta();
+
+        List<UsuarioEntity> filtrados = listaCompletaUsuarios.stream()
+                .filter(u -> {
+                    String usuarioIdStr = String.valueOf(u.getUsuarioId());
+                    String nombre = u.getNombre() != null ? u.getNombre().toLowerCase() : "";
+                    String correo = u.getCorreo() != null ? u.getCorreo().toLowerCase() : "";
+                    String estadoUsuario = u.getEstaActivo() != null ? (u.getEstaActivo() ? "activo" : "inactivo") : "";
+                    String rol = (u.getRolPermiso() != null && u.getRolPermiso().getRol() != null && u.getRolPermiso().getRol().getNombre() != null)
+                        ? u.getRolPermiso().getRol().getNombre().toLowerCase() : "sin rol";
+                    String depNombre = (u.getDepartamento() != null && u.getDepartamento().getNombre() != null)
+                        ? u.getDepartamento().getNombre().toLowerCase() : "sin departamento";
+                    boolean coincideTexto = texto.isEmpty()
+                        || usuarioIdStr.contains(texto)
+                        || nombre.contains(texto)
+                        || correo.contains(texto)
+                        || estadoUsuario.contains(texto)
+                        || rol.contains(texto)
+                        || depNombre.contains(texto);
+
+                    boolean coincideEstado = estado.equals("Todos")
+                            || (estado.equals("Activos") && Boolean.TRUE.equals(u.getEstaActivo()))
+                            || (estado.equals("Inactivos") && Boolean.FALSE.equals(u.getEstaActivo()));
+
+                    boolean coincideDep = departamento.equals("Todos") || departamento.equalsIgnoreCase(depNombre);
+
+                    boolean coincideFecha = true;
+                    if (desde != null && hasta != null) {
+                        if (u.getFechaCreacion() != null) {
+                            String fecha = u.getFechaCreacion().toLocalDate().toString();
+                            coincideFecha = (fecha.compareTo(desde) >= 0 && fecha.compareTo(hasta) <= 0);
+                        } else {
+                            coincideFecha = false;
+                        }
+                    }
+
+                    boolean coincideRol = true;
+                    // Si tienes un filtro de rol, aquí puedes agregar la lógica
+
+                    return coincideTexto && coincideEstado && coincideDep && coincideFecha && coincideRol;
+                })
+                .collect(Collectors.toList());
+
+        tablaUsuariosTable.setUsuarios(filtrados);
     }
 
     private List<UsuarioEntity> obtenerUsuarios() {
@@ -177,10 +247,10 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     }
 
     private List<DepartamentoEntity> obtenerDepartamentos() {
-        return departamentosCotroller.buscarTodos();
+        return departamentosController.buscarTodos();
     }
 
     private List<RolPermisoEntity> obtenerRoles() {
-        return rolesPemisosController.buscarTodos();
+        return rolesPermisosController.buscarTodos();
     }
 }

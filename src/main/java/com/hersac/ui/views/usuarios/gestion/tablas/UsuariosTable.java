@@ -9,6 +9,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Comparator;
 import java.util.EventObject;
 import java.util.List;
 
@@ -37,28 +38,26 @@ public class UsuariosTable extends JPanel {
     public UsuariosTable() {
         setLayout(new BorderLayout());
 
-        String[] columnas = { "ID", "Nombre", "Correo", "Estado", "Acciones" };
+        String[] columnas = { "ID", "Nombre", "Correo", "Departamento", "Rol", "Estado", "Acciones" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 4;
+                return column == 6;
             }
         };
 
         tablaUsuarios = new JTable(modeloTabla);
         tablaUsuarios.setRowHeight(40);
         tablaUsuarios.setShowGrid(false);
-
-        tablaUsuarios.getColumnModel().getColumn(4).setCellRenderer(new AccionesRenderer());
-        tablaUsuarios.getColumnModel().getColumn(4).setCellEditor(new AccionesEditor());
-
+        tablaUsuarios.getColumnModel().getColumn(6).setCellRenderer(new AccionesRenderer());
+        tablaUsuarios.getColumnModel().getColumn(6).setCellEditor(new AccionesEditor());
         tablaUsuarios.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int column = tablaUsuarios.columnAtPoint(e.getPoint());
                 int row = tablaUsuarios.rowAtPoint(e.getPoint());
 
-                if (column == 4 && row >= 0 && tablaUsuarios.isCellEditable(row, column)) {
+                if (column == 6 && row >= 0 && tablaUsuarios.isCellEditable(row, column)) {
                     tablaUsuarios.editCellAt(row, column);
                     tablaUsuarios.getEditorComponent().requestFocusInWindow();
                 }
@@ -69,12 +68,20 @@ public class UsuariosTable extends JPanel {
     }
 
     public void setUsuarios(List<UsuarioEntity> usuarios) {
+        usuarios.sort(Comparator.comparingLong(UsuarioEntity::getUsuarioId));
+
         modeloTabla.setRowCount(0);
         for (UsuarioEntity usuario : usuarios) {
+            String departamento = (usuario.getDepartamento() != null && usuario.getDepartamento().getNombre() != null)
+                ? usuario.getDepartamento().getNombre() : "Sin departamento";
+            String rol = (usuario.getRolPermiso() != null && usuario.getRolPermiso().getRol() != null && usuario.getRolPermiso().getRol().getNombre() != null)
+                ? usuario.getRolPermiso().getRol().getNombre() : "Sin rol";
             modeloTabla.addRow(new Object[] {
                     usuario.getUsuarioId(),
                     usuario.getNombre(),
                     usuario.getCorreo(),
+                    departamento,
+                    rol,
                     usuario.getEstaActivo() ? "Activo" : "Inactivo",
                     usuario
             });

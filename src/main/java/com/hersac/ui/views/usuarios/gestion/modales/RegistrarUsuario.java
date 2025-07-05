@@ -32,11 +32,14 @@ public class RegistrarUsuario extends JDialog {
 
     private UsuarioEntity usuarioRegistrado;
     private final UsuariosListeners listener;
+    private boolean esEdicion;
 
     public RegistrarUsuario(JFrame parent, List<DepartamentoEntity> departamentos, List<RolPermisoEntity> roles,
-            UsuariosListeners listener) {
-        super(parent, "Registrar Usuario", true);
+            UsuariosListeners listener, UsuarioEntity usuarioParaEditar) {
+        super(parent, usuarioParaEditar != null ? "Actualizar Usuario" : "Registrar Usuario", true);
         this.listener = listener;
+        this.usuarioRegistrado = usuarioParaEditar;
+        this.esEdicion = usuarioParaEditar != null;
         initComponents(departamentos, roles);
     }
 
@@ -59,6 +62,15 @@ public class RegistrarUsuario extends JDialog {
         departamentos.forEach(departamentoCombo::addItem);
         roles.forEach(rolCombo::addItem);
 
+        if (esEdicion && usuarioRegistrado != null) {
+            nombreField.setText(usuarioRegistrado.getNombre());
+            correoField.setText(usuarioRegistrado.getCorreo());
+            contrasenaField.setText(usuarioRegistrado.getContrasena());
+            activoCheckBox.setSelected(usuarioRegistrado.getEstaActivo());
+            departamentoCombo.setSelectedItem(usuarioRegistrado.getDepartamento());
+            rolCombo.setSelectedItem(usuarioRegistrado.getRolPermiso());
+        }
+
         formPanel.add(new JLabel("Nombre:"));
         formPanel.add(nombreField);
 
@@ -78,7 +90,7 @@ public class RegistrarUsuario extends JDialog {
         formPanel.add(activoCheckBox);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton guardarBtn = new JButton("Guardar");
+        JButton guardarBtn = new JButton(esEdicion ? "Actualizar" : "Guardar");
         JButton cancelarBtn = new JButton("Cancelar");
 
         guardarBtn.addActionListener(e -> guardarUsuario());
@@ -97,18 +109,25 @@ public class RegistrarUsuario extends JDialog {
         DepartamentoEntity departamentoSeleccionado = (DepartamentoEntity) departamentoCombo.getSelectedItem();
         RolPermisoEntity rolSeleccionado = (RolPermisoEntity) rolCombo.getSelectedItem();
 
-        usuarioRegistrado = UsuarioEntity.builder()
-                .nombre(nombreField.getText())
-                .correo(correoField.getText())
-                .contrasena(new String(contrasenaField.getPassword()))
-                .estaActivo(activoCheckBox.isSelected())
-                .departamento(departamentoSeleccionado)
-                .rolPermiso(rolSeleccionado)
-                .usuarioCreacion(UsuarioEntity.builder().usuarioId(1L).build()) // ⚠ ID mínimo necesario
-                .usuarioActualizacion(UsuarioEntity.builder().usuarioId(1L).build()) // ⚠ lo mismo aquí
-                .build();
+        if (usuarioRegistrado == null) {
+            usuarioRegistrado = new UsuarioEntity();
+        }
 
-        listener.crearUsuario(usuarioRegistrado);
+        usuarioRegistrado.setNombre(nombreField.getText());
+        usuarioRegistrado.setCorreo(correoField.getText());
+        usuarioRegistrado.setContrasena(new String(contrasenaField.getPassword()));
+        usuarioRegistrado.setEstaActivo(activoCheckBox.isSelected());
+        usuarioRegistrado.setDepartamento(departamentoSeleccionado);
+        usuarioRegistrado.setRolPermiso(rolSeleccionado);
+        usuarioRegistrado.setUsuarioActualizacion(UsuarioEntity.builder().usuarioId(1L).build());
+
+        if (!esEdicion) {
+            usuarioRegistrado.setUsuarioCreacion(UsuarioEntity.builder().usuarioId(1L).build());
+            listener.crearUsuario(usuarioRegistrado);
+        } else {
+            listener.actualizarUsuario(usuarioRegistrado);
+        }
+
         dispose();
     }
 
