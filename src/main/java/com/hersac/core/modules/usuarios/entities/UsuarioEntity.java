@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hersac.core.modules.departamentos.entities.DepartamentoEntity;
+import com.hersac.core.modules.roles.entities.RolEntity;
 import com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity;
 
 import jakarta.persistence.Column;
@@ -56,9 +57,9 @@ public class UsuarioEntity {
     // Relaciones
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rol_permiso_id", nullable = true)
+    @JoinColumn(name = "rol_id", nullable = true)
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-    private RolPermisoEntity rolPermiso;
+    private RolEntity rol;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "departamento_id", nullable = true)

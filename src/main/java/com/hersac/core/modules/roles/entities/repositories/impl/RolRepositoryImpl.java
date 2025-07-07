@@ -16,36 +16,61 @@ public class RolRepositoryImpl implements RolRepository {
 
     @Override
     public List<RolEntity> buscarTodos() {
-        return entityManager.createQuery("FROM RolEntity", RolEntity.class).getResultList();
+        try {
+            return entityManager.createQuery("FROM RolEntity", RolEntity.class).getResultList();
+        } catch (Exception e) {
+            entityManager.getTransaction().rollback();
+            throw new RuntimeException("Error al buscar todos los roles", e);
+        }
     }
 
     @Override
     public RolEntity buscarPorId(Long id) {
-        return entityManager.find(RolEntity.class, id);
+        try {
+            return entityManager.find(RolEntity.class, id);
+        } catch (Exception e) {
+            entityManager.getTransaction().rollback();
+            throw new RuntimeException("Error al buscar el rol por ID", e);
+        }
     }
 
     @Override
     public RolEntity crear(RolEntity entidad) {
-        entityManager.getTransaction().begin();
-        entityManager.persist(entidad);
-        entityManager.getTransaction().commit();
-        return entidad;
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.persist(entidad);
+            entityManager.getTransaction().commit();
+            return entidad;
+        } catch (Exception e) {
+            entityManager.getTransaction().rollback();
+            throw new RuntimeException("Error al crear el rol", e);
+        }
     }
 
     @Override
     public void actualizar(RolEntity entidad) {
-        entityManager.getTransaction().begin();
-        entityManager.merge(entidad);
-        entityManager.getTransaction().commit();
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.merge(entidad);
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            entityManager.getTransaction().rollback();
+            throw new RuntimeException("Error al actualizar el rol", e);
+        }
     }
 
     @Override
     public void eliminar(Long id) {
-        entityManager.getTransaction().begin();
-        RolEntity rol = entityManager.find(RolEntity.class, id);
-        if (rol != null) {
-            entityManager.remove(rol);
+        try {
+            entityManager.getTransaction().begin();
+            RolEntity rol = entityManager.find(RolEntity.class, id);
+            if (rol != null) {
+                entityManager.remove(rol);
+            }
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            entityManager.getTransaction().rollback();
+            throw new RuntimeException("Error al eliminar el rol", e);
         }
-        entityManager.getTransaction().commit();
     }
 }

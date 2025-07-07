@@ -74,8 +74,8 @@ public class UsuariosTable extends JPanel {
         for (UsuarioEntity usuario : usuarios) {
             String departamento = (usuario.getDepartamento() != null && usuario.getDepartamento().getNombre() != null)
                 ? usuario.getDepartamento().getNombre() : "Sin departamento";
-            String rol = (usuario.getRolPermiso() != null && usuario.getRolPermiso().getRol() != null && usuario.getRolPermiso().getRol().getNombre() != null)
-                ? usuario.getRolPermiso().getRol().getNombre() : "Sin rol";
+            String rol = (usuario.getRol() != null && usuario.getRol().getNombre() != null)
+                ? usuario.getRol().getNombre() : "Sin rol";
             modeloTabla.addRow(new Object[] {
                     usuario.getUsuarioId(),
                     usuario.getNombre(),

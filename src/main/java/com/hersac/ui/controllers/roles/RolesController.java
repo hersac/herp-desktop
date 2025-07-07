@@ -16,19 +16,19 @@ public class RolesController {
         return rolesService.buscarTodos();
     }
 
-    public RolEntity buscarPorId(Long permisoId) {
-        return rolesService.buscarPorId(permisoId);
+    public RolEntity buscarPorId(Long rolId) {
+        return rolesService.buscarPorId(rolId);
     }
 
-    public RolEntity crear(RolEntity permiso) {
-        return rolesService.crear(permiso);
+    public RolEntity crear(RolEntity rol, List<Long> permisos) {
+        return rolesService.crear(rol, permisos);
     }
 
-    public void actualizar(Long permisoId, RolEntity permiso) {
-        rolesService.actualizar(permisoId, permiso);
+    public void actualizar(Long rolId, RolEntity rol, List<Long> permisos) {
+        rolesService.actualizar(rolId, rol, permisos);
     }
 
-    public void eliminar(Long permisoId) {
-        rolesService.eliminar(permisoId);
+    public void eliminar(Long rolId) {
+        rolesService.eliminar(rolId);
     }
 }

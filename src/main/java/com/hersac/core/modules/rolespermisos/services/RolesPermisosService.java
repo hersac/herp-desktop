@@ -9,9 +9,15 @@ public interface RolesPermisosService {
 
     public RolPermisoEntity buscarPorId(Long id);
 
+    public List<RolPermisoEntity> buscarPorRolId(Long rolId);
+
     public RolPermisoEntity crear(RolPermisoEntity entidad);
+
+    public List<RolPermisoEntity> crearMasivo(List<RolPermisoEntity> entidades);
 
     public void actualizar(Long id, RolPermisoEntity entidad);
 
     public void eliminar(Long id);
+
+    public void eliminarPorRolId(Long rolId);
 }

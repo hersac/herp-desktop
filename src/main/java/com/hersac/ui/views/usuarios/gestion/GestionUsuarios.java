@@ -17,6 +17,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.hersac.core.modules.roles.entities.RolEntity;
+import com.hersac.ui.controllers.roles.RolesController;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -38,7 +40,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     private JFrame frame = new JFrame("Registrar Usuario");
     private final UsuariosController usuariosController;
     private final DepartamentosController departamentosController;
-    private final RolesPermisosController rolesPermisosController;
+    private final RolesController rolesController;
     private final UsuariosTable tablaUsuariosTable = new UsuariosTable();
 
     private List<UsuarioEntity> listaCompletaUsuarios;
@@ -48,7 +50,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     public GestionUsuarios(DIContainer diContainer) {
         this.usuariosController = diContainer.getUsuariosController();
         this.departamentosController = diContainer.getDepartamentosController();
-        this.rolesPermisosController = diContainer.getRolesPermisosController();
+        this.rolesController = diContainer.getRolesController();
 
         this.tablaUsuariosTable.setActionListener(this);
 
@@ -84,8 +86,8 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         JPanel panelBtn = new JPanel();
         panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
         panelBtn.setOpaque(false);
-        panelBtn.setPreferredSize(new Dimension(800, 40));
-        panelBtn.setMaximumSize(new Dimension(800, 40));
+        panelBtn.setPreferredSize(new Dimension(900, 40));
+        panelBtn.setMaximumSize(new Dimension(900, 40));
         panelBtn.add(searchField);
         panelBtn.add(Box.createHorizontalGlue());
         panelBtn.add(registrarBtn);
@@ -121,7 +123,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         // Acción botón registrar
         List<DepartamentoEntity> departamentos = obtenerDepartamentos();
         filtrosForm.setDepartamentos(departamentos);
-        List<RolPermisoEntity> roles = obtenerRoles();
+        List<RolEntity> roles = obtenerRoles();
         ejecutarAccion(registrarBtn, () -> {
             new RegistrarUsuario(frame, departamentos, roles, this, null);
         });
@@ -159,7 +161,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     @Override
     public void verUsuario(UsuarioEntity usuario) {
         List<DepartamentoEntity> departamentos = obtenerDepartamentos();
-        List<RolPermisoEntity> roles = obtenerRoles();
+        List<RolEntity> roles = obtenerRoles();
         new RegistrarUsuario(frame, departamentos, roles, this, usuario);
     }
 
@@ -204,8 +206,8 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
                     String nombre = u.getNombre() != null ? u.getNombre().toLowerCase() : "";
                     String correo = u.getCorreo() != null ? u.getCorreo().toLowerCase() : "";
                     String estadoUsuario = u.getEstaActivo() != null ? (u.getEstaActivo() ? "activo" : "inactivo") : "";
-                    String rol = (u.getRolPermiso() != null && u.getRolPermiso().getRol() != null && u.getRolPermiso().getRol().getNombre() != null)
-                        ? u.getRolPermiso().getRol().getNombre().toLowerCase() : "sin rol";
+                    String rol = (u.getRol() != null && u.getRol().getNombre() != null)
+                        ? u.getRol().getNombre().toLowerCase() : "sin rol";
                     String depNombre = (u.getDepartamento() != null && u.getDepartamento().getNombre() != null)
                         ? u.getDepartamento().getNombre().toLowerCase() : "sin departamento";
                     boolean coincideTexto = texto.isEmpty()
@@ -233,8 +235,6 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
                     }
 
                     boolean coincideRol = true;
-                    // Si tienes un filtro de rol, aquí puedes agregar la lógica
-
                     return coincideTexto && coincideEstado && coincideDep && coincideFecha && coincideRol;
                 })
                 .collect(Collectors.toList());
@@ -250,7 +250,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         return departamentosController.buscarTodos();
     }
 
-    private List<RolPermisoEntity> obtenerRoles() {
-        return rolesPermisosController.buscarTodos();
+    private List<RolEntity> obtenerRoles() {
+        return rolesController.buscarTodos();
     }
 }

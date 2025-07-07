@@ -69,10 +69,14 @@ public class DIContainer {
     }
 
     public RolesController getRolesController() {
-        RolRepository rolPermisoRepository = new RolRepositoryImpl(entityManager);
-        RolesServices rolesPermisosService = new RolesServicesImpl(rolPermisoRepository);
+        PermisoRepository permisoRepository = new PermisoRepositoryImpl(entityManager);
+        PermisosService permisosService = new PermisosServiceImpl(permisoRepository);
+        RolPermisoRepository rolPermisoRepository = new RolPermisoRepositoryImpl(entityManager);
+        RolesPermisosService rolesPermisosService = new RolesPermisosServicesImpl(rolPermisoRepository);
+        RolRepository rolRepository = new RolRepositoryImpl(entityManager);
+        RolesServices rolesServices = new RolesServicesImpl(rolRepository, rolesPermisosService, permisosService);
 
-        return new RolesController(rolesPermisosService);
+        return new RolesController(rolesServices);
     }
 
     public PermisosController getPermisosController() {

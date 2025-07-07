@@ -59,4 +59,9 @@ public class RolEntity {
     protected void onUpdate() {
         this.fechaActualizacion = LocalDateTime.now();
     }
+
+    @Override
+    public String toString() {
+        return nombre;
+    }
 }

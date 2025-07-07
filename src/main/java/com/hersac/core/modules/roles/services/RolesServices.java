@@ -9,9 +9,9 @@ public interface RolesServices {
 
     public RolEntity buscarPorId(Long id);
 
-    public RolEntity crear(RolEntity entidad);
+    public RolEntity crear(RolEntity entidad, List<Long> permisos);
 
-    public void actualizar(Long id, RolEntity entidad);
+    public void actualizar(Long id, RolEntity entidad, List<Long> permisos);
 
     public void eliminar(Long id);
 

@@ -24,9 +24,20 @@ public class RolesPermisosServicesImpl implements RolesPermisosService {
     }
 
     @Override
+    public List<RolPermisoEntity> buscarPorRolId(Long rolId) {
+        return rolPermisoRepository.buscarPorRolId(rolId);
+    }
+
+    @Override
     public RolPermisoEntity crear(RolPermisoEntity entidad) {
         return rolPermisoRepository.crear(entidad);
     }
+
+    @Override
+    public List<RolPermisoEntity> crearMasivo(List<RolPermisoEntity> entidades) {
+        return rolPermisoRepository.crearMasivo(entidades);
+    }
+
 
     @Override
     public void actualizar(Long id, RolPermisoEntity entidad) {
@@ -41,6 +52,12 @@ public class RolesPermisosServicesImpl implements RolesPermisosService {
     @Override
     public void eliminar(Long id) {
         rolPermisoRepository.eliminar(id);
+    }
+
+    @Override
+    public void eliminarPorRolId(Long rolId) {
+        List<RolPermisoEntity> rolPermisos = rolPermisoRepository.buscarPorRolId(rolId);
+
     }
 
 }

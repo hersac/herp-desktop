@@ -21,7 +21,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
 import com.hersac.core.modules.departamentos.entities.DepartamentoEntity;
-import com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity;
+import com.hersac.core.modules.roles.entities.RolEntity;
 import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import com.hersac.ui.views.usuarios.gestion.listeners.UsuariosListeners;
 
@@ -32,13 +32,13 @@ public class RegistrarUsuario extends JDialog {
     private JPasswordField contrasenaField;
     private JCheckBox activoCheckBox;
     private JComboBox<DepartamentoEntity> departamentoCombo;
-    private JComboBox<RolPermisoEntity> rolCombo;
+    private JComboBox<RolEntity> rolCombo;
 
     private UsuarioEntity usuarioRegistrado;
     private final UsuariosListeners listener;
     private final boolean esEdicion;
 
-    public RegistrarUsuario(JFrame parent, List<DepartamentoEntity> departamentos, List<RolPermisoEntity> roles,
+    public RegistrarUsuario(JFrame parent, List<DepartamentoEntity> departamentos, List<RolEntity> roles,
             UsuariosListeners listener, UsuarioEntity usuarioParaEditar) {
         super(parent, usuarioParaEditar != null ? "Actualizar Usuario" : "Registrar Usuario", true);
         this.listener = listener;
@@ -47,7 +47,7 @@ public class RegistrarUsuario extends JDialog {
         initComponents(departamentos, roles);
     }
 
-    private void initComponents(List<DepartamentoEntity> departamentos, List<RolPermisoEntity> roles) {
+    private void initComponents(List<DepartamentoEntity> departamentos, List<RolEntity> roles) {
         configurarVentana();
         JPanel formPanel = crearCampos(departamentos, roles);
         if (esEdicion && usuarioRegistrado != null) {
@@ -66,7 +66,7 @@ public class RegistrarUsuario extends JDialog {
         setLayout(new BorderLayout());
     }
 
-    private JPanel crearCampos(List<DepartamentoEntity> departamentos, List<RolPermisoEntity> roles) {
+    private JPanel crearCampos(List<DepartamentoEntity> departamentos, List<RolEntity> roles) {
         JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
         formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -137,7 +137,7 @@ public class RegistrarUsuario extends JDialog {
         contrasenaField.setText(usuarioRegistrado.getContrasena());
         activoCheckBox.setSelected(usuarioRegistrado.getEstaActivo());
         departamentoCombo.setSelectedItem(usuarioRegistrado.getDepartamento());
-        rolCombo.setSelectedItem(usuarioRegistrado.getRolPermiso());
+        rolCombo.setSelectedItem(usuarioRegistrado.getRol());
     }
 
     private JPanel crearPanelBotones() {
@@ -153,7 +153,7 @@ public class RegistrarUsuario extends JDialog {
 
     private void guardarUsuario() {
         DepartamentoEntity departamentoSeleccionado = (DepartamentoEntity) departamentoCombo.getSelectedItem();
-        RolPermisoEntity rolSeleccionado = (RolPermisoEntity) rolCombo.getSelectedItem();
+        RolEntity rolSeleccionado = (RolEntity) rolCombo.getSelectedItem();
 
         if (usuarioRegistrado == null) {
             usuarioRegistrado = new UsuarioEntity();
@@ -164,7 +164,7 @@ public class RegistrarUsuario extends JDialog {
         usuarioRegistrado.setContrasena(new String(contrasenaField.getPassword()));
         usuarioRegistrado.setEstaActivo(activoCheckBox.isSelected());
         usuarioRegistrado.setDepartamento(departamentoSeleccionado);
-        usuarioRegistrado.setRolPermiso(rolSeleccionado);
+        usuarioRegistrado.setRol(rolSeleccionado);
         usuarioRegistrado.setUsuarioActualizacion(UsuarioEntity.builder().usuarioId(1L).build());
 
         if (!esEdicion) {

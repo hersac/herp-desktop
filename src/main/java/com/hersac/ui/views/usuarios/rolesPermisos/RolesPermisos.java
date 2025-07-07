@@ -62,8 +62,8 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         JPanel panelBtn = new JPanel();
         panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
         panelBtn.setOpaque(false);
-        panelBtn.setPreferredSize(new Dimension(800, 40));
-        panelBtn.setMaximumSize(new Dimension(800, 40));
+        panelBtn.setPreferredSize(new Dimension(900, 40));
+        panelBtn.setMaximumSize(new Dimension(900, 40));
         panelBtn.add(searchField);
         panelBtn.add(Box.createHorizontalGlue());
         panelBtn.add(registrarBtn);
@@ -102,16 +102,9 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
             modal.setVisible(true);
             if (modal.isGuardado()) {
                 RolEntity nuevoRol = modal.getRolCreado();
-                List<PermisoEntity> permisosSeleccionados = modal.getPermisosSeleccionados();
-                RolEntity rolGuardado = rolesController.crear(nuevoRol);
+                List<Long> permisosSeleccionados = modal.getPermisosSeleccionados();
+                RolEntity rolGuardado = rolesController.crear(nuevoRol, permisosSeleccionados);
                 if (rolGuardado != null && rolGuardado.getRolId() != null) {
-                    for (PermisoEntity permiso : permisosSeleccionados) {
-                        RolPermisoEntity rp = RolPermisoEntity.builder()
-                                .rol(rolGuardado)
-                                .permiso(permiso)
-                                .build();
-                        rolesPermisosController.crear(rp);
-                    }
                     actualizarTabla();
                     JOptionPane.showMessageDialog(this, "Rol y permisos asociados creados exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 } else {
@@ -146,8 +139,8 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
     }
 
     @Override
-    public void crearRol(RolEntity rol) {
-        RolEntity rolGuardado = rolesController.crear(rol);
+    public void crearRol(RolEntity rol, List<Long> permisos) {
+        RolEntity rolGuardado = rolesController.crear(rol, permisos);
         if (rolGuardado != null && rolGuardado.getRolId() != null) {
             actualizarTabla();
             JOptionPane.showMessageDialog(this, "Rol creado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
@@ -157,8 +150,8 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
     }
 
     @Override
-    public void editarRol(RolEntity rol) {
-        rolesController.actualizar(rol.getRolId(), rol);
+    public void editarRol(RolEntity rol, List<Long> permisos) {
+        rolesController.actualizar(rol.getRolId(), rol, permisos);
         actualizarTabla();
         JOptionPane.showMessageDialog(this, "Rol actualizado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
@@ -179,7 +172,9 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
     @Override
     public void mostrarModalEditarRol(RolEntity rol) {
         List<PermisoEntity> permisos = permisosController.buscarTodos();
-        RegistrarRolPermiso modal = new RegistrarRolPermiso(frame, permisos);
+        List<RolPermisoEntity> rolPermisos = rolesPermisosController.buscarPorRolId(rol.getRolId());
+        java.util.Map<String, Boolean[]> permisosMap = construirMapaPermisos(rolPermisos, permisos);
+        com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso modal = new com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso(frame, permisos, permisosMap);
         modal.setTitle("Editar Rol");
         modal.nombreField.setText(rol.getNombre());
         modal.descripcionArea.setText(rol.getDescripcion());
@@ -190,7 +185,36 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
             rol.setNombre(rolEditado.getNombre());
             rol.setDescripcion(rolEditado.getDescripcion());
             rol.setEstaActivo(rolEditado.getEstaActivo());
-            editarRol(rol);
+            editarRol(rol, modal.getPermisosSeleccionados());
         }
+    }
+
+    private java.util.Map<String, Boolean[]> construirMapaPermisos(List<RolPermisoEntity> rolPermisos, List<PermisoEntity> permisos) {
+        java.util.Map<String, Boolean[]> map = new java.util.HashMap<>();
+        // Crear un set de IDs de permisos asociados al rol
+        java.util.Set<Long> idsSeleccionados = new java.util.HashSet<>();
+        for (RolPermisoEntity rp : rolPermisos) {
+            if (rp.getPermiso() != null && rp.getPermiso().getPermisoId() != null) {
+                idsSeleccionados.add(rp.getPermiso().getPermisoId());
+            }
+        }
+        // Obtener el módulo actual (por defecto el primero)
+        int moduloIdx = 0;
+        // Puedes ajustar esto si necesitas soportar edición en otros módulos
+        String[] submodulos = {
+            "Clientes", "Ventas", "Compras", "Inventario", "Reportes"
+        };
+        int idPermiso = 1;
+        for (String submodulo : submodulos) {
+            Boolean[] checks = new Boolean[]{false, false, false, false};
+            for (int j = 0; j < 4; j++) {
+                if (idsSeleccionados.contains((long) idPermiso)) {
+                    checks[j] = true;
+                }
+                idPermiso++;
+            }
+            map.put(submodulo, checks);
+        }
+        return map;
     }
 }

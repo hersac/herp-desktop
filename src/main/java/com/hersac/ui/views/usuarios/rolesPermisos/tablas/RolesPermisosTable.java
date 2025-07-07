@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 import com.hersac.core.modules.roles.entities.RolEntity;
+import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
 import com.hersac.ui.views.usuarios.rolesPermisos.listeners.RolesPermisosListener;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
@@ -17,6 +18,7 @@ public class RolesPermisosTable extends JPanel {
     private JTable table;
     private DefaultTableModel model;
     private RolesPermisosListener listener;
+    private RolesPermisosController rolesPermisosController;
 
     public RolesPermisosTable() {
         setLayout(new BorderLayout());
@@ -58,6 +60,10 @@ public class RolesPermisosTable extends JPanel {
         this.listener = listener;
     }
 
+    public void setRolesPermisosController(RolesPermisosController controller) {
+        this.rolesPermisosController = controller;
+    }
+
     private class AccionesRenderer implements javax.swing.table.TableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -97,7 +103,18 @@ public class RolesPermisosTable extends JPanel {
                             rol.setEstaActivo(!rol.getEstaActivo());
                             model.setValueAt(rol.getEstaActivo() ? "Sí" : "No", row, 3);
                             model.setValueAt(rol, row, 4);
-                            if (listener != null) listener.editarRol(rol);
+                            if (listener != null) {
+                                List<Long> permisos = new java.util.ArrayList<>();
+                                if (rolesPermisosController != null) {
+                                    List<com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity> rolPermisos = rolesPermisosController.buscarPorRolId(rol.getRolId());
+                                    for (com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity rp : rolPermisos) {
+                                        if (rp.getPermiso() != null && rp.getPermiso().getPermisoId() != null) {
+                                            permisos.add(rp.getPermiso().getPermisoId());
+                                        }
+                                    }
+                                }
+                                listener.editarRol(rol, permisos);
+                            }
                             fireEditingStopped();
                         });
                 JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED, e -> {

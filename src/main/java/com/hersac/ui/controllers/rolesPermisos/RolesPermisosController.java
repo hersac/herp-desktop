@@ -20,8 +20,16 @@ public class RolesPermisosController {
         return rolesPermisosService.buscarPorId(id);
     }
 
+    public List<RolPermisoEntity> buscarPorRolId(Long rolId) {
+        return rolesPermisosService.buscarPorRolId(rolId);
+    }
+
     public RolPermisoEntity crear(RolPermisoEntity entidad) {
         return rolesPermisosService.crear(entidad);
+    }
+
+    public List<RolPermisoEntity> crearMasivo(List<RolPermisoEntity> entidades) {
+        return rolesPermisosService.crearMasivo(entidades);
     }
 
     public void actualizar(Long id, RolPermisoEntity entidad) {
