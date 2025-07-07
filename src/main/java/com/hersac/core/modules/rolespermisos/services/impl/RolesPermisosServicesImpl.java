@@ -56,8 +56,7 @@ public class RolesPermisosServicesImpl implements RolesPermisosService {
 
     @Override
     public void eliminarPorRolId(Long rolId) {
-        List<RolPermisoEntity> rolPermisos = rolPermisoRepository.buscarPorRolId(rolId);
-
+        rolPermisoRepository.eliminarPorRolId(rolId);
     }
 
 }

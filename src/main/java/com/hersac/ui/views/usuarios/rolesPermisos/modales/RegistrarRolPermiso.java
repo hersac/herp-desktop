@@ -20,8 +20,8 @@ public class RegistrarRolPermiso extends JDialog {
     private JComboBox<String> moduloSelector;
     private static final String[] MODULOS = {"Comercial", "Financiero", "Usuarios"};
     private static final String[][] SUBMODULOS = {
-        {"Clientes", "Ventas", "Compras", "Inventario", "Reportes"},
-        {"CxC", "CxP", "Movimientos", "Bancos", "Reportes"},
+        {"Clientes", "Ventas", "Compras", "Inventario", "Reportes (Comercial)"},
+        {"CxC", "CxP", "Movimientos", "Bancos", "Reportes (Financiero)"},
         {"Gestión de usuarios", "Roles y permisos", "Auditoría"}
     };
     private java.util.Map<String, Boolean[]> permisosSeleccionadosMap = new java.util.HashMap<>();
@@ -142,10 +142,12 @@ public class RegistrarRolPermiso extends JDialog {
 
     private List<Long> obtenerPermisosSeleccionados(List<PermisoEntity> permisos) {
         List<Long> seleccionados = new ArrayList<>();
-        // Recorrer los submódulos y acciones seleccionadas
         int idPermiso = 1;
-        for (String modulo : SUBMODULOS[moduloSelector.getSelectedIndex()]) {
-            Boolean[] checks = permisosSeleccionadosMap.get(modulo);
+        int moduloIdx = moduloSelector.getSelectedIndex();
+        int[] basePermisoPorModulo = {1, 21, 41};
+        idPermiso = basePermisoPorModulo[moduloIdx];
+        for (String submodulo : SUBMODULOS[moduloIdx]) {
+            Boolean[] checks = permisosSeleccionadosMap.get(submodulo);
             if (checks != null) {
                 for (int j = 0; j < 4; j++) {
                     if (checks[j] != null && checks[j]) {

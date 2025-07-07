@@ -67,12 +67,15 @@ public class RolesServicesImpl implements RolesServices {
         System.out.println("PERMISOS:" + permisos);
 
         RolEntity existingRol = rolRepository.buscarPorId(id);
-        if (existingRol != null) {
+
+        if (existingRol == null) {
+            throw new IllegalArgumentException("Rol con ID " + id + " no encontrado.");
+        }
             existingRol.setNombre(entidad.getNombre());
             existingRol.setDescripcion(entidad.getDescripcion());
             existingRol.setUsuarioActualizacionId(entidad.getUsuarioActualizacionId());
             existingRol.setFechaActualizacion(entidad.getFechaActualizacion());
-            rolRepository.actualizar(existingRol);
+
 
             // Eliminar permisos actuales del rol
             rolesPermisosService.eliminarPorRolId(id);
@@ -87,7 +90,8 @@ public class RolesServicesImpl implements RolesServices {
                 rolesPermisos.add(rolPermiso);
             }
             rolesPermisosService.crearMasivo(rolesPermisos);
-        }
+
+        rolRepository.actualizar(existingRol);
     }
 
     @Override

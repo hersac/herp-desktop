@@ -197,10 +197,10 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
                 idsSeleccionados.add(rp.getPermiso().getPermisoId());
             }
         }
-        // Definir los submódulos por módulo
+        // Definir los submódulos por módulo, usando nombres únicos para los reportes
         String[][] submodulosPorModulo = {
-            {"Clientes", "Ventas", "Compras", "Inventario", "Reportes"},
-            {"CxC", "CxP", "Movimientos", "Bancos", "Reportes"},
+            {"Clientes", "Ventas", "Compras", "Inventario", "Reportes (Comercial)"},
+            {"CxC", "CxP", "Movimientos", "Bancos", "Reportes (Financiero)"},
             {"Gestión de usuarios", "Roles y permisos", "Auditoría"}
         };
         int[] basePermisoPorModulo = {1, 21, 41}; // Comercial inicia en 1, Financiero en 21, Usuarios en 41
