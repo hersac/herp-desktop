@@ -1,0 +1,2 @@
+INSERT INTO usuarios (nombre, correo, contrasena, esta_activo, departamento_id, rol_id, created_at, updated_at, created_by, updated_by)
+VALUES ('SUPERADMIN', 'admin', 'admin', true, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, null, null);

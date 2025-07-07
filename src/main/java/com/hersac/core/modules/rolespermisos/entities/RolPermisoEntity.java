@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 public class RolPermisoEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "rol_permiso_id")
     private Long rolPermisoId;
 

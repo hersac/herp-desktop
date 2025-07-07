@@ -191,29 +191,32 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
 
     private java.util.Map<String, Boolean[]> construirMapaPermisos(List<RolPermisoEntity> rolPermisos, List<PermisoEntity> permisos) {
         java.util.Map<String, Boolean[]> map = new java.util.HashMap<>();
-        // Crear un set de IDs de permisos asociados al rol
         java.util.Set<Long> idsSeleccionados = new java.util.HashSet<>();
         for (RolPermisoEntity rp : rolPermisos) {
             if (rp.getPermiso() != null && rp.getPermiso().getPermisoId() != null) {
                 idsSeleccionados.add(rp.getPermiso().getPermisoId());
             }
         }
-        // Obtener el módulo actual (por defecto el primero)
-        int moduloIdx = 0;
-        // Puedes ajustar esto si necesitas soportar edición en otros módulos
-        String[] submodulos = {
-            "Clientes", "Ventas", "Compras", "Inventario", "Reportes"
+        // Definir los submódulos por módulo
+        String[][] submodulosPorModulo = {
+            {"Clientes", "Ventas", "Compras", "Inventario", "Reportes"},
+            {"CxC", "CxP", "Movimientos", "Bancos", "Reportes"},
+            {"Gestión de usuarios", "Roles y permisos", "Auditoría"}
         };
-        int idPermiso = 1;
-        for (String submodulo : submodulos) {
-            Boolean[] checks = new Boolean[]{false, false, false, false};
-            for (int j = 0; j < 4; j++) {
-                if (idsSeleccionados.contains((long) idPermiso)) {
-                    checks[j] = true;
+        int[] basePermisoPorModulo = {1, 21, 41}; // Comercial inicia en 1, Financiero en 21, Usuarios en 41
+        for (int moduloIdx = 0; moduloIdx < submodulosPorModulo.length; moduloIdx++) {
+            String[] submodulos = submodulosPorModulo[moduloIdx];
+            int idPermiso = basePermisoPorModulo[moduloIdx];
+            for (String submodulo : submodulos) {
+                Boolean[] checks = new Boolean[]{false, false, false, false};
+                for (int j = 0; j < 4; j++) {
+                    if (idsSeleccionados.contains((long) idPermiso)) {
+                        checks[j] = true;
+                    }
+                    idPermiso++;
                 }
-                idPermiso++;
+                map.put(submodulo, checks);
             }
-            map.put(submodulo, checks);
         }
         return map;
     }
