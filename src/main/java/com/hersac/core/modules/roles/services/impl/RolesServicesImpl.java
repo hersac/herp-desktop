@@ -96,6 +96,9 @@ public class RolesServicesImpl implements RolesServices {
 
     @Override
     public void eliminar(Long id) {
+        // Eliminar primero los permisos asociados al rol
+        rolesPermisosService.eliminarPorRolId(id);
+        // Luego eliminar el rol
         rolRepository.eliminar(id);
     }
 }

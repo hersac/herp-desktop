@@ -44,6 +44,10 @@ public class RolesPermisosTable extends JPanel {
     }
 
     public void setRoles(List<RolEntity> lista) {
+        // Detener edición activa antes de actualizar el modelo
+        if (table.isEditing()) {
+            table.getCellEditor().stopCellEditing();
+        }
         model.setRowCount(0);
         for (RolEntity rol : lista) {
             model.addRow(new Object[]{
@@ -101,8 +105,15 @@ public class RolesPermisosTable extends JPanel {
                         activo ? new Color(0, 180, 0) : Color.RED,
                         e -> {
                             rol.setEstaActivo(!rol.getEstaActivo());
-                            model.setValueAt(rol.getEstaActivo() ? "Sí" : "No", row, 3);
-                            model.setValueAt(rol, row, 4);
+                            // Validar que la fila y columnas siguen existiendo antes de modificar el modelo
+                            if (row >= 0 && row < model.getRowCount() && 3 < model.getColumnCount() && 4 < model.getColumnCount()) {
+                                try {
+                                    model.setValueAt(rol.getEstaActivo() ? "Sí" : "No", row, 3);
+                                    model.setValueAt(rol, row, 4);
+                                } catch (Exception ex) {
+                                    // Ignorar si ocurre un error por cambio de modelo
+                                }
+                            }
                             if (listener != null) {
                                 List<Long> permisos = new java.util.ArrayList<>();
                                 if (rolesPermisosController != null) {
@@ -118,8 +129,8 @@ public class RolesPermisosTable extends JPanel {
                             fireEditingStopped();
                         });
                 JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED, e -> {
+                    fireEditingStopped(); // Detener edición antes de eliminar
                     if (listener != null) listener.eliminarRol(rol);
-                    fireEditingStopped();
                 });
                 panel.add(btnVer);
                 panel.add(btnToggle);
