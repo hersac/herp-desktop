@@ -77,10 +77,12 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         panelBtnExpansible.add(panelBtn);
         panelBtnExpansible.add(Box.createHorizontalGlue());
 
-        tablaRolesPermisos.setAlignmentX(CENTER_ALIGNMENT);
-        tablaRolesPermisos.setMinimumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        tablaRolesPermisos.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        tablaRolesPermisos.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
+        JScrollPane scrollPane = new JScrollPane(tablaRolesPermisos);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setAlignmentX(CENTER_ALIGNMENT);
+        scrollPane.setPreferredSize(new Dimension(900, 400));
+        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
 
         add(Box.createRigidArea(new Dimension(0, 10)));
         add(titleLabel);
@@ -89,7 +91,7 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         add(Box.createRigidArea(new Dimension(0, 100)));
         add(panelBtnExpansible);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(tablaRolesPermisos);
+        add(scrollPane);
         add(Box.createVerticalGlue());
 
         List<RolEntity> listaRoles = rolesController.buscarTodos();

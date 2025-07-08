@@ -40,7 +40,8 @@ public class RolesPermisosTable extends JPanel {
                 }
             }
         });
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        // Quitar JScrollPane aquí, solo agregar la tabla directamente
+        add(table, BorderLayout.CENTER);
     }
 
     public void setRoles(List<RolEntity> lista) {

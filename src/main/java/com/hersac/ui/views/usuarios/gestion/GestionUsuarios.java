@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import com.hersac.core.modules.roles.entities.RolEntity;
@@ -101,10 +102,12 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         panelBtnExpansible.add(panelBtn);
         panelBtnExpansible.add(Box.createHorizontalGlue());
 
-        tablaUsuariosTable.setAlignmentX(CENTER_ALIGNMENT);
-        tablaUsuariosTable.setMinimumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        tablaUsuariosTable.setPreferredSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-        tablaUsuariosTable.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
+        JScrollPane scrollPane = new JScrollPane(tablaUsuariosTable);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setAlignmentX(CENTER_ALIGNMENT);
+        scrollPane.setPreferredSize(new Dimension(900, 400));
+        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
 
         add(Box.createRigidArea(new Dimension(0, 10)));
         add(titleLabel);
@@ -113,7 +116,7 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         add(Box.createRigidArea(new Dimension(0, 100)));
         add(panelBtnExpansible);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(tablaUsuariosTable);
+        add(scrollPane);
         add(Box.createVerticalGlue());
 
         List<UsuarioEntity> listaUsuarios = obtenerUsuarios();

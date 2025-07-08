@@ -64,7 +64,13 @@ public class UsuariosTable extends JPanel {
             }
         });
 
-        add(new JScrollPane(tablaUsuarios), BorderLayout.CENTER);
+        // En vez de agregar la tabla directamente, la envolvemos en un JScrollPane para permitir scroll vertical
+        JScrollPane scrollPane = new JScrollPane(tablaUsuarios);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setPreferredSize(new Dimension(900, 400));
+        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     public void setUsuarios(List<UsuarioEntity> usuarios) {
