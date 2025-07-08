@@ -15,8 +15,10 @@ public class AppViews extends JFrame {
 
     private final JPanel bg;
     private JPanel contenido;
+    private final DIContainer container;
 
     public AppViews(DIContainer container) {
+        this.container = container;
 
         setTitle("HERP");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -30,8 +32,6 @@ public class AppViews extends JFrame {
 
         LoginView loginView = container.getLoginView();
         bg.add(loginView, BorderLayout.CENTER);
-
-
 
         loginView.addLoginListener(token -> {
             if (token != null) {
@@ -57,6 +57,31 @@ public class AppViews extends JFrame {
                     contenido.repaint();
                 });
 
+                navbar.setLogoutListener(() -> {
+                    bg.removeAll();
+                    LoginView newLoginView = container.getLoginView();
+                    bg.add(newLoginView, BorderLayout.CENTER);
+                    bg.revalidate();
+                    bg.repaint();
+                    newLoginView.addLoginListener(token2 -> {
+                        if (token2 != null) {
+                            bg.removeAll();
+                            NavbarComponent newNavbar = new NavbarComponent();
+                            SidebarComponent newSidebar = new SidebarComponent();
+                            contenido = new JPanel(new BorderLayout());
+                            contenido.setBackground(Color.WHITE);
+                            contenido.add(new JLabel("Bienvenido al sistema"), BorderLayout.NORTH);
+                            newNavbar.setNavigationListener(navbar.getNavigationListener());
+                            newNavbar.setLogoutListener(this::reiniciarLogin);
+                            bg.add(newNavbar, BorderLayout.NORTH);
+                            bg.add(newSidebar, BorderLayout.WEST);
+                            bg.add(contenido, BorderLayout.CENTER);
+                            bg.revalidate();
+                            bg.repaint();
+                        }
+                    });
+                });
+
                 bg.add(navbar, BorderLayout.NORTH);
                 bg.add(sidebar, BorderLayout.WEST);
                 bg.add(contenido, BorderLayout.CENTER);
@@ -67,5 +92,31 @@ public class AppViews extends JFrame {
         });
 
         setVisible(true);
+    }
+
+    // Método auxiliar para reiniciar el login correctamente
+    private void reiniciarLogin() {
+        bg.removeAll();
+        LoginView loginView = container.getLoginView();
+        bg.add(loginView, BorderLayout.CENTER);
+        bg.revalidate();
+        bg.repaint();
+        loginView.addLoginListener(token -> {
+            if (token != null) {
+                bg.removeAll();
+                NavbarComponent navbar = new NavbarComponent();
+                SidebarComponent sidebar = new SidebarComponent();
+                contenido = new JPanel(new BorderLayout());
+                contenido.setBackground(Color.WHITE);
+                contenido.add(new JLabel("Bienvenido al sistema"), BorderLayout.NORTH);
+                navbar.setNavigationListener(navbar.getNavigationListener());
+                navbar.setLogoutListener(this::reiniciarLogin);
+                bg.add(navbar, BorderLayout.NORTH);
+                bg.add(sidebar, BorderLayout.WEST);
+                bg.add(contenido, BorderLayout.CENTER);
+                bg.revalidate();
+                bg.repaint();
+            }
+        });
     }
 }

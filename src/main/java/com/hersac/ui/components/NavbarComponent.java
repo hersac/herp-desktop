@@ -2,6 +2,9 @@ package com.hersac.ui.components;
 
 import com.hersac.ui.globals.enums.ColorsTheme;
 import com.hersac.ui.listeners.NavigationListener;
+import com.hersac.ui.listeners.LogoutListener;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +16,7 @@ import java.util.List;
 public class NavbarComponent extends JPanel {
 
     private NavigationListener navigationListener;
+    private LogoutListener logoutListener;
 
     private static final Color COLOR_FONDO = ColorsTheme.BACKGROUND.get();
     private static final Color COLOR_TEXTO = ColorsTheme.TEXT_PRIMARY.get();
@@ -41,8 +45,26 @@ public class NavbarComponent extends JPanel {
         add(panelMenuFijo, BorderLayout.WEST);
         add(panelMenuDinamico, BorderLayout.CENTER);
 
+        JButton btnLogout = new JButton(FontIcon.of(FontAwesomeSolid.SIGN_OUT_ALT, 14, COLOR_TEXTO));
+        btnLogout.setToolTipText("Cerrar sesión");
+        btnLogout.setBorderPainted(false);
+        btnLogout.setFocusPainted(false);
+        btnLogout.setContentAreaFilled(false);
+        btnLogout.setOpaque(false);
+        btnLogout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnLogout.addActionListener(e -> {
+            if (logoutListener != null) {
+                logoutListener.onLogout();
+            }
+        });
+        JPanel panelLogout = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
+        panelLogout.setBackground(COLOR_FONDO);
+        panelLogout.add(btnLogout);
+        add(panelLogout, BorderLayout.EAST);
+
         construirMenu(fuenteEtiqueta);
     }
+
     private JLabel crearEtiqueta(String texto, Font fuente, String[] subOpciones, String navigationKey) {
         JLabel etiqueta = new JLabel(texto, SwingConstants.CENTER);
         etiqueta.setFont(fuente);
@@ -80,7 +102,6 @@ public class NavbarComponent extends JPanel {
 
         return etiqueta;
     }
-
 
     private void agregarEfectoHover(JLabel etiqueta) {
         etiqueta.addMouseListener(new MouseAdapter() {
@@ -157,5 +178,13 @@ public class NavbarComponent extends JPanel {
 
     public void setNavigationListener(NavigationListener listener) {
         this.navigationListener = listener;
+    }
+
+    public void setLogoutListener(LogoutListener listener) {
+        this.logoutListener = listener;
+    }
+
+    public NavigationListener getNavigationListener() {
+        return this.navigationListener;
     }
 }
