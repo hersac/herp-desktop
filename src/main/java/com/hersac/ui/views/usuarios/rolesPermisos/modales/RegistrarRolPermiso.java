@@ -142,21 +142,21 @@ public class RegistrarRolPermiso extends JDialog {
 
     private List<Long> obtenerPermisosSeleccionados(List<PermisoEntity> permisos) {
         List<Long> seleccionados = new ArrayList<>();
-        int idPermiso = 1;
-        int moduloIdx = moduloSelector.getSelectedIndex();
         int[] basePermisoPorModulo = {1, 21, 41};
-        idPermiso = basePermisoPorModulo[moduloIdx];
-        for (String submodulo : SUBMODULOS[moduloIdx]) {
-            Boolean[] checks = permisosSeleccionadosMap.get(submodulo);
-            if (checks != null) {
-                for (int j = 0; j < 4; j++) {
-                    if (checks[j] != null && checks[j]) {
-                        seleccionados.add((long) idPermiso);
+        for (int moduloIdx = 0; moduloIdx < MODULOS.length; moduloIdx++) {
+            int idPermiso = basePermisoPorModulo[moduloIdx];
+            for (String submodulo : SUBMODULOS[moduloIdx]) {
+                Boolean[] checks = permisosSeleccionadosMap.get(submodulo);
+                if (checks != null) {
+                    for (int j = 0; j < 4; j++) {
+                        if (checks[j] != null && checks[j]) {
+                            seleccionados.add((long) idPermiso);
+                        }
+                        idPermiso++;
                     }
-                    idPermiso++;
+                } else {
+                    idPermiso += 4;
                 }
-            } else {
-                idPermiso += 4;
             }
         }
         return seleccionados;

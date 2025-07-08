@@ -140,6 +140,9 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
 
     @Override
     public void crearRol(RolEntity rol, List<Long> permisos) {
+
+        System.out.println("AQUI:" + rol + ", PERMISOS:" + permisos);
+
         RolEntity rolGuardado = rolesController.crear(rol, permisos);
         if (rolGuardado != null && rolGuardado.getRolId() != null) {
             actualizarTabla();
@@ -151,6 +154,8 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
 
     @Override
     public void editarRol(RolEntity rol, List<Long> permisos) {
+        System.out.println("AQUI 2:" + rol + ", PERMISOS:" + permisos);
+
         rolesController.actualizar(rol.getRolId(), rol, permisos);
         actualizarTabla();
         JOptionPane.showMessageDialog(this, "Rol actualizado exitosamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
