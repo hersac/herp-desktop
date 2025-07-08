@@ -20,6 +20,10 @@ public class RolesPermisosTable extends JPanel {
     private RolesPermisosListener listener;
     private RolesPermisosController rolesPermisosController;
 
+    private boolean puedeVer = false;
+    private boolean puedeEditar = false;
+    private boolean puedeEliminar = false;
+
     public RolesPermisosTable() {
         setLayout(new BorderLayout());
         model = new DefaultTableModel(new Object[]{"ID", "Nombre", "Descripción", "Activo", "Acciones"}, 0) {
@@ -40,12 +44,10 @@ public class RolesPermisosTable extends JPanel {
                 }
             }
         });
-        // Quitar JScrollPane aquí, solo agregar la tabla directamente
         add(table, BorderLayout.CENTER);
     }
 
     public void setRoles(List<RolEntity> lista) {
-        // Detener edición activa antes de actualizar el modelo
         if (table.isEditing()) {
             table.getCellEditor().stopCellEditing();
         }
@@ -67,6 +69,13 @@ public class RolesPermisosTable extends JPanel {
 
     public void setRolesPermisosController(RolesPermisosController controller) {
         this.rolesPermisosController = controller;
+    }
+
+    public void setPermisos(boolean puedeVer, boolean puedeEditar, boolean puedeEliminar) {
+        this.puedeVer = puedeVer;
+        this.puedeEditar = puedeEditar;
+        this.puedeEliminar = puedeEliminar;
+        repaint();
     }
 
     private class AccionesRenderer implements javax.swing.table.TableCellRenderer {
@@ -96,46 +105,51 @@ public class RolesPermisosTable extends JPanel {
                 rol = (RolEntity) value;
                 panel.removeAll();
                 boolean activo = Boolean.TRUE.equals(rol.getEstaActivo());
-                JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver rol", new Color(60, 130, 200), e -> {
-                    if (listener != null) listener.mostrarModalEditarRol(rol);
-                    fireEditingStopped();
-                });
-                JButton btnToggle = crearBotonAccion(
-                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                        activo ? "Inactivar" : "Activar",
-                        activo ? new Color(0, 180, 0) : Color.RED,
-                        e -> {
-                            rol.setEstaActivo(!rol.getEstaActivo());
-                            // Validar que la fila y columnas siguen existiendo antes de modificar el modelo
-                            if (row >= 0 && row < model.getRowCount() && 3 < model.getColumnCount() && 4 < model.getColumnCount()) {
-                                try {
-                                    model.setValueAt(rol.getEstaActivo() ? "Sí" : "No", row, 3);
-                                    model.setValueAt(rol, row, 4);
-                                } catch (Exception ex) {
-                                    // Ignorar si ocurre un error por cambio de modelo
-                                }
-                            }
-                            if (listener != null) {
-                                List<Long> permisos = new java.util.ArrayList<>();
-                                if (rolesPermisosController != null) {
-                                    List<com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity> rolPermisos = rolesPermisosController.buscarPorRolId(rol.getRolId());
-                                    for (com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity rp : rolPermisos) {
-                                        if (rp.getPermiso() != null && rp.getPermiso().getPermisoId() != null) {
-                                            permisos.add(rp.getPermiso().getPermisoId());
-                                        }
+                if (puedeVer) {
+                    JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver rol", new Color(60, 130, 200), e -> {
+                        if (listener != null) listener.mostrarModalEditarRol(rol);
+                        fireEditingStopped();
+                    });
+                    panel.add(btnVer);
+                }
+                if (puedeEditar) {
+                    JButton btnToggle = crearBotonAccion(
+                            activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                            activo ? "Inactivar" : "Activar",
+                            activo ? new Color(0, 180, 0) : Color.RED,
+                            e -> {
+                                rol.setEstaActivo(!rol.getEstaActivo());
+                                if (row >= 0 && row < model.getRowCount() && 3 < model.getColumnCount() && 4 < model.getColumnCount()) {
+                                    try {
+                                        model.setValueAt(rol.getEstaActivo() ? "Sí" : "No", row, 3);
+                                        model.setValueAt(rol, row, 4);
+                                    } catch (Exception ex) {
+                                        // Ignorar si ocurre un error por cambio de modelo
                                     }
                                 }
-                                listener.editarRol(rol, permisos);
-                            }
-                            fireEditingStopped();
-                        });
-                JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED, e -> {
-                    fireEditingStopped(); // Detener edición antes de eliminar
-                    if (listener != null) listener.eliminarRol(rol);
-                });
-                panel.add(btnVer);
-                panel.add(btnToggle);
-                panel.add(btnEliminar);
+                                if (listener != null) {
+                                    List<Long> permisos = new java.util.ArrayList<>();
+                                    if (rolesPermisosController != null) {
+                                        List<com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity> rolPermisos = rolesPermisosController.buscarPorRolId(rol.getRolId());
+                                        for (com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity rp : rolPermisos) {
+                                            if (rp.getPermiso() != null && rp.getPermiso().getPermisoId() != null) {
+                                                permisos.add(rp.getPermiso().getPermisoId());
+                                            }
+                                        }
+                                    }
+                                    listener.editarRol(rol, permisos);
+                                }
+                                fireEditingStopped();
+                            });
+                    panel.add(btnToggle);
+                }
+                if (puedeEliminar) {
+                    JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED, e -> {
+                        fireEditingStopped();
+                        if (listener != null) listener.eliminarRol(rol);
+                    });
+                    panel.add(btnEliminar);
+                }
             }
             return panel;
         }
@@ -148,17 +162,23 @@ public class RolesPermisosTable extends JPanel {
 
     private JPanel crearPanelAcciones(RolEntity rol) {
         boolean activo = Boolean.TRUE.equals(rol.getEstaActivo());
-        JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver rol", new Color(60, 130, 200));
-        JButton btnToggle = crearIconoBoton(
-                activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                activo ? "Inactivar" : "Activar",
-                activo ? new Color(0, 180, 0) : Color.RED);
-        JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         panel.setOpaque(false);
-        panel.add(btnVer);
-        panel.add(btnToggle);
-        panel.add(btnEliminar);
+        if (puedeVer) {
+            JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver rol", new Color(60, 130, 200));
+            panel.add(btnVer);
+        }
+        if (puedeEditar) {
+            JButton btnToggle = crearIconoBoton(
+                    activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                    activo ? "Inactivar" : "Activar",
+                    activo ? new Color(0, 180, 0) : Color.RED);
+            panel.add(btnToggle);
+        }
+        if (puedeEliminar) {
+            JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar rol", Color.RED);
+            panel.add(btnEliminar);
+        }
         return panel;
     }
 

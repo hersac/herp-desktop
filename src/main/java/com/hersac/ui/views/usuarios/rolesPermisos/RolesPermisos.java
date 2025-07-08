@@ -17,6 +17,7 @@ import com.hersac.ui.views.usuarios.rolesPermisos.forms.FiltrosForm;
 import com.hersac.ui.views.usuarios.rolesPermisos.listeners.RolesPermisosListener;
 import com.hersac.ui.views.usuarios.rolesPermisos.tablas.RolesPermisosTable;
 import com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso;
+import com.hersac.core.globals.store.UserSessionStore;
 
 public class RolesPermisos extends JPanel implements RolesPermisosListener {
     private final RolesPermisosController rolesPermisosController;
@@ -36,6 +37,16 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
 
+        // Obtener permisos del usuario actual
+        java.util.Set<Long> permisosUsuario = UserSessionStore.getInstance().getPermisosUsuario();
+        boolean puedeVer = permisosUsuario.contains(45L);
+        boolean puedeRegistrar = permisosUsuario.contains(46L);
+        boolean puedeEditar = permisosUsuario.contains(47L);
+        boolean puedeEliminar = permisosUsuario.contains(48L);
+
+        // Pasar permisos a la tabla
+        tablaRolesPermisos.setPermisos(puedeVer, puedeEditar, puedeEliminar);
+
         JLabel titleLabel = new JLabel("Roles y Permisos");
         titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
         titleLabel.setAlignmentX(CENTER_ALIGNMENT);
@@ -46,6 +57,7 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
         registrarBtn.setBackground(new Color(33, 150, 243));
         registrarBtn.setForeground(Color.WHITE);
+        registrarBtn.setEnabled(puedeRegistrar); // Solo habilitar si tiene permiso 46
 
         searchField = new JTextField(25);
         searchField.setMaximumSize(new Dimension(400, 30));
