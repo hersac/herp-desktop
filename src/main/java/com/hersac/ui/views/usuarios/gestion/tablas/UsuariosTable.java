@@ -26,13 +26,16 @@ import javax.swing.table.TableCellRenderer;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
+import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
+import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.ui.views.usuarios.gestion.listeners.UsuariosListeners;
 
 public class UsuariosTable extends JPanel {
     private final JTable tablaUsuarios;
     private final DefaultTableModel modeloTabla;
     private UsuariosListeners usuariosListeners;
+    private final PermissionService permissionService = new PermissionService(null);
 
     public UsuariosTable() {
         setLayout(new BorderLayout());
@@ -102,7 +105,27 @@ public class UsuariosTable extends JPanel {
                 boolean isSelected, boolean hasFocus,
                 int row, int column) {
             if (value instanceof UsuarioEntity usuario) {
-                JPanel panel = crearPanelAcciones(usuario);
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                panel.setOpaque(false);
+                boolean puedeVer = permissionService.tienePermiso((long) Permiso.VER_GESTION_USUARIO.getId());
+                boolean puedeEditar = permissionService.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
+                boolean puedeEliminar = permissionService.tienePermiso((long) Permiso.ELIMINAR_GESTION_USUARIO.getId());
+                if (puedeVer) {
+                    JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver usuario", new Color(60, 130, 200));
+                    panel.add(btnVer);
+                }
+                if (puedeEditar) {
+                    boolean activo = Boolean.TRUE.equals(usuario.getEstaActivo());
+                    JButton btnToggle = crearIconoBoton(
+                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                        activo ? "Inactivar" : "Activar",
+                        activo ? new Color(0, 180, 0) : Color.RED);
+                    panel.add(btnToggle);
+                }
+                if (puedeEliminar) {
+                    JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar usuario", Color.RED);
+                    panel.add(btnEliminar);
+                }
                 panel.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
                 return panel;
             }
@@ -125,16 +148,20 @@ public class UsuariosTable extends JPanel {
             if (value instanceof UsuarioEntity) {
                 usuario = (UsuarioEntity) value;
                 panel.removeAll();
-
                 boolean activo = Boolean.TRUE.equals(usuario.getEstaActivo());
-
-                JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver usuario", new Color(60, 130, 200), e -> {
-                    if (usuariosListeners != null)
-                        usuariosListeners.verUsuario(usuario);
-                    fireEditingStopped();
-                });
-
-                JButton btnToggle = crearBotonAccion(
+                boolean puedeVer = permissionService.tienePermiso((long) Permiso.VER_GESTION_USUARIO.getId());
+                boolean puedeEditar = permissionService.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
+                boolean puedeEliminar = permissionService.tienePermiso((long) Permiso.ELIMINAR_GESTION_USUARIO.getId());
+                if (puedeVer) {
+                    JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver usuario", new Color(60, 130, 200), e -> {
+                        if (usuariosListeners != null)
+                            usuariosListeners.verUsuario(usuario);
+                        fireEditingStopped();
+                    });
+                    panel.add(btnVer);
+                }
+                if (puedeEditar) {
+                    JButton btnToggle = crearBotonAccion(
                         activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
                         activo ? "Inactivar" : "Activar",
                         activo ? new Color(0, 180, 0) : Color.RED,
@@ -146,16 +173,16 @@ public class UsuariosTable extends JPanel {
                                 usuariosListeners.actualizarUsuario(usuario);
                             fireEditingStopped();
                         });
-
-                JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar usuario", Color.RED, e -> {
-                    if (usuariosListeners != null)
-                        usuariosListeners.eliminarUsuario(usuario);
-                    fireEditingStopped();
-                });
-
-                panel.add(btnVer);
-                panel.add(btnToggle);
-                panel.add(btnEliminar);
+                    panel.add(btnToggle);
+                }
+                if (puedeEliminar) {
+                    JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar usuario", Color.RED, e -> {
+                        if (usuariosListeners != null)
+                            usuariosListeners.eliminarUsuario(usuario);
+                        fireEditingStopped();
+                    });
+                    panel.add(btnEliminar);
+                }
             }
             return panel;
         }

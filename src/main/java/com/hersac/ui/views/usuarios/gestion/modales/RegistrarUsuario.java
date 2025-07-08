@@ -20,6 +20,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+import com.hersac.core.globals.servicios.PermissionService;
+import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.core.modules.departamentos.entities.DepartamentoEntity;
 import com.hersac.core.modules.roles.entities.RolEntity;
 import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
@@ -54,6 +56,21 @@ public class RegistrarUsuario extends JDialog {
         JPanel buttonPanel = crearPanelBotones();
         add(formPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
+        PermissionService permissionService = new PermissionService(null);
+        boolean puedeEditar = permissionService.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
+        if (!puedeEditar) {
+            nombreField.setEnabled(false);
+            correoField.setEnabled(false);
+            contrasenaField.setEnabled(false);
+            activoCheckBox.setEnabled(false);
+            departamentoCombo.setEnabled(false);
+            rolCombo.setEnabled(false);
+            for (java.awt.Component comp : buttonPanel.getComponents()) {
+                if (comp instanceof JButton btn && !btn.getText().equals("Cancelar")) {
+                    btn.setEnabled(false);
+                }
+            }
+        }
         setVisible(true);
     }
 
