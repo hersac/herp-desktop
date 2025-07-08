@@ -26,14 +26,12 @@ import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import com.hersac.ui.views.usuarios.gestion.listeners.UsuariosListeners;
 
 public class RegistrarUsuario extends JDialog {
-
     private JTextField nombreField;
     private JTextField correoField;
     private JPasswordField contrasenaField;
     private JCheckBox activoCheckBox;
     private JComboBox<DepartamentoEntity> departamentoCombo;
     private JComboBox<RolEntity> rolCombo;
-
     private UsuarioEntity usuarioRegistrado;
     private final UsuariosListeners listener;
     private final boolean esEdicion;

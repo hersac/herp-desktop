@@ -73,11 +73,9 @@ public class RegistrarRolPermiso extends JDialog {
         permisosTable.setMinimumSize(new Dimension(200, 200));
         formPanel.add(permisosTable);
 
-        // Precargar permisos si existen (para edición)
         precargarPermisos(permisos);
 
         moduloSelector.addActionListener(e -> {
-            // Guardar los cambios actuales antes de cambiar
             guardarSeleccionActual();
             int idx = moduloSelector.getSelectedIndex();
             permisosTable.setSubmodulos(SUBMODULOS[idx], permisosSeleccionadosMap);
@@ -117,10 +115,9 @@ public class RegistrarRolPermiso extends JDialog {
     }
 
     public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, java.util.Map<String, Boolean[]> permisosSeleccionadosMap) {
-        this(parent, permisos); // Llama al constructor principal
+        this(parent, permisos);
         if (permisosSeleccionadosMap != null) {
             this.permisosSeleccionadosMap = new java.util.HashMap<>(permisosSeleccionadosMap);
-            // Precargar la tabla con los permisos del primer módulo
             permisosTable.setSubmodulos(SUBMODULOS[moduloSelector.getSelectedIndex()], this.permisosSeleccionadosMap);
         }
     }
@@ -136,8 +133,6 @@ public class RegistrarRolPermiso extends JDialog {
     }
 
     private void precargarPermisos(List<PermisoEntity> permisos) {
-        // Si es edición, aquí puedes llenar permisosSeleccionadosMap según los permisos del rol
-        // Por ahora, se deja vacío para nuevo registro
     }
 
     private List<Long> obtenerPermisosSeleccionados(List<PermisoEntity> permisos) {

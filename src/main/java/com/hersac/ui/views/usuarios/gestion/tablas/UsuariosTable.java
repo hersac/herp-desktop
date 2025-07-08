@@ -30,7 +30,6 @@ import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import com.hersac.ui.views.usuarios.gestion.listeners.UsuariosListeners;
 
 public class UsuariosTable extends JPanel {
-
     private final JTable tablaUsuarios;
     private final DefaultTableModel modeloTabla;
     private UsuariosListeners usuariosListeners;
@@ -64,7 +63,6 @@ public class UsuariosTable extends JPanel {
             }
         });
 
-        // En vez de agregar la tabla directamente, la envolvemos en un JScrollPane para permitir scroll vertical
         JScrollPane scrollPane = new JScrollPane(tablaUsuarios);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
