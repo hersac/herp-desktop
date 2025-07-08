@@ -18,8 +18,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.core.modules.roles.entities.RolEntity;
+import com.hersac.core.modules.rolespermisos.entities.repositories.RolPermisoRepository;
+import com.hersac.core.modules.rolespermisos.entities.repositories.impl.RolPermisoRepositoryImpl;
+import com.hersac.core.modules.rolespermisos.services.RolesPermisosService;
+import com.hersac.core.modules.rolespermisos.services.impl.RolesPermisosServicesImpl;
 import com.hersac.ui.controllers.roles.RolesController;
+import com.hersac.ui.globals.enums.Permiso;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -109,9 +115,16 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
         List<DepartamentoEntity> departamentos = obtenerDepartamentos();
         filtrosForm.setDepartamentos(departamentos);
         List<RolEntity> roles = obtenerRoles();
-        ejecutarAccion(registrarBtn, () -> {
-            new RegistrarUsuario(frame, departamentos, roles, this, null);
-        });
+
+        PermissionService permissionService = new PermissionService(null);
+        boolean puedeRegistrar = permissionService.tienePermiso((long) Permiso.CREAR_GESTION_USUARIO.getId());
+        registrarBtn.setVisible(puedeRegistrar);
+
+        if (puedeRegistrar) {
+            ejecutarAccion(registrarBtn, () -> {
+                new RegistrarUsuario(frame, departamentos, roles, this, null);
+            });
+        }
     }
 
     private void ejecutarAccion(JButton panel, Runnable accion) {

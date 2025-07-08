@@ -42,7 +42,9 @@ public class DIContainer {
     public AuthenticationController getAuthenticationController() {
         UsuarioRepository usuarioRepository = new UsuarioRepositoryImpl(entityManager);
         UsuariosServices usuariosServices = new UsuariosServicesImpl(usuarioRepository);
-        AuthenticationServices authenticationServices = new AuthenticationServiceImpl(usuariosServices);
+        RolPermisoRepository rolPermisoRepository = new RolPermisoRepositoryImpl(entityManager);
+        RolesPermisosService rolesPermisosService = new RolesPermisosServicesImpl(rolPermisoRepository);
+        AuthenticationServices authenticationServices = new AuthenticationServiceImpl(usuariosServices, rolesPermisosService);
 
         return new AuthenticationController(authenticationServices);
     }
