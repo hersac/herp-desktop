@@ -4,6 +4,7 @@ import com.hersac.core.di.DIContainer;
 import com.hersac.ui.views.authentication.login.LoginView;
 import com.hersac.ui.components.NavbarComponent;
 import com.hersac.ui.components.SidebarComponent;
+import com.hersac.ui.views.terceros.GestionTerceros;
 import com.hersac.ui.views.usuarios.auditorias.Auditorias;
 import com.hersac.ui.views.usuarios.gestion.GestionUsuarios;
 import com.hersac.ui.views.usuarios.rolesPermisos.RolesPermisos;
@@ -48,6 +49,7 @@ public class AppViews extends JFrame {
                     contenido.removeAll();
 
                     switch (destino) {
+                        case "gestion-terceros" -> contenido.add(new GestionTerceros(container), BorderLayout.CENTER);
                         case "gestion-usuarios" -> contenido.add(new GestionUsuarios(container), BorderLayout.CENTER);
                         case "roles-permisos" -> contenido.add(new RolesPermisos(container), BorderLayout.CENTER);
                         case "auditorias" -> contenido.add(new Auditorias(), BorderLayout.CENTER);

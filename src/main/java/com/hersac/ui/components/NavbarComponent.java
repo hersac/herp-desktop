@@ -45,7 +45,7 @@ public class NavbarComponent extends JPanel {
 
         panelMenuFijo.add(crearEtiqueta("Módulos", fuenteEtiqueta, new String[]{"Comercial", "Financiero", "Usuarios"}, null));
         panelMenuFijo.add(crearEtiqueta("Compañía", fuenteEtiqueta, new String[]{"Perfil", "Configuración"}, null));
-        panelMenuFijo.add(crearEtiqueta("Terceros", fuenteEtiqueta, null, null));
+        panelMenuFijo.add(crearEtiqueta("Terceros", fuenteEtiqueta, null, "gestion-terceros"));
 
         add(panelMenuFijo, BorderLayout.WEST);
         add(panelMenuDinamico, BorderLayout.CENTER);
@@ -62,6 +62,7 @@ public class NavbarComponent extends JPanel {
                 logoutListener.onLogout();
             }
         });
+
         JPanel panelLogout = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
         panelLogout.setBackground(COLOR_FONDO);
         panelLogout.add(btnLogout);
@@ -80,11 +81,13 @@ public class NavbarComponent extends JPanel {
 
         agregarEfectoHover(etiqueta);
 
-        if (navigationKey != null && navigationListener != null) {
+        if (navigationKey != null) {
             etiqueta.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    navigationListener.onNavigate(navigationKey);
+                    if (navigationListener != null) {
+                        navigationListener.onNavigate(navigationKey);
+                    }
                 }
             });
         }

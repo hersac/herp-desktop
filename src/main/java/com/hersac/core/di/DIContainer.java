@@ -18,6 +18,10 @@ import com.hersac.core.modules.rolespermisos.entities.repositories.RolPermisoRep
 import com.hersac.core.modules.rolespermisos.entities.repositories.impl.RolPermisoRepositoryImpl;
 import com.hersac.core.modules.rolespermisos.services.RolesPermisosService;
 import com.hersac.core.modules.rolespermisos.services.impl.RolesPermisosServicesImpl;
+import com.hersac.core.modules.terceros.entities.repositories.TerceroRepository;
+import com.hersac.core.modules.terceros.entities.repositories.impl.TerceroRepositoryImpl;
+import com.hersac.core.modules.terceros.services.TercerosServices;
+import com.hersac.core.modules.terceros.services.impl.TercerosServicesImpl;
 import com.hersac.core.modules.usuarios.entities.repositories.UsuarioRepository;
 import com.hersac.core.modules.usuarios.entities.repositories.impl.UsuarioRepositoryImpl;
 import com.hersac.core.modules.usuarios.services.UsuariosServices;
@@ -27,6 +31,7 @@ import com.hersac.ui.controllers.departamentos.DepartamentosController;
 import com.hersac.ui.controllers.permisos.PermisosController;
 import com.hersac.ui.controllers.roles.RolesController;
 import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
+import com.hersac.ui.controllers.terceros.TercerosController;
 import com.hersac.ui.controllers.usuarios.UsuariosController;
 import com.hersac.ui.views.authentication.login.LoginView;
 
@@ -98,5 +103,11 @@ public class DIContainer {
         RolPermisoRepository rolPermisoRepository = new RolPermisoRepositoryImpl(entityManager);
         RolesPermisosService rolesPermisosService = new RolesPermisosServicesImpl(rolPermisoRepository);
         return new PermissionService(rolesPermisosService);
+    }
+
+    public TercerosController getTercerosController() {
+        TerceroRepository terceroRepository = new TerceroRepositoryImpl(entityManager);
+        TercerosServices tercerosServices = new TercerosServicesImpl(terceroRepository);
+        return new TercerosController(tercerosServices);
     }
 }

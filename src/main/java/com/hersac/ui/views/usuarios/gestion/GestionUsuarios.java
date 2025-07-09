@@ -20,10 +20,6 @@ import javax.swing.JTextField;
 
 import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.core.modules.roles.entities.RolEntity;
-import com.hersac.core.modules.rolespermisos.entities.repositories.RolPermisoRepository;
-import com.hersac.core.modules.rolespermisos.entities.repositories.impl.RolPermisoRepositoryImpl;
-import com.hersac.core.modules.rolespermisos.services.RolesPermisosService;
-import com.hersac.core.modules.rolespermisos.services.impl.RolesPermisosServicesImpl;
 import com.hersac.ui.controllers.roles.RolesController;
 import com.hersac.ui.globals.enums.Permiso;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
