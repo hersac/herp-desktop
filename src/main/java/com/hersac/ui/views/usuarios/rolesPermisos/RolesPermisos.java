@@ -37,14 +37,12 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
 
-        // Obtener permisos del usuario actual
         java.util.Set<Long> permisosUsuario = UserSessionStore.getInstance().getPermisosUsuario();
         boolean puedeVer = permisosUsuario.contains(45L);
         boolean puedeRegistrar = permisosUsuario.contains(46L);
         boolean puedeEditar = permisosUsuario.contains(47L);
         boolean puedeEliminar = permisosUsuario.contains(48L);
 
-        // Pasar permisos a la tabla
         tablaRolesPermisos.setPermisos(puedeVer, puedeEditar, puedeEliminar);
 
         JLabel titleLabel = new JLabel("Roles y Permisos");
@@ -193,13 +191,25 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         List<PermisoEntity> permisos = permisosController.buscarTodos();
         List<RolPermisoEntity> rolPermisos = rolesPermisosController.buscarPorRolId(rol.getRolId());
         java.util.Map<String, Boolean[]> permisosMap = construirMapaPermisos(rolPermisos, permisos);
-        com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso modal = new com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso(frame, permisos, permisosMap);
+        boolean puedeEditar = UserSessionStore.getInstance().getPermisosUsuario().contains(47L);
+        com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso modal =
+            new com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso(frame, permisos, permisosMap, true);
         modal.setTitle("Editar Rol");
         modal.nombreField.setText(rol.getNombre());
         modal.descripcionArea.setText(rol.getDescripcion());
         modal.activoCheck.setSelected(Boolean.TRUE.equals(rol.getEstaActivo()));
+        if (!puedeEditar) {
+            modal.nombreField.setEnabled(false);
+            modal.descripcionArea.setEnabled(false);
+            modal.activoCheck.setEnabled(false);
+            modal.guardarBtn.setEnabled(false);
+            modal.moduloSelector.setEnabled(false);
+            if (modal.permisosTable != null) {
+                modal.permisosTable.setEnabled(false);
+            }
+        }
         modal.setVisible(true);
-        if (modal.isGuardado()) {
+        if (modal.isGuardado() && puedeEditar) {
             RolEntity rolEditado = modal.getRolCreado();
             rol.setNombre(rolEditado.getNombre());
             rol.setDescripcion(rolEditado.getDescripcion());
@@ -216,7 +226,7 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
                 idsSeleccionados.add(rp.getPermiso().getPermisoId());
             }
         }
-        // Definir los submódulos por módulo, usando nombres únicos para los reportes
+
         String[][] submodulosPorModulo = {
             {"Clientes", "Ventas", "Compras", "Inventario", "Reportes (Comercial)"},
             {"CxC", "CxP", "Movimientos", "Bancos", "Reportes (Financiero)"},

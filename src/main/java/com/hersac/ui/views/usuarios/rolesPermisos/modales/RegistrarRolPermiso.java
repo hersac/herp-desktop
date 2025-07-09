@@ -16,8 +16,8 @@ public class RegistrarRolPermiso extends JDialog {
     public boolean guardado = false;
     public RolEntity rolCreado;
     public List<Long> permisosSeleccionados;
-    private PermisosTable permisosTable;
-    private JComboBox<String> moduloSelector;
+    public PermisosTable permisosTable;
+    public JComboBox<String> moduloSelector;
     private static final String[] MODULOS = {"Comercial", "Financiero", "Usuarios"};
     private static final String[][] SUBMODULOS = {
         {"Clientes", "Ventas", "Compras", "Inventario", "Reportes (Comercial)"},
@@ -119,6 +119,21 @@ public class RegistrarRolPermiso extends JDialog {
         if (permisosSeleccionadosMap != null) {
             this.permisosSeleccionadosMap = new java.util.HashMap<>(permisosSeleccionadosMap);
             permisosTable.setSubmodulos(SUBMODULOS[moduloSelector.getSelectedIndex()], this.permisosSeleccionadosMap);
+        }
+    }
+
+    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, java.util.Map<String, Boolean[]> permisosSeleccionadosMap, boolean esEdicion) {
+        this(parent, permisos, permisosSeleccionadosMap);
+        // Si es solo vista (no edición), deshabilitar todos los campos
+        if (!esEdicion) {
+            nombreField.setEnabled(false);
+            descripcionArea.setEnabled(false);
+            activoCheck.setEnabled(false);
+            guardarBtn.setEnabled(false);
+            moduloSelector.setEnabled(false);
+            if (permisosTable != null) {
+                permisosTable.setEnabled(false);
+            }
         }
     }
 
