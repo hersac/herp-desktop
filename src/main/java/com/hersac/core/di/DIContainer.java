@@ -30,6 +30,7 @@ import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
 import com.hersac.ui.controllers.usuarios.UsuariosController;
 import com.hersac.ui.views.authentication.login.LoginView;
 
+import com.hersac.core.globals.servicios.PermissionService;
 import jakarta.persistence.EntityManager;
 
 public class DIContainer {
@@ -91,5 +92,11 @@ public class DIContainer {
     public LoginView getLoginView() {
         AuthenticationController authController = getAuthenticationController();
         return new LoginView(authController);
+    }
+
+    public PermissionService getPermissionService() {
+        RolPermisoRepository rolPermisoRepository = new RolPermisoRepositoryImpl(entityManager);
+        RolesPermisosService rolesPermisosService = new RolesPermisosServicesImpl(rolPermisoRepository);
+        return new PermissionService(rolesPermisosService);
     }
 }

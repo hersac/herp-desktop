@@ -37,7 +37,7 @@ public class AppViews extends JFrame {
             if (token != null) {
                 bg.removeAll();
 
-                NavbarComponent navbar = new NavbarComponent();
+                NavbarComponent navbar = new NavbarComponent(container.getPermissionService());
                 SidebarComponent sidebar = new SidebarComponent();
 
                 contenido = new JPanel(new BorderLayout());
@@ -66,7 +66,7 @@ public class AppViews extends JFrame {
                     newLoginView.addLoginListener(token2 -> {
                         if (token2 != null) {
                             bg.removeAll();
-                            NavbarComponent newNavbar = new NavbarComponent();
+                            NavbarComponent newNavbar = new NavbarComponent(container.getPermissionService());
                             SidebarComponent newSidebar = new SidebarComponent();
                             contenido = new JPanel(new BorderLayout());
                             contenido.setBackground(Color.WHITE);
@@ -104,7 +104,7 @@ public class AppViews extends JFrame {
         loginView.addLoginListener(token -> {
             if (token != null) {
                 bg.removeAll();
-                NavbarComponent navbar = new NavbarComponent();
+                NavbarComponent navbar = new NavbarComponent(container.getPermissionService());
                 SidebarComponent sidebar = new SidebarComponent();
                 contenido = new JPanel(new BorderLayout());
                 contenido.setBackground(Color.WHITE);

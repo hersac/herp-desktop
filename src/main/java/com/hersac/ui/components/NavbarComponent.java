@@ -1,6 +1,8 @@
 package com.hersac.ui.components;
 
 import com.hersac.ui.globals.enums.ColorsTheme;
+import com.hersac.ui.globals.enums.Permiso;
+import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.ui.listeners.NavigationListener;
 import com.hersac.ui.listeners.LogoutListener;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
@@ -28,7 +30,10 @@ public class NavbarComponent extends JPanel {
 
     private final List<String> MODULOS_PRINCIPALES = Arrays.asList("Comercial", "Financiero", "Usuarios");
 
-    public NavbarComponent() {
+    private final PermissionService permissionService;
+
+    public NavbarComponent(PermissionService permissionService) {
+        this.permissionService = permissionService;
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(0, 25));
         setBackground(COLOR_FONDO);
@@ -166,8 +171,12 @@ public class NavbarComponent extends JPanel {
                 panelMenuDinamico.add(crearEtiqueta("Reportes", fuenteEtiqueta, new String[]{"Flujo de caja", "Estado de resultados", "Balance General"}, null));
             }
             case "Usuarios" -> {
-                panelMenuDinamico.add(crearEtiqueta("Gestión usuarios", fuenteEtiqueta, null, "gestion-usuarios"));
-                panelMenuDinamico.add(crearEtiqueta("Roles y permisos", fuenteEtiqueta, null, "roles-permisos"));
+                if (permissionService.tienePermiso((long) Permiso.VER_GESTION_USUARIO.getId())) {
+                    panelMenuDinamico.add(crearEtiqueta("Gestión usuarios", fuenteEtiqueta, null, "gestion-usuarios"));
+                }
+                if (permissionService.tienePermiso((long) Permiso.VER_ROL_PERMISO.getId())) {
+                    panelMenuDinamico.add(crearEtiqueta("Roles y permisos", fuenteEtiqueta, null, "roles-permisos"));
+                }
                 panelMenuDinamico.add(crearEtiqueta("Auditoría", fuenteEtiqueta, null, "auditorias"));
             }
         }
