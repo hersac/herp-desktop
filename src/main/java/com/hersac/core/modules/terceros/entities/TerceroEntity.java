@@ -1,6 +1,7 @@
 package com.hersac.core.modules.terceros.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hersac.core.modules.terceros.entities.relations.TipoPersonaEntity;
 import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -20,9 +21,6 @@ public class TerceroEntity {
     @Id
     @Column(name = "tercero_id", nullable = false)
     private String terceroId;
-
-    @Column(name = "tipo", nullable = false)
-    private String tipo;
 
     @Column(name = "nombre", nullable = false)
     private String nombre;
@@ -46,6 +44,11 @@ public class TerceroEntity {
     private LocalDateTime fechaActualizacion;
 
     //Relaciones
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_persona_id", nullable = false)
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+    private TipoPersonaEntity tipoPersona;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)

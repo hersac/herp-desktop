@@ -2,7 +2,7 @@ package com.hersac.ui.views.terceros;
 
 import com.hersac.core.di.DIContainer;
 import com.hersac.core.modules.terceros.entities.TerceroEntity;
-import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
+import com.hersac.core.modules.terceros.entities.relations.TipoPersonaEntity;
 import com.hersac.ui.controllers.terceros.TercerosController;
 import com.hersac.ui.views.terceros.forms.FiltrosTercerosForm;
 import com.hersac.ui.views.terceros.listeners.TercerosListeners;
@@ -29,11 +29,21 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
         titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
         titleLabel.setAlignmentX(CENTER_ALIGNMENT);
         filtrosForm = new FiltrosTercerosForm();
+        filtrosForm.setOnFiltrosCambiados(this::filtrarTerceros);
         JButton registrarBtn = new JButton("Registrar Tercero");
         registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
+        registrarBtn.addActionListener(e -> {
+            new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, null);
+        });
         searchField = new JTextField(25);
         searchField.setMaximumSize(new Dimension(400, 30));
         searchField.setAlignmentX(CENTER_ALIGNMENT);
+        searchField.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                filtrarTerceros();
+            }
+        });
         JPanel panelBtn = new JPanel();
         panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
         panelBtn.setOpaque(false);
@@ -68,19 +78,69 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
 
         this.listaCompletaTerceros = obtenerTerceros();
         tablaTercerosTable.setTerceros(listaCompletaTerceros);
-        // TODO: cargar listaCompletaTerceros y setear en tablaTercerosTable
-        // TODO: listeners de búsqueda, filtros y registrarBtn
+        tablaTercerosTable.setActionListener(this);
     }
 
-    // Métodos de TercerosListeners (vacíos por ahora)
+    private void filtrarTerceros() {
+        String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
+        String estado = filtrosForm.getEstadoSeleccionado();
+        TipoPersonaEntity tipoSeleccionado = filtrosForm.getTipoSeleccionado();
+        final Integer tipoIdSeleccionado = (tipoSeleccionado != null) ? tipoSeleccionado.getTipoPersonaId() : null;
+        List<TerceroEntity> filtrados = listaCompletaTerceros.stream()
+            .filter(t -> {
+                String idStr = String.valueOf(t.getTerceroId());
+                String nombre = t.getNombre() != null ? t.getNombre().toLowerCase() : "";
+                String estadoTercero = t.getEstado() != null ? t.getEstado().toLowerCase() : "";
+                Integer tipoId = t.getTipoPersona() != null ? t.getTipoPersona().getTipoPersonaId() : null;
+                String tipoNombre = t.getTipoPersona() != null && t.getTipoPersona().getNombre() != null ? t.getTipoPersona().getNombre().toLowerCase() : "";
+                boolean coincideTexto = texto.isEmpty() || idStr.contains(texto) || nombre.contains(texto) || estadoTercero.contains(texto) || tipoNombre.contains(texto);
+                boolean coincideEstado = estado.equals("Todos") || estadoTercero.equals(estado.toLowerCase());
+                boolean coincideTipo = tipoIdSeleccionado == null || (tipoId != null && tipoIdSeleccionado.equals(tipoId));
+                return coincideTexto && coincideEstado && coincideTipo;
+            })
+            .toList();
+        tablaTercerosTable.setTerceros(filtrados);
+    }
+
+    // Métodos de TercerosListeners
     @Override
-    public void crearTercero(TerceroEntity tercero) {}
+    public void crearTercero(TerceroEntity tercero) {
+        tercerosController.crear(tercero);
+        this.listaCompletaTerceros = obtenerTerceros();
+        tablaTercerosTable.setTerceros(listaCompletaTerceros);
+        JOptionPane.showMessageDialog(this,
+                "Tercero creado exitosamente:\n\nNombre: " + tercero.getNombre() + "\nID: " + tercero.getTerceroId(),
+                "Tercero Creado", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     @Override
-    public void verTercero(TerceroEntity tercero) {}
+    public void verTercero(TerceroEntity tercero) {
+        new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, tercero);
+    }
+
     @Override
-    public void actualizarTercero(TerceroEntity tercero) {}
+    public void actualizarTercero(TerceroEntity tercero) {
+        tercerosController.actualizar(tercero.getTerceroId(), tercero);
+        this.listaCompletaTerceros = obtenerTerceros();
+        tablaTercerosTable.setTerceros(listaCompletaTerceros);
+        JOptionPane.showMessageDialog(this,
+                "Tercero actualizado exitosamente:\n\nNombre: " + tercero.getNombre() + "\nID: " + tercero.getTerceroId(),
+                "Tercero Actualizado", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     @Override
-    public void eliminarTercero(TerceroEntity tercero) {}
+    public void eliminarTercero(TerceroEntity tercero) {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "¿Seguro que deseas eliminar al tercero " + tercero.getNombre() + "?",
+                "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            tercerosController.eliminar(tercero.getTerceroId());
+            this.listaCompletaTerceros = obtenerTerceros();
+            tablaTercerosTable.setTerceros(listaCompletaTerceros);
+            JOptionPane.showMessageDialog(this, "Tercero eliminado correctamente.",
+                    "Eliminación exitosa", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 
     private List<TerceroEntity> obtenerTerceros() {
         return tercerosController.buscarTodos();

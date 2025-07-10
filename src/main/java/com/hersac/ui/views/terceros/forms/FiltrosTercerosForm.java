@@ -1,11 +1,13 @@
 package com.hersac.ui.views.terceros.forms;
 
+import com.hersac.core.modules.terceros.entities.relations.TipoPersonaEntity;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class FiltrosTercerosForm extends JPanel {
     private JComboBox<String> estadoCombo;
-    private JComboBox<String> tipoCombo;
+    private JComboBox<TipoPersonaEntity> tipoCombo;
     private Runnable onFiltrosCambiados;
 
     public FiltrosTercerosForm() {
@@ -18,10 +20,10 @@ public class FiltrosTercerosForm extends JPanel {
         gbc.gridy = 0;
         tipoCombo = new JComboBox<>();
         tipoCombo.setPreferredSize(new Dimension(130, 28));
-        tipoCombo.addItem("Todos");
-        tipoCombo.addItem("Cliente");
-        tipoCombo.addItem("Proveedor");
-        tipoCombo.addItem("Otro");
+        tipoCombo.addItem(new TipoPersonaEntity(null, "Todos"));
+        for (com.hersac.ui.views.terceros.constantes.TiposTerceroEnum tipo : com.hersac.ui.views.terceros.constantes.TiposTerceroEnum.values()) {
+            tipoCombo.addItem(new TipoPersonaEntity(tipo.getId(), tipo.getNombre()));
+        }
         tipoCombo.addActionListener(e -> notificarCambio());
         addFiltro(filtrosPanel, gbc, 0, "Tipo:", tipoCombo);
         estadoCombo = new JComboBox<>(new String[] {"Todos", "Activo", "Inactivo"});
@@ -55,7 +57,7 @@ public class FiltrosTercerosForm extends JPanel {
         return (String) estadoCombo.getSelectedItem();
     }
 
-    public String getTipoSeleccionado() {
-        return (String) tipoCombo.getSelectedItem();
+    public TipoPersonaEntity getTipoSeleccionado() {
+        return (TipoPersonaEntity) tipoCombo.getSelectedItem();
     }
 }
