@@ -149,6 +149,32 @@ public class RegistrarRolPermiso extends JDialog {
     }
 
     private void precargarPermisos(List<PermisoEntity> permisos) {
+        // Inicializar el mapa para todos los submódulos
+        for (String[] submodulosPorModulo : SUBMODULOS) {
+            for (String sub : submodulosPorModulo) {
+                permisosSeleccionadosMap.put(sub, new Boolean[]{false, false, false, false});
+            }
+        }
+        // Mapear los IDs base por módulo
+        int[] basePermisoPorModulo = {1, 21, 41, 53};
+        for (int moduloIdx = 0; moduloIdx < SUBMODULOS.length; moduloIdx++) {
+            int idPermiso = basePermisoPorModulo[moduloIdx];
+            for (String submodulo : SUBMODULOS[moduloIdx]) {
+                Boolean[] checks = new Boolean[]{false, false, false, false};
+                for (int j = 0; j < 4; j++) {
+                    final int idPermisoFinal = idPermiso;
+                    boolean tienePermiso = permisos.stream().anyMatch(p -> p.getPermisoId() != null && p.getPermisoId() == idPermisoFinal);
+                    checks[j] = tienePermiso;
+                    idPermiso++;
+                }
+                permisosSeleccionadosMap.put(submodulo, checks);
+            }
+        }
+        // Refrescar la tabla de permisos para el módulo seleccionado
+        if (moduloSelector != null && permisosTable != null) {
+            int idx = moduloSelector.getSelectedIndex();
+            permisosTable.setSubmodulos(SUBMODULOS[idx], permisosSeleccionadosMap);
+        }
     }
 
     private List<Long> obtenerPermisosSeleccionados(List<PermisoEntity> permisos) {

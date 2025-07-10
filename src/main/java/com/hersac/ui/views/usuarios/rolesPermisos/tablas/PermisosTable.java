@@ -95,13 +95,11 @@ public class PermisosTable extends JPanel {
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             if (columnIndex == 0) return submodulos[rowIndex];
-            // Ajustar el índice para acceder correctamente a los permisos
             return data[rowIndex][columnIndex - 1];
         }
         @Override
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
             if (columnIndex > 0) {
-                // Ajustar el índice para acceder correctamente a los permisos
                 data[rowIndex][columnIndex - 1] = (Boolean) aValue;
                 fireTableCellUpdated(rowIndex, columnIndex);
             }
@@ -114,13 +112,10 @@ public class PermisosTable extends JPanel {
             return Boolean.class;
         }
         public boolean[][] getPermisosSeleccionados() {
-            // Ajusta para que los permisos seleccionados empiecen desde 1
             boolean[][] seleccionados = new boolean[data.length][data[0].length + 1];
             for (int i = 0; i < data.length; i++) {
-                // La posición 0 se deja en false (sin uso)
                 seleccionados[i][0] = false;
                 for (int j = 1; j < seleccionados[i].length; j++) {
-                    // Validar que j-1 esté dentro de los límites de data[i]
                     if ((j - 1) < data[i].length) {
                         seleccionados[i][j] = Boolean.TRUE.equals(data[i][j - 1]);
                         System.out.println(": Seleccionado[" + i + "][" + j + "] = " + seleccionados[i][j]);
@@ -132,22 +127,17 @@ public class PermisosTable extends JPanel {
             return seleccionados;
         }
         public Object[] getPermisosSeleccionadosLineal() {
-            // Cada submódulo ocupa 5 posiciones: 1 para el nombre, 4 para los permisos
             Object[] seleccionados = new Object[data.length * 5];
             for (int i = 0; i < data.length; i++) {
                 int base = i * 5;
-                seleccionados[base] = submodulos[i]; // Nombre del submódulo
+                seleccionados[base] = submodulos[i];
                 for (int j = 1; j <= 4; j++) {
                     int idx = base + j;
-                    // El id del permiso en BD es igual al índice en el array menos la cantidad de nombres de submódulo antes de ese índice
-                    // Es decir, id_permiso = idx - (idx / 5)
                     int idPermiso = idx - (idx / 5);
-                    // Si el índice es múltiplo de 5, es nombre de submódulo, no permiso
                     if (idx % 5 != 0) {
-                        // Mapear el valor del permiso correspondiente
                         seleccionados[idx] = Boolean.TRUE.equals(data[i][j - 1]);
                     } else {
-                        seleccionados[idx] = null; // O false, o dejarlo vacío
+                        seleccionados[idx] = null;
                     }
                 }
             }

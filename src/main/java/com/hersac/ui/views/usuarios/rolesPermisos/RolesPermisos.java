@@ -230,9 +230,10 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         String[][] submodulosPorModulo = {
             {"Clientes", "Ventas", "Compras", "Inventario", "Reportes (Comercial)"},
             {"CxC", "CxP", "Movimientos", "Bancos", "Reportes (Financiero)"},
-            {"Gestión de usuarios", "Roles y permisos", "Auditoría"}
+            {"Gestión de usuarios", "Roles y permisos", "Auditoría"},
+            {"Terceros"}
         };
-        int[] basePermisoPorModulo = {1, 21, 41}; // Comercial inicia en 1, Financiero en 21, Usuarios en 41
+        int[] basePermisoPorModulo = {1, 21, 41, 53}; // Agregamos Terceros (53)
         for (int moduloIdx = 0; moduloIdx < submodulosPorModulo.length; moduloIdx++) {
             String[] submodulos = submodulosPorModulo[moduloIdx];
             int idPermiso = basePermisoPorModulo[moduloIdx];
