@@ -1,6 +1,8 @@
 package com.hersac.ui.views.terceros.tablas;
 
 import com.hersac.core.modules.terceros.entities.TerceroEntity;
+import com.hersac.core.globals.servicios.PermissionService;
+import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.ui.views.terceros.constantes.TiposTerceroEnum;
 import com.hersac.ui.views.terceros.listeners.TercerosListeners;
 
@@ -23,8 +25,14 @@ public class TercerosTable extends JPanel {
     private final JTable tablaTerceros;
     private final DefaultTableModel modeloTabla;
     private TercerosListeners tercerosListeners;
+    private PermissionService permissionService;
 
     public TercerosTable() {
+        this(null);
+    }
+
+    public TercerosTable(PermissionService permissionService) {
+        this.permissionService = permissionService;
         setLayout(new BorderLayout());
         String[] columnas = {"ID", "Nombre", "Tipo", "Estado", "Acciones"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
@@ -119,31 +127,37 @@ public class TercerosTable extends JPanel {
                 tercero = (TerceroEntity) value;
                 panel.removeAll();
                 boolean activo = "Activo".equalsIgnoreCase(tercero.getEstado());
-                JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver tercero", new Color(60, 130, 200), e -> {
-                    if (tercerosListeners != null)
-                        tercerosListeners.verTercero(tercero);
-                    fireEditingStopped();
-                });
-                JButton btnToggle = crearBotonAccion(
-                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                        activo ? "Inactivar" : "Activar",
-                        activo ? new Color(0, 180, 0) : Color.RED,
-                        e -> {
-                            tercero.setEstado(activo ? "Inactivo" : "Activo");
-                            modeloTabla.setValueAt(tercero.getEstado(), row, 3);
-                            modeloTabla.setValueAt(tercero, row, 4);
-                            if (tercerosListeners != null)
-                                tercerosListeners.actualizarTercero(tercero);
-                            fireEditingStopped();
-                        });
-                JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar tercero", Color.RED, e -> {
-                    if (tercerosListeners != null)
-                        tercerosListeners.eliminarTercero(tercero);
-                    fireEditingStopped();
-                });
-                panel.add(btnVer);
-                panel.add(btnToggle);
-                panel.add(btnEliminar);
+                if (permissionService == null || permissionService.tienePermiso((long) Permiso.VER_TERCERO.getId())) {
+                    JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver tercero", new Color(60, 130, 200), e -> {
+                        if (tercerosListeners != null)
+                            tercerosListeners.verTercero(tercero);
+                        fireEditingStopped();
+                    });
+                    panel.add(btnVer);
+                }
+                if (permissionService == null || permissionService.tienePermiso((long) Permiso.EDITAR_TERCERO.getId())) {
+                    JButton btnToggle = crearBotonAccion(
+                            activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                            activo ? "Inactivar" : "Activar",
+                            activo ? new Color(0, 180, 0) : Color.RED,
+                            e -> {
+                                tercero.setEstado(activo ? "Inactivo" : "Activo");
+                                modeloTabla.setValueAt(tercero.getEstado(), row, 3);
+                                modeloTabla.setValueAt(tercero, row, 4);
+                                if (tercerosListeners != null)
+                                    tercerosListeners.actualizarTercero(tercero);
+                                fireEditingStopped();
+                            });
+                    panel.add(btnToggle);
+                }
+                if (permissionService == null || permissionService.tienePermiso((long) Permiso.ELIMINAR_TERCERO.getId())) {
+                    JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar tercero", Color.RED, e -> {
+                        if (tercerosListeners != null)
+                            tercerosListeners.eliminarTercero(tercero);
+                        fireEditingStopped();
+                    });
+                    panel.add(btnEliminar);
+                }
             }
             return panel;
         }
@@ -161,17 +175,23 @@ public class TercerosTable extends JPanel {
 
     private JPanel crearPanelAcciones(TerceroEntity tercero, boolean conListeners) {
         boolean activo = "Activo".equalsIgnoreCase(tercero.getEstado());
-        JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver tercero", new Color(60, 130, 200));
-        JButton btnToggle = crearIconoBoton(
-                activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                activo ? "Inactivar" : "Activar",
-                activo ? new Color(0, 180, 0) : Color.RED);
-        JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar tercero", Color.RED);
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         panel.setOpaque(false);
-        panel.add(btnVer);
-        panel.add(btnToggle);
-        panel.add(btnEliminar);
+        if (permissionService == null || permissionService.tienePermiso((long) Permiso.VER_TERCERO.getId())) {
+            JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver tercero", new Color(60, 130, 200));
+            panel.add(btnVer);
+        }
+        if (permissionService == null || permissionService.tienePermiso((long) Permiso.EDITAR_TERCERO.getId())) {
+            JButton btnToggle = crearIconoBoton(
+                    activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                    activo ? "Inactivar" : "Activar",
+                    activo ? new Color(0, 180, 0) : Color.RED);
+            panel.add(btnToggle);
+        }
+        if (permissionService == null || permissionService.tienePermiso((long) Permiso.ELIMINAR_TERCERO.getId())) {
+            JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar tercero", Color.RED);
+            panel.add(btnEliminar);
+        }
         return panel;
     }
 

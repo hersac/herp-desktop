@@ -67,7 +67,13 @@ public enum Permiso {
     VER_AUDITORIA(49),
     CREAR_AUDITORIA(50),
     EDITAR_AUDITORIA(51),
-    ELIMINAR_AUDITORIA(52);
+    ELIMINAR_AUDITORIA(52),
+
+    // TERCEROS
+    VER_TERCERO(53),
+    CREAR_TERCERO(54),
+    EDITAR_TERCERO(55),
+    ELIMINAR_TERCERO(56);
 
     private final int id;
 

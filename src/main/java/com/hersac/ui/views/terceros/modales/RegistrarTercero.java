@@ -4,6 +4,7 @@ import com.hersac.core.modules.terceros.entities.TerceroEntity;
 import com.hersac.core.modules.terceros.entities.relations.TipoPersonaEntity;
 import com.hersac.ui.views.terceros.constantes.TiposTerceroEnum;
 import com.hersac.ui.views.terceros.listeners.TercerosListeners;
+import com.hersac.core.globals.servicios.PermissionService;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
@@ -23,12 +24,15 @@ public class RegistrarTercero extends JDialog {
     private TerceroEntity terceroRegistrado;
     private final TercerosListeners listener;
     private final boolean esEdicion;
+    private final PermissionService permissionService;
+    private static final long PERMISO_INACTIVAR = 55L;
 
-    public RegistrarTercero(JFrame parent, TercerosListeners listener, TerceroEntity terceroParaEditar) {
+    public RegistrarTercero(JFrame parent, TercerosListeners listener, TerceroEntity terceroParaEditar, PermissionService permissionService) {
         super(parent, terceroParaEditar != null ? "Actualizar Tercero" : "Registrar Tercero", true);
         this.listener = listener;
         this.terceroRegistrado = terceroParaEditar;
         this.esEdicion = terceroParaEditar != null;
+        this.permissionService = permissionService;
         initComponents();
     }
 
@@ -86,6 +90,15 @@ public class RegistrarTercero extends JDialog {
         buttonPanel.add(cancelarBtn);
         add(formPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
+        boolean puedeEditar = (permissionService == null) || permissionService.tienePermiso(PERMISO_INACTIVAR);
+        idField.setEnabled(!esEdicion && puedeEditar);
+        nombreField.setEnabled(puedeEditar);
+        tipoComboBox.setEnabled(puedeEditar);
+        direccionField.setEnabled(puedeEditar);
+        telefonoField.setEnabled(puedeEditar);
+        emailField.setEnabled(puedeEditar);
+        activoCheckBox.setEnabled(puedeEditar);
+        guardarBtn.setEnabled(puedeEditar);
         setVisible(true);
     }
 

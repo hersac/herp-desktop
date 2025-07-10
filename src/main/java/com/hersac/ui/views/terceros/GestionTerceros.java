@@ -1,9 +1,11 @@
 package com.hersac.ui.views.terceros;
 
 import com.hersac.core.di.DIContainer;
+import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.core.modules.terceros.entities.TerceroEntity;
 import com.hersac.core.modules.terceros.entities.relations.TipoPersonaEntity;
 import com.hersac.ui.controllers.terceros.TercerosController;
+import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.ui.views.terceros.forms.FiltrosTercerosForm;
 import com.hersac.ui.views.terceros.listeners.TercerosListeners;
 import com.hersac.ui.views.terceros.tablas.TercerosTable;
@@ -14,14 +16,17 @@ import java.util.List;
 
 public class GestionTerceros extends JPanel implements TercerosListeners {
     private final TercerosController tercerosController;
+    private final PermissionService permissionService;
     private JFrame frame = new JFrame("Registrar Tercero");
-    private final TercerosTable tablaTercerosTable = new TercerosTable();
+    private final TercerosTable tablaTercerosTable;
     private List<TerceroEntity> listaCompletaTerceros;
     private FiltrosTercerosForm filtrosForm;
     private JTextField searchField;
 
     public GestionTerceros(DIContainer diContainer) {
         this.tercerosController = diContainer.getTercerosController();
+        this.permissionService = diContainer.getPermissionService();
+        this.tablaTercerosTable = new TercerosTable(permissionService);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
@@ -32,8 +37,10 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
         filtrosForm.setOnFiltrosCambiados(this::filtrarTerceros);
         JButton registrarBtn = new JButton("Registrar Tercero");
         registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
+        registrarBtn.setEnabled(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
+        registrarBtn.setVisible(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
         registrarBtn.addActionListener(e -> {
-            new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, null);
+            new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, null, permissionService);
         });
         searchField = new JTextField(25);
         searchField.setMaximumSize(new Dimension(400, 30));
@@ -115,7 +122,7 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
 
     @Override
     public void verTercero(TerceroEntity tercero) {
-        new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, tercero);
+        new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, tercero, permissionService);
     }
 
     @Override

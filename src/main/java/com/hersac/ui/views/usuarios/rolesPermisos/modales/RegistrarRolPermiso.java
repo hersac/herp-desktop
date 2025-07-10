@@ -18,11 +18,12 @@ public class RegistrarRolPermiso extends JDialog {
     public List<Long> permisosSeleccionados;
     public PermisosTable permisosTable;
     public JComboBox<String> moduloSelector;
-    private static final String[] MODULOS = {"Comercial", "Financiero", "Usuarios"};
+    private static final String[] MODULOS = {"Comercial", "Financiero", "Usuarios", "Terceros"};
     private static final String[][] SUBMODULOS = {
         {"Clientes", "Ventas", "Compras", "Inventario", "Reportes (Comercial)"},
         {"CxC", "CxP", "Movimientos", "Bancos", "Reportes (Financiero)"},
-        {"Gestión de usuarios", "Roles y permisos", "Auditoría"}
+        {"Gestión de usuarios", "Roles y permisos", "Auditoría"},
+        {"Terceros"}
     };
     private java.util.Map<String, Boolean[]> permisosSeleccionadosMap = new java.util.HashMap<>();
 
@@ -152,7 +153,7 @@ public class RegistrarRolPermiso extends JDialog {
 
     private List<Long> obtenerPermisosSeleccionados(List<PermisoEntity> permisos) {
         List<Long> seleccionados = new ArrayList<>();
-        int[] basePermisoPorModulo = {1, 21, 41};
+        int[] basePermisoPorModulo = {1, 21, 41, 53}; // 53 es el id base para Terceros
         for (int moduloIdx = 0; moduloIdx < MODULOS.length; moduloIdx++) {
             int idPermiso = basePermisoPorModulo[moduloIdx];
             for (String submodulo : SUBMODULOS[moduloIdx]) {
