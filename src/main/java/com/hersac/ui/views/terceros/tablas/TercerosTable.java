@@ -15,6 +15,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EventObject;
 import java.util.List;
@@ -66,7 +67,7 @@ public class TercerosTable extends JPanel {
     }
 
     public void setTerceros(List<TerceroEntity> terceros) {
-        List<TerceroEntity> listaMutable = new java.util.ArrayList<>(terceros);
+        List<TerceroEntity> listaMutable = new ArrayList<>(terceros);
         listaMutable.sort(Comparator.comparing(TerceroEntity::getTerceroId));
         modeloTabla.setRowCount(0);
         for (TerceroEntity tercero : listaMutable) {

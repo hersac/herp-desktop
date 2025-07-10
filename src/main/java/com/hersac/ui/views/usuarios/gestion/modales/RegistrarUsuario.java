@@ -1,8 +1,6 @@
 package com.hersac.ui.views.usuarios.gestion.modales;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -65,7 +63,7 @@ public class RegistrarUsuario extends JDialog {
             activoCheckBox.setEnabled(false);
             departamentoCombo.setEnabled(false);
             rolCombo.setEnabled(false);
-            for (java.awt.Component comp : buttonPanel.getComponents()) {
+            for (Component comp : buttonPanel.getComponents()) {
                 if (comp instanceof JButton btn && !btn.getText().equals("Cancelar")) {
                     btn.setEnabled(false);
                 }

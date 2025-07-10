@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.hersac.core.di.DIContainer;
@@ -37,7 +38,7 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
 
-        java.util.Set<Long> permisosUsuario = UserSessionStore.getInstance().getPermisosUsuario();
+        Set<Long> permisosUsuario = UserSessionStore.getInstance().getPermisosUsuario();
         boolean puedeVer = permisosUsuario.contains(45L);
         boolean puedeRegistrar = permisosUsuario.contains(46L);
         boolean puedeEditar = permisosUsuario.contains(47L);
@@ -190,7 +191,7 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
     public void mostrarModalEditarRol(RolEntity rol) {
         List<PermisoEntity> permisos = permisosController.buscarTodos();
         List<RolPermisoEntity> rolPermisos = rolesPermisosController.buscarPorRolId(rol.getRolId());
-        java.util.Map<String, Boolean[]> permisosMap = construirMapaPermisos(rolPermisos, permisos);
+        Map<String, Boolean[]> permisosMap = construirMapaPermisos(rolPermisos, permisos);
         boolean puedeEditar = UserSessionStore.getInstance().getPermisosUsuario().contains(47L);
         com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso modal =
             new com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso(frame, permisos, permisosMap, true);
@@ -218,9 +219,9 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         }
     }
 
-    private java.util.Map<String, Boolean[]> construirMapaPermisos(List<RolPermisoEntity> rolPermisos, List<PermisoEntity> permisos) {
-        java.util.Map<String, Boolean[]> map = new java.util.HashMap<>();
-        java.util.Set<Long> idsSeleccionados = new java.util.HashSet<>();
+    private Map<String, Boolean[]> construirMapaPermisos(List<RolPermisoEntity> rolPermisos, List<PermisoEntity> permisos) {
+        Map<String, Boolean[]> map = new HashMap<>();
+        Set<Long> idsSeleccionados = new HashSet<>();
         for (RolPermisoEntity rp : rolPermisos) {
             if (rp.getPermiso() != null && rp.getPermiso().getPermisoId() != null) {
                 idsSeleccionados.add(rp.getPermiso().getPermisoId());

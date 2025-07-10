@@ -22,13 +22,10 @@ public class UsuariosServicesImpl implements UsuariosServices {
 
     @Override
     public UsuarioEntity buscarPorId(Long usuarioId) {
-
         UsuarioEntity usuario = usuarioRepository.buscarPorId(usuarioId);
-
         if (usuario == null) {
             throw new UsuarioNoEncontradoException(usuarioId);
         }
-
         return usuario;
     }
 
@@ -40,11 +37,9 @@ public class UsuariosServicesImpl implements UsuariosServices {
     @Override
     public void actualizar(Long usuarioId, UsuarioEntity usuario) {
         UsuarioEntity usuarioExistente = usuarioRepository.buscarPorId(usuarioId);
-
         if (usuarioExistente == null) {
             throw new UsuarioNoEncontradoException(usuarioId);
         }
-
         usuarioExistente.setNombre(usuario.getNombre());
         usuarioExistente.setCorreo(usuario.getCorreo());
         usuarioExistente.setContrasena(usuario.getContrasena());
@@ -56,11 +51,9 @@ public class UsuariosServicesImpl implements UsuariosServices {
     @Override
     public void eliminar(Long usuarioId) {
         UsuarioEntity usuarioExistente = usuarioRepository.buscarPorId(usuarioId);
-
         if (usuarioExistente == null) {
             throw new UsuarioNoEncontradoException(usuarioId);
         }
-
         usuarioRepository.eliminar(usuarioId);
     }
 
@@ -70,7 +63,6 @@ public class UsuariosServicesImpl implements UsuariosServices {
         if (usuarioExistente == null) {
             throw new UsuarioNoEncontradoException(correo);
         }
-
         return usuarioExistente;
     }
 }

@@ -8,10 +8,13 @@ import com.hersac.ui.controllers.terceros.TercerosController;
 import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.ui.views.terceros.forms.FiltrosTercerosForm;
 import com.hersac.ui.views.terceros.listeners.TercerosListeners;
+import com.hersac.ui.views.terceros.modales.RegistrarTercero;
 import com.hersac.ui.views.terceros.tablas.TercerosTable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class GestionTerceros extends JPanel implements TercerosListeners {
@@ -40,14 +43,14 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
         registrarBtn.setEnabled(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
         registrarBtn.setVisible(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
         registrarBtn.addActionListener(e -> {
-            new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, null, permissionService);
+            new RegistrarTercero(frame, this, null, permissionService);
         });
         searchField = new JTextField(25);
         searchField.setMaximumSize(new Dimension(400, 30));
         searchField.setAlignmentX(CENTER_ALIGNMENT);
-        searchField.addKeyListener(new java.awt.event.KeyAdapter() {
+        searchField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyReleased(java.awt.event.KeyEvent e) {
+            public void keyReleased(KeyEvent e) {
                 filtrarTerceros();
             }
         });

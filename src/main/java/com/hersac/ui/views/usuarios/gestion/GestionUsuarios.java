@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -124,18 +126,18 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     }
 
     private void ejecutarAccion(JButton panel, Runnable accion) {
-        panel.addMouseListener(new java.awt.event.MouseAdapter() {
+        panel.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
+            public void mouseClicked(MouseEvent e) {
                 accion.run();
             }
             @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
+            public void mouseEntered(MouseEvent e) {
                 panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 panel.setBackground(ColorsTheme.PRIMARY_LIGTH.get());
             }
             @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
+            public void mouseExited(MouseEvent e) {
                 panel.setBackground(ColorsTheme.PRIMARY.get());
             }
         });

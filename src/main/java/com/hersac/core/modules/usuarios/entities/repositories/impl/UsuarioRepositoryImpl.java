@@ -55,7 +55,6 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
                 "SELECT u FROM UsuarioEntity u WHERE u.correo = :correo", UsuarioEntity.class)
             .setParameter("correo", correo)
             .getResultList();
-
         return resultados.isEmpty() ? null : resultados.getFirst();
     }
 }

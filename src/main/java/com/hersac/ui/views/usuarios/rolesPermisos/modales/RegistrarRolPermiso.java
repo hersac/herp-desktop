@@ -3,7 +3,10 @@ package com.hersac.ui.views.usuarios.rolesPermisos.modales;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.hersac.core.modules.roles.entities.RolEntity;
 import com.hersac.core.modules.permisos.entities.PermisoEntity;
 import com.hersac.ui.views.usuarios.rolesPermisos.tablas.PermisosTable;
@@ -25,7 +28,7 @@ public class RegistrarRolPermiso extends JDialog {
         {"Gestión de usuarios", "Roles y permisos", "Auditoría"},
         {"Terceros"}
     };
-    private java.util.Map<String, Boolean[]> permisosSeleccionadosMap = new java.util.HashMap<>();
+    private Map<String, Boolean[]> permisosSeleccionadosMap = new HashMap<>();
 
     public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos) {
         super(parent, "Registrar Rol", true);
@@ -115,17 +118,16 @@ public class RegistrarRolPermiso extends JDialog {
         add(btnPanel, BorderLayout.SOUTH);
     }
 
-    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, java.util.Map<String, Boolean[]> permisosSeleccionadosMap) {
+    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, Map<String, Boolean[]> permisosSeleccionadosMap) {
         this(parent, permisos);
         if (permisosSeleccionadosMap != null) {
-            this.permisosSeleccionadosMap = new java.util.HashMap<>(permisosSeleccionadosMap);
+            this.permisosSeleccionadosMap = new HashMap<>(permisosSeleccionadosMap);
             permisosTable.setSubmodulos(SUBMODULOS[moduloSelector.getSelectedIndex()], this.permisosSeleccionadosMap);
         }
     }
 
-    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, java.util.Map<String, Boolean[]> permisosSeleccionadosMap, boolean esEdicion) {
+    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, Map<String, Boolean[]> permisosSeleccionadosMap, boolean esEdicion) {
         this(parent, permisos, permisosSeleccionadosMap);
-        // Si es solo vista (no edición), deshabilitar todos los campos
         if (!esEdicion) {
             nombreField.setEnabled(false);
             descripcionArea.setEnabled(false);
@@ -142,20 +144,18 @@ public class RegistrarRolPermiso extends JDialog {
     public RolEntity getRolCreado() { return rolCreado; }
     private void guardarSeleccionActual() {
         String[] submodulosActuales = permisosTable.getSubmodulos();
-        java.util.Map<String, Boolean[]> seleccionados = permisosTable.getSeleccionadosMap();
+        Map<String, Boolean[]> seleccionados = permisosTable.getSeleccionadosMap();
         for (String sub : submodulosActuales) {
             permisosSeleccionadosMap.put(sub, seleccionados.get(sub));
         }
     }
 
     private void precargarPermisos(List<PermisoEntity> permisos) {
-        // Inicializar el mapa para todos los submódulos
         for (String[] submodulosPorModulo : SUBMODULOS) {
             for (String sub : submodulosPorModulo) {
                 permisosSeleccionadosMap.put(sub, new Boolean[]{false, false, false, false});
             }
         }
-        // Mapear los IDs base por módulo
         int[] basePermisoPorModulo = {1, 21, 41, 53};
         for (int moduloIdx = 0; moduloIdx < SUBMODULOS.length; moduloIdx++) {
             int idPermiso = basePermisoPorModulo[moduloIdx];
@@ -170,7 +170,6 @@ public class RegistrarRolPermiso extends JDialog {
                 permisosSeleccionadosMap.put(submodulo, checks);
             }
         }
-        // Refrescar la tabla de permisos para el módulo seleccionado
         if (moduloSelector != null && permisosTable != null) {
             int idx = moduloSelector.getSelectedIndex();
             permisosTable.setSubmodulos(SUBMODULOS[idx], permisosSeleccionadosMap);

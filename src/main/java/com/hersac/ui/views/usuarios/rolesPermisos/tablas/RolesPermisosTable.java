@@ -2,10 +2,13 @@ package com.hersac.ui.views.usuarios.rolesPermisos.tablas;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.hersac.core.modules.roles.entities.RolEntity;
@@ -78,7 +81,7 @@ public class RolesPermisosTable extends JPanel {
         repaint();
     }
 
-    private class AccionesRenderer implements javax.swing.table.TableCellRenderer {
+    private class AccionesRenderer implements TableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             if (value instanceof RolEntity rol) {
@@ -90,7 +93,7 @@ public class RolesPermisosTable extends JPanel {
         }
     }
 
-    private class AccionesEditor extends AbstractCellEditor implements javax.swing.table.TableCellEditor {
+    private class AccionesEditor extends AbstractCellEditor implements TableCellEditor {
         private final JPanel panel;
         private RolEntity rol;
 
@@ -128,7 +131,7 @@ public class RolesPermisosTable extends JPanel {
                                     }
                                 }
                                 if (listener != null) {
-                                    List<Long> permisos = new java.util.ArrayList<>();
+                                    List<Long> permisos = new ArrayList<>();
                                     if (rolesPermisosController != null) {
                                         List<com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity> rolPermisos = rolesPermisosController.buscarPorRolId(rol.getRolId());
                                         for (com.hersac.core.modules.rolespermisos.entities.RolPermisoEntity rp : rolPermisos) {

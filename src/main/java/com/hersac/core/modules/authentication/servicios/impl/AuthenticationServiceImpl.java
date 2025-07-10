@@ -28,10 +28,7 @@ public class AuthenticationServiceImpl implements AuthenticationServices {
 
     public ResponseEntity login(RequestEntity request) {
         UsuarioEntity usuario = usuariosServices.buscarPorCorreo(request.getCorreo());
-
         validarUsuario(usuario, request);
-
-        // Guardar usuario y permisos en el store
         UserSessionStore store = UserSessionStore.getInstance();
         store.setUsuarioActual(usuario);
         Set<Long> permisos = rolesPermisosService.buscarPorRolId(usuario.getRol().getRolId())
@@ -57,11 +54,9 @@ public class AuthenticationServiceImpl implements AuthenticationServices {
         if (usuario == null) {
             throw new UsuarioNoEncontradoException(request.getCorreo());
         }
-
         if (!usuario.getEstaActivo()) {
             throw new UsuarioBloqueadoException(request.getCorreo());
         }
-
         if (!usuario.getContrasena().equals(request.getContrasena())) {
             throw new NoAutenticadoException();
         }

@@ -3,6 +3,8 @@ package com.hersac.ui.views.usuarios.rolesPermisos.tablas;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PermisosTable extends JPanel {
     private JTable table;
@@ -20,7 +22,7 @@ public class PermisosTable extends JPanel {
     public void setSubmodulos(String[] submodulos) {
         model.setSubmodulos(submodulos);
     }
-    public void setSubmodulos(String[] submodulos, java.util.Map<String, Boolean[]> seleccionados) {
+    public void setSubmodulos(String[] submodulos, Map<String, Boolean[]> seleccionados) {
         model.setSubmodulos(submodulos, seleccionados);
     }
 
@@ -34,7 +36,7 @@ public class PermisosTable extends JPanel {
     public String[] getSubmodulos() {
         return model.getSubmodulos();
     }
-    public java.util.Map<String, Boolean[]> getSeleccionadosMap() {
+    public Map<String, Boolean[]> getSeleccionadosMap() {
         return model.getSeleccionadosMap();
     }
 
@@ -47,7 +49,7 @@ public class PermisosTable extends JPanel {
             setSubmodulos(submodulos);
         }
         public void setSubmodulos(String[] submodulos) {
-            java.util.Map<String, Boolean[]> prevSeleccion = new java.util.HashMap<>();
+            Map<String, Boolean[]> prevSeleccion = new HashMap<>();
             if (this.submodulos != null && data != null) {
                 for (int i = 0; i < this.submodulos.length; i++) {
                     Boolean[] permisos = new Boolean[4];
@@ -71,7 +73,7 @@ public class PermisosTable extends JPanel {
             }
             fireTableDataChanged();
         }
-        public void setSubmodulos(String[] submodulos, java.util.Map<String, Boolean[]> seleccionados) {
+        public void setSubmodulos(String[] submodulos, Map<String, Boolean[]> seleccionados) {
             this.submodulos = submodulos;
             data = new Boolean[submodulos.length][4];
             for (int i = 0; i < submodulos.length; i++) {
@@ -154,8 +156,8 @@ public class PermisosTable extends JPanel {
         public String[] getSubmodulos() {
             return submodulos;
         }
-        public java.util.Map<String, Boolean[]> getSeleccionadosMap() {
-            java.util.Map<String, Boolean[]> map = new java.util.HashMap<>();
+        public Map<String, Boolean[]> getSeleccionadosMap() {
+            Map<String, Boolean[]> map = new HashMap<>();
             for (int i = 0; i < submodulos.length; i++) {
                 Boolean[] permisos = new Boolean[4];
                 for (int j = 0; j < 4; j++) {

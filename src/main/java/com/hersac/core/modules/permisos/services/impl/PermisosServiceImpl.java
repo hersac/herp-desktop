@@ -39,13 +39,11 @@ public class PermisosServiceImpl implements PermisosService {
         if (permisoExistente == null) {
             throw new IllegalArgumentException("Permiso no encontrado con ID: " + permisoId);
         }
-
         permisoExistente.setNombre(permiso.getNombre());
         permisoExistente.setDescripcion(permiso.getDescripcion());
         permisoExistente.setEstaActivo(permiso.getEstaActivo());
         permisoExistente.setUsuarioActualizacionId(permiso.getUsuarioActualizacionId());
         permisoExistente.setFechaActualizacion(permiso.getFechaActualizacion());
-
         permisoRepository.actualizar(permisoExistente);
     }
 
