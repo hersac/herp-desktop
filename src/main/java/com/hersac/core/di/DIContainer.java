@@ -2,14 +2,26 @@ package com.hersac.core.di;
 
 import com.hersac.core.modules.authentication.servicios.AuthenticationServices;
 import com.hersac.core.modules.authentication.servicios.impl.AuthenticationServiceImpl;
+import com.hersac.core.modules.clientes.entities.repositories.ClienteRepository;
+import com.hersac.core.modules.clientes.entities.repositories.impl.ClienteRepositoryImpl;
+import com.hersac.core.modules.clientes.services.ClientesService;
+import com.hersac.core.modules.clientes.services.impl.ClientesServiceImpl;
 import com.hersac.core.modules.departamentos.entities.repositories.DepartamentoRepository;
 import com.hersac.core.modules.departamentos.entities.repositories.impl.DepartamentoRepositoryImpl;
 import com.hersac.core.modules.departamentos.services.DepartamentosServices;
 import com.hersac.core.modules.departamentos.services.impl.DepartamentosServicesImpl;
+import com.hersac.core.modules.items.entities.repositories.ItemRepository;
+import com.hersac.core.modules.items.entities.repositories.impl.ItemRepositoryImpl;
+import com.hersac.core.modules.items.services.ItemsService;
+import com.hersac.core.modules.items.services.impl.ItemsServiceImpl;
 import com.hersac.core.modules.permisos.entities.repositories.PermisoRepository;
 import com.hersac.core.modules.permisos.entities.repositories.impl.PermisoRepositoryImpl;
 import com.hersac.core.modules.permisos.services.PermisosService;
 import com.hersac.core.modules.permisos.services.impl.PermisosServiceImpl;
+import com.hersac.core.modules.productos.entities.repositories.ProductoRepository;
+import com.hersac.core.modules.productos.entities.repositories.impl.ProductoRepositoryImpl;
+import com.hersac.core.modules.productos.services.ProductosService;
+import com.hersac.core.modules.productos.services.impl.ProductosServiceImpl;
 import com.hersac.core.modules.roles.entities.repositories.RolRepository;
 import com.hersac.core.modules.roles.entities.repositories.impl.RolRepositoryImpl;
 import com.hersac.core.modules.roles.services.RolesServices;
@@ -27,8 +39,11 @@ import com.hersac.core.modules.usuarios.entities.repositories.impl.UsuarioReposi
 import com.hersac.core.modules.usuarios.services.UsuariosServices;
 import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
+import com.hersac.ui.controllers.clientes.ClientesController;
 import com.hersac.ui.controllers.departamentos.DepartamentosController;
+import com.hersac.ui.controllers.items.ItemsController;
 import com.hersac.ui.controllers.permisos.PermisosController;
+import com.hersac.ui.controllers.productos.ProductosController;
 import com.hersac.ui.controllers.roles.RolesController;
 import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
 import com.hersac.ui.controllers.terceros.TercerosController;
@@ -109,5 +124,23 @@ public class DIContainer {
         TerceroRepository terceroRepository = new TerceroRepositoryImpl(entityManager);
         TercerosServices tercerosServices = new TercerosServicesImpl(terceroRepository);
         return new TercerosController(tercerosServices);
+    }
+
+    public ClientesController getClientesController() {
+        ClienteRepository clienteRepository = new ClienteRepositoryImpl(entityManager);
+        ClientesService clientesService = new ClientesServiceImpl(clienteRepository);
+        return new ClientesController(clientesService);
+    }
+
+    public ItemsController getItemsController() {
+        ItemRepository itemRepository = new ItemRepositoryImpl(entityManager);
+        ItemsService itemsService = new ItemsServiceImpl(itemRepository);
+        return new ItemsController(itemsService);
+    }
+
+    public ProductosController getProductosController() {
+        ProductoRepository productoRepository = new ProductoRepositoryImpl(entityManager);
+        ProductosService productosService = new ProductosServiceImpl(productoRepository);
+        return new ProductosController(productosService);
     }
 }
