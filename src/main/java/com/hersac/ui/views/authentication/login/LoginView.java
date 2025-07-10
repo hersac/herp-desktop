@@ -5,6 +5,9 @@ import com.hersac.core.modules.authentication.entities.ResponseEntity;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
 import com.hersac.ui.views.authentication.login.interfaces.LoginListener;
 import com.hersac.ui.globals.enums.ColorsTheme;
+import com.hersac.core.globals.exceptions.UsuarioNoEncontradoException;
+import com.hersac.core.globals.exceptions.NoAutenticadoException;
+import com.hersac.core.globals.exceptions.UsuarioBloqueadoException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -103,14 +106,22 @@ public class LoginView extends JPanel {
             String contrasena = new String(contrasenaField.getPassword());
 
             RequestEntity request = new RequestEntity(correo, contrasena);
-            ResponseEntity response = authController.login(request);
-
-            if (response == null) {
-                return;
+            try {
+                ResponseEntity response = authController.login(request);
+                if (response == null) {
+                    return;
+                }
+                token = response.getToken();
+                handleLogin();
+            } catch (UsuarioNoEncontradoException ex) {
+                mostrarMensajeError(ex.getMessage());
+            } catch (UsuarioBloqueadoException ex) {
+                mostrarMensajeError(ex.getMessage());
+            } catch (NoAutenticadoException ex) {
+                mostrarMensajeError(ex.getMessage());
+            } catch (Exception ex) {
+                mostrarMensajeError("Error inesperado al intentar iniciar sesión");
             }
-
-            token = response.getToken();
-            handleLogin();
         });
 
         JPanel loginFormContent = new JPanel(new GridLayout(4, 1));
@@ -293,5 +304,9 @@ public class LoginView extends JPanel {
                 loginListener.onLoginSuccess(token);
             }
         }
+    }
+
+    private void mostrarMensajeError(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Error de autenticación", JOptionPane.ERROR_MESSAGE);
     }
 }

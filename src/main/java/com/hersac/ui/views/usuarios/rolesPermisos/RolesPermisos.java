@@ -19,6 +19,9 @@ import com.hersac.ui.views.usuarios.rolesPermisos.listeners.RolesPermisosListene
 import com.hersac.ui.views.usuarios.rolesPermisos.tablas.RolesPermisosTable;
 import com.hersac.ui.views.usuarios.rolesPermisos.modales.RegistrarRolPermiso;
 import com.hersac.core.globals.store.UserSessionStore;
+import com.hersac.ui.globals.enums.ColorsTheme;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class RolesPermisos extends JPanel implements RolesPermisosListener {
     private final RolesPermisosController rolesPermisosController;
@@ -53,9 +56,11 @@ public class RolesPermisos extends JPanel implements RolesPermisosListener {
         filtrosForm = new FiltrosForm();
 
         JButton registrarBtn = new JButton("Registrar Rol");
+        FontIcon iconVer = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
         registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        registrarBtn.setBackground(new Color(33, 150, 243));
-        registrarBtn.setForeground(Color.WHITE);
+        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
+        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        registrarBtn.setIcon(iconVer);
         registrarBtn.setEnabled(puedeRegistrar); // Solo habilitar si tiene permiso 46
 
         searchField = new JTextField(25);

@@ -6,10 +6,13 @@ import com.hersac.core.modules.terceros.entities.TerceroEntity;
 import com.hersac.core.modules.terceros.entities.relations.TipoPersonaEntity;
 import com.hersac.ui.controllers.terceros.TercerosController;
 import com.hersac.ui.globals.enums.Permiso;
+import com.hersac.ui.globals.enums.ColorsTheme;
 import com.hersac.ui.views.terceros.forms.FiltrosTercerosForm;
 import com.hersac.ui.views.terceros.listeners.TercerosListeners;
 import com.hersac.ui.views.terceros.modales.RegistrarTercero;
 import com.hersac.ui.views.terceros.tablas.TercerosTable;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,7 +42,11 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
         filtrosForm = new FiltrosTercerosForm();
         filtrosForm.setOnFiltrosCambiados(this::filtrarTerceros);
         JButton registrarBtn = new JButton("Registrar Tercero");
+        FontIcon iconVer = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
         registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
+        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
+        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        registrarBtn.setIcon(iconVer);
         registrarBtn.setEnabled(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
         registrarBtn.setVisible(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
         registrarBtn.addActionListener(e -> {
