@@ -5,7 +5,6 @@ import java.awt.*;
 
 public class FiltrosClientesForm extends JPanel {
     private JComboBox<String> estadoCombo;
-    private JComboBox<String> tipoCombo;
     private Runnable onFiltrosCambiados;
 
     public FiltrosClientesForm() {
@@ -16,21 +15,10 @@ public class FiltrosClientesForm extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
         gbc.gridy = 0;
-        tipoCombo = new JComboBox<>();
-        tipoCombo.setPreferredSize(new Dimension(130, 28));
-        tipoCombo.addItem("Todos");
-        tipoCombo.addItem("Natural");
-        tipoCombo.addItem("Jurídica");
-        tipoCombo.addItem("Extranjera");
-        tipoCombo.addItem("Gobierno");
-        tipoCombo.addItem("ONG");
-        tipoCombo.addItem("Otro");
-        tipoCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 0, "Tipo:", tipoCombo);
         estadoCombo = new JComboBox<>(new String[] {"Todos", "Activo", "Inactivo"});
         estadoCombo.setPreferredSize(new Dimension(120, 28));
         estadoCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 1, "Estado:", estadoCombo);
+        addFiltro(filtrosPanel, gbc, 0, "Estado:", estadoCombo);
         add(Box.createVerticalStrut(10));
         add(filtrosPanel);
     }
@@ -49,5 +37,12 @@ public class FiltrosClientesForm extends JPanel {
             onFiltrosCambiados.run();
         }
     }
-}
 
+    public String getEstadoSeleccionado() {
+        return (String) estadoCombo.getSelectedItem();
+    }
+
+    public void setOnFiltrosCambiados(Runnable onFiltrosCambiados) {
+        this.onFiltrosCambiados = onFiltrosCambiados;
+    }
+}
