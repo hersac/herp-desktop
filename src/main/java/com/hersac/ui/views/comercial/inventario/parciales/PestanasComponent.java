@@ -1,4 +1,38 @@
 package com.hersac.ui.views.comercial.inventario.parciales;
 
-public class PestanasComponent {
+import com.hersac.core.di.DIContainer;
+import com.hersac.ui.views.comercial.inventario.listeners.InventarioListeners;
+import com.hersac.ui.views.comercial.inventario.contenidos.items.GestionItems;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JScrollPane;
+import java.awt.Dimension;
+import java.awt.BorderLayout;
+
+public class PestanasComponent extends JPanel {
+    private InventarioListeners listener;
+    private JTabbedPane pestanas;
+
+    public PestanasComponent(DIContainer diContainer) {
+        setOpaque(false);
+        setLayout(new BorderLayout());
+        pestanas = new JTabbedPane();
+        pestanas.setPreferredSize(new Dimension(800, 500));
+        pestanas.addTab("Items", new JScrollPane(new GestionItems(diContainer)));
+        pestanas.addTab("Proveedores", new JScrollPane(new JPanel()));
+        pestanas.addTab("Bodegas", new JScrollPane(new JPanel()));
+        pestanas.addTab("Movimientos de inventario", new JScrollPane(new JPanel()));
+        pestanas.addTab("Órdenes de compra", new JScrollPane(new JPanel()));
+        pestanas.addChangeListener(e -> {
+            if (listener != null) {
+                listener.onTabChanged(pestanas.getSelectedIndex());
+            }
+        });
+        add(pestanas, BorderLayout.CENTER);
+        setPreferredSize(new Dimension(800, 500));
+    }
+
+    public void setInventarioListener(InventarioListeners listener) {
+        this.listener = listener;
+    }
 }
