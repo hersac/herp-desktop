@@ -2,6 +2,10 @@ package com.hersac.core.di;
 
 import com.hersac.core.modules.authentication.servicios.AuthenticationServices;
 import com.hersac.core.modules.authentication.servicios.impl.AuthenticationServiceImpl;
+import com.hersac.core.modules.bodegas.entities.repositories.BodegaRepository;
+import com.hersac.core.modules.bodegas.entities.repositories.impl.BodegaRepositoryImpl;
+import com.hersac.core.modules.bodegas.services.BodegasServices;
+import com.hersac.core.modules.bodegas.services.impl.BodegasServicesImpl;
 import com.hersac.core.modules.clientes.entities.repositories.ClienteRepository;
 import com.hersac.core.modules.clientes.entities.repositories.impl.ClienteRepositoryImpl;
 import com.hersac.core.modules.clientes.services.ClientesService;
@@ -43,6 +47,7 @@ import com.hersac.core.modules.usuarios.entities.repositories.impl.UsuarioReposi
 import com.hersac.core.modules.usuarios.services.UsuariosServices;
 import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
+import com.hersac.ui.controllers.bodegas.BodegasController;
 import com.hersac.ui.controllers.clientes.ClientesController;
 import com.hersac.ui.controllers.departamentos.DepartamentosController;
 import com.hersac.ui.controllers.items.ItemsController;
@@ -153,5 +158,11 @@ public class DIContainer {
         ProductoRepository productoRepository = new ProductoRepositoryImpl(entityManager);
         ProductosService productosService = new ProductosServiceImpl(productoRepository);
         return new ProductosController(productosService);
+    }
+
+    public BodegasController getBodegasController() {
+        BodegaRepository bodegaRepository = new BodegaRepositoryImpl(entityManager);
+        BodegasServices bodegasServices = new BodegasServicesImpl(bodegaRepository);
+        return new BodegasController(bodegasServices);
     }
 }

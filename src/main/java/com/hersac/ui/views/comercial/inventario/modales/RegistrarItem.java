@@ -30,6 +30,9 @@ public class RegistrarItem extends JDialog {
     private JTextField categoriaField;
     private boolean soloLectura = false;
     private ItemEntity itemOriginal; // Para actualización
+    private JTextField bodegaIdField;
+    private JTextField bodegaNombreField;
+    private com.hersac.core.modules.bodegas.entities.BodegaEntity bodegaEncontrada;
 
     public RegistrarItem(JFrame parent, DIContainer diContainer, ItemsListeners listener) {
         this(parent, diContainer, listener, null, false);
@@ -43,7 +46,7 @@ public class RegistrarItem extends JDialog {
         if (esActualizacion && item != null) {
             this.itemOriginal = item;
         }
-        setSize(600, 400);
+        setSize(550, 550);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -58,46 +61,124 @@ public class RegistrarItem extends JDialog {
     }
 
     private JPanel crearCampos() {
-        JPanel formPanel = new JPanel(new GridLayout(9, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        // Campo para código de producto
-        codigoProductoField = new JTextField();
-        aplicarFiltroMayusculas(codigoProductoField);
-        formPanel.add(new JLabel("Código Producto:"));
-        formPanel.add(codigoProductoField);
-        // Campo informativo para nombre de producto
-        nombreProductoField = new JTextField();
-        nombreProductoField.setEditable(false);
-        formPanel.add(new JLabel("Nombre Producto:"));
-        formPanel.add(nombreProductoField);
-        // Listener para buscar producto al presionar Enter
-        codigoProductoField.addActionListener(e -> buscarProductoPorCodigo());
-        // Campo para categoría
-        categoriaField = new JTextField();
-        aplicarFiltroMayusculas(categoriaField);
-        formPanel.add(new JLabel("Categoría:"));
-        formPanel.add(categoriaField);
-        // Campos existentes
-        codigoField = new JTextField();
-        aplicarFiltroMayusculas(codigoField);
-        nombreField = new JTextField();
-        aplicarFiltroMayusculas(nombreField);
-        descripcionField = new JTextField();
-        precioUnitarioField = new JTextField();
-        stockField = new JTextField();
-        activoCheckBox = new JCheckBox("Activo", true);
-        formPanel.add(new JLabel("Código:"));
-        formPanel.add(codigoField);
-        formPanel.add(new JLabel("Nombre:"));
-        formPanel.add(nombreField);
-        formPanel.add(new JLabel("Descripción:"));
-        formPanel.add(descripcionField);
-        formPanel.add(new JLabel("Precio Unitario:"));
-        formPanel.add(precioUnitarioField);
-        formPanel.add(new JLabel("Stock:"));
-        formPanel.add(stockField);
-        formPanel.add(new JLabel("¿Está activo?:"));
-        formPanel.add(activoCheckBox);
+        JPanel formPanel = new JPanel();
+        formPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        int labelWidth = 120;
+        int inputMinWidth = 200;
+        // Labels e Inputs
+        JLabel lblCodigo = new JLabel("Código:");
+        lblCodigo.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblCodigo, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        codigoField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(codigoField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblNombre = new JLabel("Nombre:");
+        lblNombre.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblNombre, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        nombreField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(nombreField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblDescripcion = new JLabel("Descripción:");
+        lblDescripcion.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblDescripcion, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        descripcionField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(descripcionField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblPrecio = new JLabel("Precio Unitario:");
+        lblPrecio.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblPrecio, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        precioUnitarioField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(precioUnitarioField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblStock = new JLabel("Stock:");
+        lblStock.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblStock, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        stockField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(stockField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblCategoria = new JLabel("Categoría:");
+        lblCategoria.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblCategoria, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        categoriaField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(categoriaField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblActivo = new JLabel("Activo:");
+        lblActivo.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblActivo, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        formPanel.add(activoCheckBox, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblBodegaId = new JLabel("Bodega ID:");
+        lblBodegaId.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblBodegaId, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        bodegaIdField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(bodegaIdField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblBodegaNombre = new JLabel("Nombre Bodega:");
+        lblBodegaNombre.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblBodegaNombre, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        bodegaNombreField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(bodegaNombreField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblCodigoProducto = new JLabel("Código Producto:");
+        lblCodigoProducto.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblCodigoProducto, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        codigoProductoField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(codigoProductoField, gbc);
+        gbc.weightx = 0;
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel lblNombreProducto = new JLabel("Nombre Producto:");
+        lblNombreProducto.setPreferredSize(new Dimension(labelWidth, 30));
+        formPanel.add(lblNombreProducto, gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        nombreProductoField.setMinimumSize(new Dimension(inputMinWidth, 30));
+        formPanel.add(nombreProductoField, gbc);
         return formPanel;
     }
 
@@ -112,6 +193,24 @@ public class RegistrarItem extends JDialog {
             }
         } else {
             nombreProductoField.setText("");
+        }
+    }
+
+    private void buscarBodega() {
+        String idText = bodegaIdField.getText();
+        bodegaEncontrada = null;
+        bodegaNombreField.setText("");
+        try {
+            Long id = Long.parseLong(idText);
+            var bodegasController = diContainer.getBodegasController();
+            bodegaEncontrada = bodegasController.buscarPorId(id);
+            if (bodegaEncontrada != null) {
+                bodegaNombreField.setText(bodegaEncontrada.getNombre());
+            } else {
+                bodegaNombreField.setText("No encontrada");
+            }
+        } catch (Exception ex) {
+            bodegaNombreField.setText("ID inválido");
         }
     }
 
@@ -158,6 +257,9 @@ public class RegistrarItem extends JDialog {
         } else if (esActualizacion && itemOriginal != null && itemOriginal.getProducto() != null) {
             itemRegistrado.setProducto(itemOriginal.getProducto());
         }
+        if (bodegaEncontrada != null) {
+            itemRegistrado.setBodega(bodegaEncontrada);
+        }
         if (esActualizacion) {
             listener.actualizarItems(itemRegistrado);
         } else {
@@ -177,6 +279,11 @@ public class RegistrarItem extends JDialog {
         if (item.getProducto() != null) {
             codigoProductoField.setText(item.getProducto().getCodigo());
             nombreProductoField.setText(item.getProducto().getNombre());
+        }
+        if (item.getBodega() != null) {
+            bodegaIdField.setText(String.valueOf(item.getBodega().getBodegaId()));
+            bodegaNombreField.setText(item.getBodega().getNombre());
+            bodegaEncontrada = item.getBodega();
         }
         // Ya no se deja en solo lectura, todos los campos quedan editables
     }
@@ -200,5 +307,25 @@ public class RegistrarItem extends JDialog {
 
     public ItemEntity getItemRegistrado() {
         return itemRegistrado;
+    }
+
+    {
+        codigoField = new JTextField();
+        nombreField = new JTextField();
+        descripcionField = new JTextField();
+        precioUnitarioField = new JTextField();
+        stockField = new JTextField();
+        categoriaField = new JTextField();
+        activoCheckBox = new JCheckBox("Activo", true);
+        bodegaIdField = new JTextField();
+        bodegaNombreField = new JTextField();
+        bodegaNombreField.setEditable(false);
+        bodegaNombreField.setBackground(new Color(240,240,240));
+        bodegaIdField.addActionListener(e -> buscarBodega());
+        codigoProductoField = new JTextField();
+        nombreProductoField = new JTextField();
+        nombreProductoField.setEditable(false);
+        nombreProductoField.setBackground(new Color(240,240,240));
+        codigoProductoField.addActionListener(e -> buscarProductoPorCodigo());
     }
 }

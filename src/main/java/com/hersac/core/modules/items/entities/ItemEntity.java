@@ -1,6 +1,7 @@
 package com.hersac.core.modules.items.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.hersac.core.modules.bodegas.entities.BodegaEntity;
 import com.hersac.core.modules.productos.entities.ProductoEntity;
 import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import jakarta.persistence.*;
@@ -58,6 +59,11 @@ public class ItemEntity {
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     private ProductoEntity producto;
 
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "bodega_id", nullable = true)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "items"})
+    private BodegaEntity bodega;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
@@ -67,7 +73,6 @@ public class ItemEntity {
     @JoinColumn(name = "updated_by", nullable = false)
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     private UsuarioEntity usuarioActualizacion;
-
 
     @PrePersist
     public void prePersist() {

@@ -1,6 +1,7 @@
 package com.hersac.core.modules.items.services.impl;
 
 import com.hersac.core.globals.store.UserSessionStore;
+import com.hersac.core.modules.bodegas.entities.BodegaEntity;
 import com.hersac.core.modules.items.entities.ItemEntity;
 import com.hersac.core.modules.items.entities.repositories.ItemRepository;
 import com.hersac.core.modules.items.services.ItemsService;
@@ -36,6 +37,7 @@ public class ItemsServiceImpl implements ItemsService {
     @Override
     public void actualizar(Long itemId, ItemEntity item) {
         UsuarioEntity usuarioActual = store.getUsuarioActual();
+        BodegaEntity bodega = item.getBodega();
         ItemEntity itemExistente = itemRepository.buscarPorId(itemId);
         itemExistente.setCodigo(item.getCodigo());
         itemExistente.setNombre(item.getNombre());
@@ -45,6 +47,7 @@ public class ItemsServiceImpl implements ItemsService {
         itemExistente.setStock(item.getStock());
         itemExistente.setEstaActivo(item.isEstaActivo());
         itemExistente.setProducto(item.getProducto());
+        itemExistente.setBodega(bodega);
         itemExistente.setUsuarioActualizacion(usuarioActual);
         itemRepository.actualizar(itemExistente);
     }

@@ -22,24 +22,24 @@ public class ItemsTable extends JPanel {
 
     public ItemsTable() {
         setLayout(new BorderLayout());
-        String[] columnas = { "ID", "Código", "Nombre", "Descripción", "Precio Unitario", "Stock", "Estado", "Acciones" };
+        String[] columnas = { "ID", "Código", "Nombre", "Descripción", "Precio Unitario", "Stock", "Estado", "Bodega", "Acciones" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 7;
+                return column == 8;
             }
         };
         tablaItems = new JTable(modeloTabla);
         tablaItems.setRowHeight(40);
         tablaItems.setShowGrid(false);
-        tablaItems.getColumnModel().getColumn(7).setCellRenderer(new AccionesRenderer());
-        tablaItems.getColumnModel().getColumn(7).setCellEditor(new AccionesEditor());
+        tablaItems.getColumnModel().getColumn(8).setCellRenderer(new AccionesRenderer());
+        tablaItems.getColumnModel().getColumn(8).setCellEditor(new AccionesEditor());
         tablaItems.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int column = tablaItems.columnAtPoint(e.getPoint());
                 int row = tablaItems.rowAtPoint(e.getPoint());
-                if (column == 7 && row >= 0 && tablaItems.isCellEditable(row, column)) {
+                if (column == 8 && row >= 0 && tablaItems.isCellEditable(row, column)) {
                     tablaItems.editCellAt(row, column);
                     tablaItems.getEditorComponent().requestFocusInWindow();
                 }
@@ -65,6 +65,7 @@ public class ItemsTable extends JPanel {
                 item.getPrecioUnitario(),
                 item.getStock(),
                 item.isEstaActivo() ? "Activo" : "Inactivo",
+                item.getBodega() != null ? item.getBodega().getNombre() : "",
                 item
             });
         }
