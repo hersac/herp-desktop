@@ -40,6 +40,7 @@ public class ItemsServiceImpl implements ItemsService {
         itemExistente.setCodigo(item.getCodigo());
         itemExistente.setNombre(item.getNombre());
         itemExistente.setDescripcion(item.getDescripcion());
+        itemExistente.setCategoria(item.getCategoria());
         itemExistente.setPrecioUnitario(item.getPrecioUnitario());
         itemExistente.setStock(item.getStock());
         itemExistente.setEstaActivo(item.isEstaActivo());

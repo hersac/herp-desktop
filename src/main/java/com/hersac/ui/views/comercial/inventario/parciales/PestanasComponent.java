@@ -3,6 +3,7 @@ package com.hersac.ui.views.comercial.inventario.parciales;
 import com.hersac.core.di.DIContainer;
 import com.hersac.ui.views.comercial.inventario.listeners.InventarioListeners;
 import com.hersac.ui.views.comercial.inventario.contenidos.items.GestionItems;
+import com.hersac.ui.views.comercial.inventario.contenidos.productos.GestionProductos;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
@@ -18,6 +19,7 @@ public class PestanasComponent extends JPanel {
         setLayout(new BorderLayout());
         pestanas = new JTabbedPane();
         pestanas.setPreferredSize(new Dimension(800, 500));
+        pestanas.addTab("Productos", new JScrollPane(new GestionProductos(diContainer)));
         pestanas.addTab("Items", new JScrollPane(new GestionItems(diContainer)));
         pestanas.addTab("Proveedores", new JScrollPane(new JPanel()));
         pestanas.addTab("Bodegas", new JScrollPane(new JPanel()));

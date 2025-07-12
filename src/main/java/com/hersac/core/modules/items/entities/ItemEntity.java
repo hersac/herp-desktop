@@ -33,6 +33,9 @@ public class ItemEntity {
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 
+    @Column(name = "categoria", nullable = false)
+    private String categoria;
+
     @Column(name = "precio_unitario", nullable = false)
     private Double precioUnitario;
 
