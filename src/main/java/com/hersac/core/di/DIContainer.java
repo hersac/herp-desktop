@@ -22,6 +22,10 @@ import com.hersac.core.modules.productos.entities.repositories.ProductoRepositor
 import com.hersac.core.modules.productos.entities.repositories.impl.ProductoRepositoryImpl;
 import com.hersac.core.modules.productos.services.ProductosService;
 import com.hersac.core.modules.productos.services.impl.ProductosServiceImpl;
+import com.hersac.core.modules.proveedores.entities.repositories.ProveedorRepository;
+import com.hersac.core.modules.proveedores.entities.repositories.impl.ProveedorRepositoryImpl;
+import com.hersac.core.modules.proveedores.services.ProveedoresService;
+import com.hersac.core.modules.proveedores.services.impl.ProveedoresServiceImpl;
 import com.hersac.core.modules.roles.entities.repositories.RolRepository;
 import com.hersac.core.modules.roles.entities.repositories.impl.RolRepositoryImpl;
 import com.hersac.core.modules.roles.services.RolesServices;
@@ -44,6 +48,7 @@ import com.hersac.ui.controllers.departamentos.DepartamentosController;
 import com.hersac.ui.controllers.items.ItemsController;
 import com.hersac.ui.controllers.permisos.PermisosController;
 import com.hersac.ui.controllers.productos.ProductosController;
+import com.hersac.ui.controllers.proveedores.ProveedoresController;
 import com.hersac.ui.controllers.roles.RolesController;
 import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
 import com.hersac.ui.controllers.terceros.TercerosController;
@@ -130,6 +135,12 @@ public class DIContainer {
         ClienteRepository clienteRepository = new ClienteRepositoryImpl(entityManager);
         ClientesService clientesService = new ClientesServiceImpl(clienteRepository);
         return new ClientesController(clientesService);
+    }
+
+    public ProveedoresController getProveedoresController() {
+        ProveedorRepository proveedorRepository = new ProveedorRepositoryImpl(entityManager);
+        ProveedoresService proveedoresService = new ProveedoresServiceImpl(proveedorRepository);
+        return new ProveedoresController(proveedoresService);
     }
 
     public ItemsController getItemsController() {
