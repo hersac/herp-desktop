@@ -30,4 +30,8 @@ public class ClientesController {
     public void eliminar(Long clienteId) {
         clientesService.eliminar(clienteId);
     }
+
+    public ClienteEntity buscarPorTerceroId(String terceroId) {
+        return clientesService.buscarPorTerceroId(terceroId);
+    }
 }

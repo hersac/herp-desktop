@@ -2,6 +2,7 @@ package com.hersac.core.modules.clientes.entities.repositories.impl;
 
 import com.hersac.core.modules.clientes.entities.ClienteEntity;
 import com.hersac.core.modules.clientes.entities.repositories.ClienteRepository;
+import com.hersac.core.modules.proveedores.entities.ProveedorEntity;
 import jakarta.persistence.EntityManager;
 
 import java.util.List;
@@ -46,5 +47,14 @@ public class ClienteRepositoryImpl implements ClienteRepository {
             entityManager.remove(cliente);
         }
         entityManager.getTransaction().commit();
+    }
+
+    @Override
+    public ClienteEntity buscarPorTerceroId(String terceroId) {
+        List<ClienteEntity> resultados = entityManager.createQuery(
+                "SELECT c FROM ClienteEntity c WHERE c.tercero.terceroId = :terceroId", ClienteEntity.class)
+            .setParameter("terceroId", terceroId)
+            .getResultList();
+        return resultados.isEmpty() ? null : resultados.get(0);
     }
 }

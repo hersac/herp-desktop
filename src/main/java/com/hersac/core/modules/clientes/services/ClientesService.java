@@ -9,4 +9,5 @@ public interface ClientesService {
     void crear(ClienteEntity cliente);
     void actualizar(Long clienteId, ClienteEntity cliente);
     void eliminar(Long clienteId);
+    ClienteEntity buscarPorTerceroId(String terceroId);
 }

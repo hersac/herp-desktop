@@ -58,6 +58,14 @@ import com.hersac.core.modules.usuarios.entities.repositories.UsuarioRepository;
 import com.hersac.core.modules.usuarios.entities.repositories.impl.UsuarioRepositoryImpl;
 import com.hersac.core.modules.usuarios.services.UsuariosServices;
 import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
+import com.hersac.core.modules.ventas.entities.repositories.VentaRepository;
+import com.hersac.core.modules.ventas.entities.repositories.impl.VentaRepositoryImpl;
+import com.hersac.core.modules.ventas.services.impl.VentasService;
+import com.hersac.core.modules.ventas.services.impl.VentasServiceImpl;
+import com.hersac.core.modules.ventasdetalles.entities.repositories.VentaDetalleRepository;
+import com.hersac.core.modules.ventasdetalles.entities.repositories.impl.VentaDetalleRepositoryImpl;
+import com.hersac.core.modules.ventasdetalles.services.VentasDetallesService;
+import com.hersac.core.modules.ventasdetalles.services.impl.VentasDetallesServiceImpl;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
 import com.hersac.ui.controllers.bodegas.BodegasController;
 import com.hersac.ui.controllers.clientes.ClientesController;
@@ -73,6 +81,8 @@ import com.hersac.ui.controllers.roles.RolesController;
 import com.hersac.ui.controllers.rolesPermisos.RolesPermisosController;
 import com.hersac.ui.controllers.terceros.TercerosController;
 import com.hersac.ui.controllers.usuarios.UsuariosController;
+import com.hersac.ui.controllers.ventas.VentasController;
+import com.hersac.ui.controllers.ventasdetalles.VentasDetallesController;
 import com.hersac.ui.views.authentication.login.LoginView;
 
 import com.hersac.core.globals.servicios.PermissionService;
@@ -193,9 +203,23 @@ public class DIContainer {
         return new ComprasDetallesController(comprasDetallesService);
     }
 
+    public VentasController getVentasController() {
+        VentaRepository ventaRepository = new VentaRepositoryImpl(entityManager);
+        VentasService ventasService = new VentasServiceImpl(ventaRepository);
+        return new VentasController(ventasService);
+    }
+
+    public VentasDetallesController getVentasDetallesController() {
+        VentaDetalleRepository ventaDetalleRepository = new VentaDetalleRepositoryImpl(entityManager);
+        VentasDetallesService ventasDetallesService = new VentasDetallesServiceImpl(ventaDetalleRepository);
+        return new VentasDetallesController(ventasDetallesService);
+    }
+
     public MovimientosInventariosController getMovimientosInventariosController() {
         MovimientoInventarioRepository movimientoInventarioRepository = new MovimientoInventarioRepositoryImpl(entityManager);
         MovimientosInventariosService movimientosInventariosService = new MovimientosInventariosServiceImpl(movimientoInventarioRepository);
         return new MovimientosInventariosController(movimientosInventariosService);
     }
+
+
 }

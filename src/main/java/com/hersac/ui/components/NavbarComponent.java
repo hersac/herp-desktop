@@ -161,7 +161,7 @@ public class NavbarComponent extends JPanel {
         switch (moduloSeleccionado) {
             case "Comercial" -> {
                 panelMenuDinamico.add(crearEtiqueta("Clientes", fuenteEtiqueta, null, "gestion-clientes"));
-                panelMenuDinamico.add(crearEtiqueta("Ventas", fuenteEtiqueta, null, null));
+                panelMenuDinamico.add(crearEtiqueta("Ventas", fuenteEtiqueta, null, "gestion-ventas"));
                 panelMenuDinamico.add(crearEtiqueta("Compras", fuenteEtiqueta, null, "gestion-compras"));
                 panelMenuDinamico.add(crearEtiqueta("Inventario", fuenteEtiqueta, null, "gestion-inventario"));
                 panelMenuDinamico.add(crearEtiqueta("Reportes", fuenteEtiqueta, new String[]{"Ventas", "Compras", "Inventario"}, null));

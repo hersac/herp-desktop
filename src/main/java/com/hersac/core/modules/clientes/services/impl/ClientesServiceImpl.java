@@ -47,4 +47,9 @@ public class ClientesServiceImpl implements ClientesService {
     public void eliminar(Long clienteId) {
         clienteRepository.eliminar(clienteId);
     }
+
+    @Override
+    public ClienteEntity buscarPorTerceroId(String terceroId) {
+        return clienteRepository.buscarPorTerceroId(terceroId);
+    }
 }
