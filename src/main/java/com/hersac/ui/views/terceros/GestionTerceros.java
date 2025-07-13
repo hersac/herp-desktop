@@ -47,10 +47,10 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
         registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
         registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
         registrarBtn.setIcon(iconVer);
-        registrarBtn.setEnabled(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
-        registrarBtn.setVisible(permissionService == null || permissionService.tienePermiso((long) Permiso.CREAR_TERCERO.getId()));
+        registrarBtn.setEnabled(true);
+        registrarBtn.setVisible(true);
         registrarBtn.addActionListener(e -> {
-            new RegistrarTercero(frame, this, null, permissionService);
+            new RegistrarTercero(frame, this, null);
         });
         searchField = new JTextField(25);
         searchField.setMaximumSize(new Dimension(400, 30));
@@ -132,7 +132,7 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
 
     @Override
     public void verTercero(TerceroEntity tercero) {
-        new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, tercero, permissionService);
+        new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, tercero);
     }
 
     @Override
