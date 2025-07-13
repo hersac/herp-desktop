@@ -37,6 +37,9 @@ public class AppViews extends JFrame {
     }
 
     private void mostrarLogin() {
+        fondo.removeAll();
+        fondo.revalidate();
+        fondo.repaint();
         LoginView vistaLogin = contenedor.getLoginView();
         fondo.add(vistaLogin, BorderLayout.CENTER);
         vistaLogin.addLoginListener(token -> {
