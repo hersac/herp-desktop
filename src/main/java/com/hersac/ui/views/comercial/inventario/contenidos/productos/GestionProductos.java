@@ -111,11 +111,6 @@ public class GestionProductos extends JPanel implements ProductosListeners {
             @Override
             public void mouseEntered(MouseEvent e) {
                 registrarBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                registrarBtn.setBackground(new Color(25, 118, 210));
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                registrarBtn.setBackground(new Color(33, 150, 243));
             }
         });
     }

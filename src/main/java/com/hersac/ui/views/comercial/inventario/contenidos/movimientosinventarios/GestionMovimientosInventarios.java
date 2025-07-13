@@ -38,6 +38,8 @@ public class GestionMovimientosInventarios extends JPanel {
         filtrosMovimientosForm.setOnFiltrosCambiados(this::filtrarMovimientos);
         JButton registrarBtn = new JButton("Registrar Movimiento");
         registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
+        org.kordamp.ikonli.swing.FontIcon iconoPlus = org.kordamp.ikonli.swing.FontIcon.of(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
+        registrarBtn.setIcon(iconoPlus);
         registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
         registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
         searchField = new JTextField(25);
