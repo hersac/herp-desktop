@@ -3,7 +3,6 @@ package com.hersac.core.modules.movimientosinventarios.entities;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.hersac.core.modules.bodegas.entities.BodegaEntity;
 import com.hersac.core.modules.items.entities.ItemEntity;
-import com.hersac.core.modules.movimientosinventarios.constants.TipoReferencia;
 import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
