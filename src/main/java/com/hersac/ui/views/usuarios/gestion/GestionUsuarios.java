@@ -39,113 +39,112 @@ import com.hersac.ui.views.usuarios.gestion.modales.RegistrarUsuario;
 import com.hersac.ui.views.usuarios.gestion.tablas.UsuariosTable;
 
 public class GestionUsuarios extends JPanel implements UsuariosListeners {
-    private JFrame frame = new JFrame("Registrar Usuario");
-    private final UsuariosController usuariosController;
-    private final DepartamentosController departamentosController;
-    private final RolesController rolesController;
-    private final UsuariosTable tablaUsuariosTable = new UsuariosTable();
-    private List<UsuarioEntity> listaCompletaUsuarios;
-    private FiltrosForm filtrosForm;
-    private JTextField searchField;
+    private JFrame ventana = new JFrame("Registrar Usuario");
+    private final UsuariosController controladorUsuarios;
+    private final DepartamentosController controladorDepartamentos;
+    private final RolesController controladorRoles;
+    private final UsuariosTable tablaUsuarios = new UsuariosTable();
+    private List<UsuarioEntity> listaUsuariosCompleta;
+    private FiltrosForm formularioFiltros;
+    private JTextField campoBusqueda;
 
-    public GestionUsuarios(DIContainer diContainer) {
-        this.usuariosController = diContainer.getUsuariosController();
-        this.departamentosController = diContainer.getDepartamentosController();
-        this.rolesController = diContainer.getRolesController();
-        this.tablaUsuariosTable.setActionListener(this);
+    public GestionUsuarios(DIContainer contenedorDI) {
+        this.controladorUsuarios = contenedorDI.getUsuariosController();
+        this.controladorDepartamentos = contenedorDI.getDepartamentosController();
+        this.controladorRoles = contenedorDI.getRolesController();
+        this.tablaUsuarios.establecerOyente(this);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
-        JLabel titleLabel = new JLabel("Gestión de Usuarios");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
-        filtrosForm = new FiltrosForm();
-        JButton registrarBtn = new JButton("Registrar Usuario");
-        FontIcon iconVer = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
-        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.setIcon(iconVer);
-        searchField = new JTextField(25);
-        searchField.setMaximumSize(new Dimension(400, 30));
-        searchField.setAlignmentX(CENTER_ALIGNMENT);
-        searchField.addKeyListener(new KeyAdapter() {
+        JLabel etiquetaTitulo = new JLabel("Gestión de Usuarios");
+        etiquetaTitulo.setFont(new Font("Roboto", Font.BOLD, 24));
+        etiquetaTitulo.setAlignmentX(CENTER_ALIGNMENT);
+        formularioFiltros = new FiltrosForm();
+        JButton botonRegistrar = new JButton("Registrar Usuario");
+        FontIcon iconoAgregar = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
+        botonRegistrar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonRegistrar.setBackground(ColorsTheme.PRIMARY.get());
+        botonRegistrar.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        botonRegistrar.setIcon(iconoAgregar);
+        campoBusqueda = new JTextField(25);
+        campoBusqueda.setMaximumSize(new Dimension(400, 30));
+        campoBusqueda.setAlignmentX(CENTER_ALIGNMENT);
+        campoBusqueda.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBusqueda.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 filtrarUsuarios();
             }
         });
-        filtrosForm.setOnFiltrosCambiados(this::filtrarUsuarios);
-        JPanel panelBtn = new JPanel();
-        panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
-        panelBtn.setOpaque(false);
-        panelBtn.setPreferredSize(new Dimension(900, 40));
-        panelBtn.setMaximumSize(new Dimension(900, 40));
-        panelBtn.add(searchField);
-        panelBtn.add(Box.createHorizontalGlue());
-        panelBtn.add(registrarBtn);
-        JPanel panelBtnExpansible = new JPanel();
-        panelBtnExpansible.setLayout(new BoxLayout(panelBtnExpansible, BoxLayout.X_AXIS));
-        panelBtnExpansible.setOpaque(false);
-        panelBtnExpansible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-        panelBtnExpansible.add(panelBtn);
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-        JScrollPane scrollPane = new JScrollPane(tablaUsuariosTable);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setAlignmentX(CENTER_ALIGNMENT);
-        scrollPane.setPreferredSize(new Dimension(900, 400));
-        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
+        formularioFiltros.setOnFiltrosCambiados(this::filtrarUsuarios);
+        JPanel panelBotones = new JPanel();
+        panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.X_AXIS));
+        panelBotones.setOpaque(false);
+        panelBotones.setPreferredSize(new Dimension(900, 40));
+        panelBotones.setMaximumSize(new Dimension(900, 40));
+        panelBotones.add(campoBusqueda);
+        panelBotones.add(Box.createHorizontalGlue());
+        panelBotones.add(botonRegistrar);
+        JPanel panelBotonesExpansible = new JPanel();
+        panelBotonesExpansible.setLayout(new BoxLayout(panelBotonesExpansible, BoxLayout.X_AXIS));
+        panelBotonesExpansible.setOpaque(false);
+        panelBotonesExpansible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBotonesExpansible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBotonesExpansible.add(Box.createHorizontalGlue());
+        panelBotonesExpansible.add(panelBotones);
+        panelBotonesExpansible.add(Box.createHorizontalGlue());
+        JScrollPane panelScroll = new JScrollPane(tablaUsuarios);
+        panelScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        panelScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        panelScroll.setAlignmentX(CENTER_ALIGNMENT);
+        panelScroll.setPreferredSize(new Dimension(900, 400));
+        panelScroll.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(titleLabel);
+        add(etiquetaTitulo);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(filtrosForm);
+        add(formularioFiltros);
         add(Box.createRigidArea(new Dimension(0, 100)));
-        add(panelBtnExpansible);
+        add(panelBotonesExpansible);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(scrollPane);
+        add(panelScroll);
         add(Box.createVerticalGlue());
-        List<UsuarioEntity> listaUsuarios = obtenerUsuarios();
-        this.listaCompletaUsuarios = listaUsuarios;
-        tablaUsuariosTable.setUsuarios(listaUsuarios);
+        List<UsuarioEntity> usuarios = obtenerUsuarios();
+        this.listaUsuariosCompleta = usuarios;
+        tablaUsuarios.establecerUsuarios(usuarios);
         List<DepartamentoEntity> departamentos = obtenerDepartamentos();
-        filtrosForm.setDepartamentos(departamentos);
+        formularioFiltros.setDepartamentos(departamentos);
         List<RolEntity> roles = obtenerRoles();
-
-        PermissionService permissionService = new PermissionService(null);
-        boolean puedeRegistrar = permissionService.tienePermiso((long) Permiso.CREAR_GESTION_USUARIO.getId());
-        registrarBtn.setVisible(puedeRegistrar);
-
+        PermissionService servicioPermisos = new PermissionService(null);
+        boolean puedeRegistrar = servicioPermisos.tienePermiso((long) Permiso.CREAR_GESTION_USUARIO.getId());
+        botonRegistrar.setVisible(puedeRegistrar);
         if (puedeRegistrar) {
-            ejecutarAccion(registrarBtn, () -> {
-                new RegistrarUsuario(frame, departamentos, roles, this, null);
+            agregarAccion(botonRegistrar, () -> {
+                new RegistrarUsuario(ventana, departamentos, roles, this, null);
             });
         }
     }
 
-    private void ejecutarAccion(JButton panel, Runnable accion) {
-        panel.addMouseListener(new MouseAdapter() {
+    private void agregarAccion(JButton boton, Runnable accion) {
+        boton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 accion.run();
             }
             @Override
             public void mouseEntered(MouseEvent e) {
-                panel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                panel.setBackground(ColorsTheme.PRIMARY_LIGTH.get());
+                boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                boton.setBackground(ColorsTheme.PRIMARY_LIGTH.get());
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                panel.setBackground(ColorsTheme.PRIMARY.get());
+                boton.setBackground(ColorsTheme.PRIMARY.get());
             }
         });
     }
 
     @Override
     public void crearUsuario(UsuarioEntity usuario) {
-        usuariosController.crear(usuario);
+        controladorUsuarios.crear(usuario);
         actualizarTabla();
         JOptionPane.showMessageDialog(this,
                 "Usuario creado exitosamente:\n\nNombre: " + usuario.getNombre() + "\nCorreo: " + usuario.getCorreo(),
@@ -156,26 +155,25 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     public void verUsuario(UsuarioEntity usuario) {
         List<DepartamentoEntity> departamentos = obtenerDepartamentos();
         List<RolEntity> roles = obtenerRoles();
-        new RegistrarUsuario(frame, departamentos, roles, this, usuario);
+        new RegistrarUsuario(ventana, departamentos, roles, this, usuario);
     }
 
     @Override
     public void actualizarUsuario(UsuarioEntity usuario) {
-        usuariosController.actualizar(usuario.getUsuarioId(), usuario);
+        controladorUsuarios.actualizar(usuario.getUsuarioId(), usuario);
         actualizarTabla();
         JOptionPane.showMessageDialog(this,
-                "Usuario actualizado exitosamente:\n\nNombre: " + usuario.getNombre() + "\nCorreo: "
-                        + usuario.getCorreo(),
+                "Usuario actualizado exitosamente:\n\nNombre: " + usuario.getNombre() + "\nCorreo: " + usuario.getCorreo(),
                 "Usuario Actualizado", JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Override
     public void eliminarUsuario(UsuarioEntity usuario) {
-        int confirm = JOptionPane.showConfirmDialog(this,
+        int confirmar = JOptionPane.showConfirmDialog(this,
                 "¿Seguro que deseas eliminar al usuario " + usuario.getNombre() + "?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            usuariosController.eliminar(usuario.getUsuarioId());
+        if (confirmar == JOptionPane.YES_OPTION) {
+            controladorUsuarios.eliminar(usuario.getUsuarioId());
             actualizarTabla();
             JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente.",
                     "Eliminación exitosa", JOptionPane.INFORMATION_MESSAGE);
@@ -183,63 +181,55 @@ public class GestionUsuarios extends JPanel implements UsuariosListeners {
     }
 
     private void actualizarTabla() {
-        this.listaCompletaUsuarios = obtenerUsuarios();
+        this.listaUsuariosCompleta = obtenerUsuarios();
         filtrarUsuarios();
     }
 
     private void filtrarUsuarios() {
-        final String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
-        final String estado = filtrosForm.getEstadoSeleccionado();
-        final String departamento = filtrosForm.getDepartamentoSeleccionado();
-        final String desde = filtrosForm.getFechaDesde();
-        final String hasta = filtrosForm.getFechaHasta();
-        List<UsuarioEntity> filtrados = listaCompletaUsuarios.stream()
+        String texto = campoBusqueda.getText() != null ? campoBusqueda.getText().toLowerCase().trim() : "";
+        String estado = formularioFiltros.obtenerEstadoSeleccionado();
+        String departamento = formularioFiltros.obtenerDepartamentoSeleccionado();
+        String desde = formularioFiltros.obtenerFechaDesde();
+        String hasta = formularioFiltros.obtenerFechaHasta();
+        List<UsuarioEntity> filtrados = listaUsuariosCompleta.stream()
                 .filter(u -> {
-                    String usuarioIdStr = String.valueOf(u.getUsuarioId());
+                    String idUsuario = String.valueOf(u.getUsuarioId());
                     String nombre = u.getNombre() != null ? u.getNombre().toLowerCase() : "";
                     String correo = u.getCorreo() != null ? u.getCorreo().toLowerCase() : "";
                     String estadoUsuario = u.getEstaActivo() != null ? (u.getEstaActivo() ? "activo" : "inactivo") : "";
                     String rol = (u.getRol() != null && u.getRol().getNombre() != null)
                         ? u.getRol().getNombre().toLowerCase() : "sin rol";
-                    String depNombre = (u.getDepartamento() != null && u.getDepartamento().getNombre() != null)
+                    String nombreDep = (u.getDepartamento() != null && u.getDepartamento().getNombre() != null)
                         ? u.getDepartamento().getNombre().toLowerCase() : "sin departamento";
                     boolean coincideTexto = texto.isEmpty()
-                        || usuarioIdStr.contains(texto)
+                        || idUsuario.contains(texto)
                         || nombre.contains(texto)
                         || correo.contains(texto)
                         || estadoUsuario.contains(texto)
                         || rol.contains(texto)
-                        || depNombre.contains(texto);
-                    boolean coincideEstado = estado.equals("Todos")
-                            || (estado.equals("Activos") && Boolean.TRUE.equals(u.getEstaActivo()))
-                            || (estado.equals("Inactivos") && Boolean.FALSE.equals(u.getEstaActivo()));
-                    boolean coincideDep = departamento.equals("Todos") || departamento.equalsIgnoreCase(depNombre);
+                        || nombreDep.contains(texto);
+                    boolean coincideEstado = estado.equals("Todos") || estado.equals("Activos") && Boolean.TRUE.equals(u.getEstaActivo()) || estado.equals("Inactivos") && Boolean.FALSE.equals(u.getEstaActivo());
+                    boolean coincideDep = departamento.equals("Todos") || departamento.equalsIgnoreCase(nombreDep);
                     boolean coincideFecha = true;
-                    if (desde != null && hasta != null) {
-                        if (u.getFechaCreacion() != null) {
-                            String fecha = u.getFechaCreacion().toLocalDate().toString();
-                            coincideFecha = (fecha.compareTo(desde) >= 0 && fecha.compareTo(hasta) <= 0);
-                        } else {
-                            coincideFecha = false;
-                        }
+                    if (desde != null && hasta != null && u.getFechaCreacion() != null) {
+                        String fecha = u.getFechaCreacion().toLocalDate().toString();
+                        coincideFecha = fecha.compareTo(desde) >= 0 && fecha.compareTo(hasta) <= 0;
                     }
-                    boolean coincideRol = true;
-                    return coincideTexto && coincideEstado && coincideDep && coincideFecha && coincideRol;
+                    return coincideTexto && coincideEstado && coincideDep && coincideFecha;
                 })
                 .collect(Collectors.toList());
-
-        tablaUsuariosTable.setUsuarios(filtrados);
+        tablaUsuarios.establecerUsuarios(filtrados);
     }
 
     private List<UsuarioEntity> obtenerUsuarios() {
-        return usuariosController.buscarTodos();
+        return controladorUsuarios.buscarTodos();
     }
 
     private List<DepartamentoEntity> obtenerDepartamentos() {
-        return departamentosController.buscarTodos();
+        return controladorDepartamentos.buscarTodos();
     }
 
     private List<RolEntity> obtenerRoles() {
-        return rolesController.buscarTodos();
+        return controladorRoles.buscarTodos();
     }
 }

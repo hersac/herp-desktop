@@ -13,47 +13,42 @@ import com.hersac.core.modules.comprasdetalles.entities.CompraDetalleEntity;
 import com.hersac.ui.views.comercial.compras.forms.SelectorProveedorForm;
 import com.hersac.ui.views.comercial.compras.forms.SelectorItemsForm;
 import com.hersac.ui.views.comercial.compras.tablas.ItemsComprasTable;
-import com.hersac.ui.views.comercial.compras.listeners.ComprasListerns;
 import com.hersac.core.modules.movimientosinventarios.entities.MovimientoInventarioEntity;
 import com.hersac.core.modules.movimientosinventarios.constants.TipoReferencia;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GestionCompras extends JPanel implements ComprasListerns {
+public class GestionCompras extends JPanel {
     private SelectorProveedorForm selectorProveedorForm;
     private SelectorItemsForm selectorItemsForm;
-    private ItemsComprasTable itemsComprasTable;
-    private JLabel totalLabel;
-    private JButton guardarCompraBtn;
-    private JTextField observacionesField;
+    private ItemsComprasTable tablaItemsCompras;
+    private JLabel etiquetaTotal;
+    private JButton botonGuardarCompra;
+    private JTextField campoObservaciones;
     private ProveedorEntity proveedorSeleccionado;
-    private ItemEntity itemSeleccionado;
-    private ProveedoresController proveedorController;
-    private ItemsController itemsController;
-    private ComprasController comprasController;
-    private ComprasDetallesController comprasDetallesController;
-    private MovimientosInventariosController movimientosInventarioController;
+    private ProveedoresController controladorProveedores;
+    private ItemsController controladorItems;
+    private ComprasController controladorCompras;
+    private ComprasDetallesController controladorDetallesCompra;
+    private MovimientosInventariosController controladorMovimientosInventario;
     private final DecimalFormat formatoMoneda = new DecimalFormat("#,##0.00");
 
-    public GestionCompras(DIContainer container) {
-        this.proveedorController = container.getProveedoresController();
-        this.itemsController = container.getItemsController();
-        this.comprasController = container.getComprasController();
-        this.comprasDetallesController = container.getComprasDetallesController();
-        this.movimientosInventarioController = container.getMovimientosInventariosController();
+    public GestionCompras(DIContainer contenedor) {
+        controladorProveedores = contenedor.getProveedoresController();
+        controladorItems = contenedor.getItemsController();
+        controladorCompras = contenedor.getComprasController();
+        controladorDetallesCompra = contenedor.getComprasDetallesController();
+        controladorMovimientosInventario = contenedor.getMovimientosInventariosController();
 
         setLayout(new BorderLayout());
         JLabel titulo = new JLabel("Gestión de Compras", SwingConstants.CENTER);
-        titulo.setFont(new Font("Arial", Font.BOLD, 24));
+        titulo.setFont(new Font("Roboto", Font.BOLD, 24));
         add(titulo, BorderLayout.NORTH);
 
         JPanel panelPrincipal = new JPanel();
@@ -61,213 +56,207 @@ public class GestionCompras extends JPanel implements ComprasListerns {
         add(panelPrincipal, BorderLayout.CENTER);
 
         selectorProveedorForm = new SelectorProveedorForm();
-        selectorProveedorForm.addBuscarListener(e -> {
-            String terceroId = selectorProveedorForm.getProveedorId();
-            if (terceroId.isEmpty()) {
-                JOptionPane.showMessageDialog(GestionCompras.this, "Ingrese la cédula del proveedor.");
-                return;
-            }
-            try {
-                proveedorSeleccionado = proveedorController.buscarPorTerceroId(terceroId);
-                if (proveedorSeleccionado != null && proveedorSeleccionado.getTercero() != null) {
-                    selectorProveedorForm.setProveedorNombre(proveedorSeleccionado.getTercero().getNombre());
-                } else {
-                    selectorProveedorForm.setProveedorNombre("");
-                    JOptionPane.showMessageDialog(GestionCompras.this, "Proveedor no encontrado.");
-                }
-            } catch (Exception ex) {
-                selectorProveedorForm.setProveedorNombre("");
-                JOptionPane.showMessageDialog(GestionCompras.this, "Error al buscar proveedor: " + ex.getMessage());
-            }
-        });
+        aplicarFuenteRoboto(selectorProveedorForm);
+        selectorProveedorForm.addBuscarListener(e -> buscarProveedor());
         panelPrincipal.add(selectorProveedorForm);
 
-        JPanel observacionesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        observacionesPanel.setBorder(BorderFactory.createTitledBorder("Observaciones"));
-        observacionesPanel.add(new JLabel("Observaciones:"));
-        observacionesField = new JTextField(40);
-        observacionesPanel.add(observacionesField);
-        panelPrincipal.add(observacionesPanel);
+        JPanel panelObservaciones = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelObservaciones.setBorder(BorderFactory.createTitledBorder("Observaciones"));
+        JLabel etiquetaObservaciones = new JLabel("Observaciones:");
+        etiquetaObservaciones.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelObservaciones.add(etiquetaObservaciones);
+        campoObservaciones = new JTextField(40);
+        campoObservaciones.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelObservaciones.add(campoObservaciones);
+        panelPrincipal.add(panelObservaciones);
 
         selectorItemsForm = new SelectorItemsForm();
-        selectorItemsForm.addBuscarListener(e -> {
-            String codigo = selectorItemsForm.getItemId();
-            if (codigo.isEmpty()) {
-                JOptionPane.showMessageDialog(GestionCompras.this, "Ingrese el código del producto.");
-                return;
-            }
-            try {
-                itemSeleccionado = itemsController.buscarPorCodigo(codigo);
-                if (itemSeleccionado != null) {
-                    selectorItemsForm.setItemNombre(itemSeleccionado.getNombre());
-                    selectorItemsForm.setPrecioUnitario(String.valueOf(itemSeleccionado.getPrecioUnitario()));
-                } else {
-                    selectorItemsForm.setItemNombre("");
-                    selectorItemsForm.setPrecioUnitario("");
-                    JOptionPane.showMessageDialog(GestionCompras.this, "Producto no encontrado.");
-                }
-            } catch (Exception ex) {
-                selectorItemsForm.setItemNombre("");
-                selectorItemsForm.setPrecioUnitario("");
-                JOptionPane.showMessageDialog(GestionCompras.this, "Error al buscar producto: " + ex.getMessage());
-            }
-        });
-        selectorItemsForm.addAgregarListener(e -> {
-            String codigo = selectorItemsForm.getItemId();
-            String nombre = selectorItemsForm.getItemNombre();
-            String cantidadStr = selectorItemsForm.getCantidad();
-            Double precioOriginal = selectorItemsForm.getPrecioUnitarioOriginal();
-            if (codigo.isEmpty() || nombre.isEmpty() || cantidadStr.isEmpty() || precioOriginal == null) {
-                JOptionPane.showMessageDialog(GestionCompras.this, "Completa todos los campos del producto.");
-                return;
-            }
-            int cantidad;
-            try {
-                cantidad = Integer.parseInt(cantidadStr);
-                if (cantidad <= 0) {
-                    JOptionPane.showMessageDialog(GestionCompras.this, "La cantidad debe ser mayor a cero.");
-                    return;
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(GestionCompras.this, "Cantidad inválida.");
-                return;
-            }
-            BigDecimal precio;
-            try {
-                precio = BigDecimal.valueOf(precioOriginal);
-                if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-                    JOptionPane.showMessageDialog(GestionCompras.this, "El precio debe ser mayor a cero.");
-                    return;
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(GestionCompras.this, "Precio inválido.");
-                return;
-            }
-            BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(cantidad));
-            itemsComprasTable.getModeloTabla().addRow(new Object[]{codigo, nombre, cantidad, precio, subtotal});
-            actualizarTotal();
-            selectorItemsForm.setItemId("");
-            selectorItemsForm.setItemNombre("");
-            selectorItemsForm.setCantidad("");
-            selectorItemsForm.setPrecioUnitario("");
-        });
+        aplicarFuenteRoboto(selectorItemsForm);
+        selectorItemsForm.addBuscarListener(e -> buscarItem());
+        selectorItemsForm.addAgregarListener(e -> agregarItemATabla());
         panelPrincipal.add(selectorItemsForm);
 
-        itemsComprasTable = new ItemsComprasTable();
-        JTable tabla = itemsComprasTable.getTablaItems();
-        tabla.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public void setValue(Object value) {
-                int col = tabla.getSelectedColumn();
-                if (col == 2 || col == 3 || col == 4) {
-                    if (value instanceof Number) {
-                        setText(formatoMoneda.format(((Number) value).doubleValue()));
-                    } else {
-                        try {
-                            setText(formatoMoneda.format(Double.parseDouble(value.toString())));
-                        } catch (Exception e) {
-                            setText(value != null ? value.toString() : "");
-                        }
-                    }
-                } else {
-                    setText(value != null ? value.toString() : "");
-                }
-            }
-        });
-        panelPrincipal.add(itemsComprasTable);
+        tablaItemsCompras = new ItemsComprasTable();
+        aplicarFuenteRoboto(tablaItemsCompras);
+        panelPrincipal.add(tablaItemsCompras);
 
-        JPanel totalPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        totalLabel = new JLabel("Total: $0.00");
-        totalPanel.add(totalLabel);
-        guardarCompraBtn = new JButton("Guardar Compra");
-        totalPanel.add(guardarCompraBtn);
-        panelPrincipal.add(totalPanel);
+        JPanel panelTotal = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        etiquetaTotal = new JLabel("Total: $0.00");
+        etiquetaTotal.setFont(new Font("Roboto", Font.BOLD, 16));
+        panelTotal.add(etiquetaTotal);
+        botonGuardarCompra = new JButton("Guardar Compra");
+        botonGuardarCompra.setFont(new Font("Roboto", Font.BOLD, 14));
+        panelTotal.add(botonGuardarCompra);
+        panelPrincipal.add(panelTotal);
 
-        guardarCompraBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (proveedorSeleccionado == null) {
-                    JOptionPane.showMessageDialog(GestionCompras.this, "Debe seleccionar un proveedor.");
-                    return;
-                }
-                DefaultTableModel modeloTabla = itemsComprasTable.getModeloTabla();
-                if (modeloTabla.getRowCount() == 0) {
-                    JOptionPane.showMessageDialog(GestionCompras.this, "Debe agregar al menos un producto.");
-                    return;
-                }
-                BigDecimal totalCompra = BigDecimal.ZERO;
-                List<CompraDetalleEntity> detalles = new ArrayList<>();
-                for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-                    String codigo = modeloTabla.getValueAt(i, 0).toString();
-                    String nombre = modeloTabla.getValueAt(i, 1).toString();
-                    int cantidad = Integer.parseInt(modeloTabla.getValueAt(i, 2).toString().replace(",", ""));
-                    BigDecimal precio = new BigDecimal(modeloTabla.getValueAt(i, 3).toString().replace(",", ""));
-                    BigDecimal subtotal = new BigDecimal(modeloTabla.getValueAt(i, 4).toString().replace(",", ""));
-                    totalCompra = totalCompra.add(subtotal);
-                    ItemEntity item = itemsController.buscarPorCodigo(codigo);
-                    CompraDetalleEntity detalle = CompraDetalleEntity.builder()
-                            .cantidad(cantidad)
-                            .precioUnitario(precio)
-                            .subTotal(subtotal)
-                            .item(item)
-                            .build();
-                    detalles.add(detalle);
-                }
-                CompraEntity compra = CompraEntity.builder()
-                    .proveedor(proveedorSeleccionado)
-                    .totalCompra(totalCompra)
-                    .estado("PENDIENTE")
-                    .observaciones(observacionesField.getText())
+        botonGuardarCompra.addActionListener(e -> guardarCompra());
+    }
+
+    private void buscarProveedor() {
+        String idProveedor = selectorProveedorForm.getProveedorId();
+        if (idProveedor.isEmpty()) {
+            mostrarMensaje("Ingrese la cédula del proveedor.");
+            return;
+        }
+        proveedorSeleccionado = controladorProveedores.buscarPorTerceroId(idProveedor);
+        if (proveedorSeleccionado != null && proveedorSeleccionado.getTercero() != null) {
+            selectorProveedorForm.setProveedorNombre(proveedorSeleccionado.getTercero().getNombre());
+            return;
+        }
+        selectorProveedorForm.setProveedorNombre("");
+        mostrarMensaje("Proveedor no encontrado.");
+    }
+
+    private void buscarItem() {
+        String codigo = selectorItemsForm.getItemId();
+        if (codigo.isEmpty()) {
+            mostrarMensaje("Ingrese el código del producto.");
+            return;
+        }
+        ItemEntity item = controladorItems.buscarPorCodigo(codigo);
+        if (item != null) {
+            selectorItemsForm.setItemNombre(item.getNombre());
+            selectorItemsForm.setPrecioUnitario(String.valueOf(item.getPrecioUnitario()));
+            return;
+        }
+        selectorItemsForm.setItemNombre("");
+        selectorItemsForm.setPrecioUnitario("");
+        mostrarMensaje("Producto no encontrado.");
+    }
+
+    private void agregarItemATabla() {
+        String codigo = selectorItemsForm.getItemId();
+        String nombre = selectorItemsForm.getItemNombre();
+        String cantidadStr = selectorItemsForm.getCantidad();
+        Double precioOriginal = selectorItemsForm.getPrecioUnitarioOriginal();
+        if (codigo.isEmpty() || nombre.isEmpty() || cantidadStr.isEmpty() || precioOriginal == null) {
+            mostrarMensaje("Completa todos los campos del producto.");
+            return;
+        }
+        int cantidad = obtenerCantidadValida(cantidadStr);
+        if (cantidad <= 0) {
+            mostrarMensaje("La cantidad debe ser mayor a cero.");
+            return;
+        }
+        BigDecimal precio = obtenerPrecioValido(precioOriginal);
+        if (precio.compareTo(BigDecimal.ZERO) <= 0) {
+            mostrarMensaje("El precio debe ser mayor a cero.");
+            return;
+        }
+        BigDecimal subtotal = precio.multiply(BigDecimal.valueOf(cantidad));
+        tablaItemsCompras.getModeloTabla().addRow(new Object[]{codigo, nombre, cantidad, precio, subtotal});
+        actualizarTotal();
+        selectorItemsForm.setItemId("");
+        selectorItemsForm.setItemNombre("");
+        selectorItemsForm.setCantidad("");
+        selectorItemsForm.setPrecioUnitario("");
+    }
+
+    private int obtenerCantidadValida(String cantidadStr) {
+        try {
+            return Integer.parseInt(cantidadStr);
+        } catch (NumberFormatException ex) {
+            mostrarMensaje("Cantidad inválida.");
+            return 0;
+        }
+    }
+
+    private BigDecimal obtenerPrecioValido(Double precioOriginal) {
+        try {
+            return BigDecimal.valueOf(precioOriginal);
+        } catch (Exception ex) {
+            mostrarMensaje("Precio inválido.");
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private void guardarCompra() {
+        if (proveedorSeleccionado == null) {
+            mostrarMensaje("Debe seleccionar un proveedor.");
+            return;
+        }
+        DefaultTableModel modeloTabla = tablaItemsCompras.getModeloTabla();
+        if (modeloTabla.getRowCount() == 0) {
+            mostrarMensaje("Debe agregar al menos un producto.");
+            return;
+        }
+        BigDecimal totalCompra = BigDecimal.ZERO;
+        List<CompraDetalleEntity> detalles = new ArrayList<>();
+        for (int i = 0; i < modeloTabla.getRowCount(); i++) {
+            String codigo = modeloTabla.getValueAt(i, 0).toString();
+            int cantidad = Integer.parseInt(modeloTabla.getValueAt(i, 2).toString().replace(",", ""));
+            BigDecimal precio = new BigDecimal(modeloTabla.getValueAt(i, 3).toString().replace(",", ""));
+            BigDecimal subtotal = new BigDecimal(modeloTabla.getValueAt(i, 4).toString().replace(",", ""));
+            totalCompra = totalCompra.add(subtotal);
+            ItemEntity item = controladorItems.buscarPorCodigo(codigo);
+            CompraDetalleEntity detalle = CompraDetalleEntity.builder()
+                    .cantidad(cantidad)
+                    .precioUnitario(precio)
+                    .subTotal(subtotal)
+                    .item(item)
                     .build();
-                try {
-                    compra = comprasController.crear(compra);
-                    for (CompraDetalleEntity detalle : detalles) {
-                        detalle.setCompra(compra);
-                        comprasDetallesController.crear(detalle);
-                        MovimientoInventarioEntity movimiento = MovimientoInventarioEntity.builder()
-                            .tipoMovimiento("ENTRADA")
-                            .referenciaId(compra.getCompraId())
-                            .referenciaTipo((int)TipoReferencia.COMPRA.getValue())
-                            .cantidad(detalle.getCantidad())
-                            .item(detalle.getItem())
-                            .bodega(detalle.getItem().getBodega())
-                            .build();
-                        movimientosInventarioController.crear(movimiento);
-                    }
-                    JOptionPane.showMessageDialog(GestionCompras.this, "Compra guardada exitosamente.");
-                    itemsComprasTable.limpiarTabla();
-                    actualizarTotal();
-                    selectorProveedorForm.setProveedorId("");
-                    selectorProveedorForm.setProveedorNombre("");
-                    proveedorSeleccionado = null;
-                    observacionesField.setText("");
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(GestionCompras.this, "Error al guardar la compra: " + ex.getMessage());
-                }
+            detalles.add(detalle);
+        }
+        CompraEntity compra = CompraEntity.builder()
+                .proveedor(proveedorSeleccionado)
+                .totalCompra(totalCompra)
+                .estado("PENDIENTE")
+                .observaciones(campoObservaciones.getText())
+                .build();
+        try {
+            compra = controladorCompras.crear(compra);
+            for (CompraDetalleEntity detalle : detalles) {
+                detalle.setCompra(compra);
+                controladorDetallesCompra.crear(detalle);
+                MovimientoInventarioEntity movimiento = MovimientoInventarioEntity.builder()
+                        .tipoMovimiento("ENTRADA")
+                        .referenciaId(compra.getCompraId())
+                        .referenciaTipo((int)TipoReferencia.COMPRA.getValue())
+                        .cantidad(detalle.getCantidad())
+                        .item(detalle.getItem())
+                        .bodega(detalle.getItem().getBodega())
+                        .build();
+                controladorMovimientosInventario.crear(movimiento);
             }
-        });
+            mostrarMensaje("Compra guardada exitosamente.");
+            tablaItemsCompras.limpiarTabla();
+            actualizarTotal();
+            selectorProveedorForm.setProveedorId("");
+            selectorProveedorForm.setProveedorNombre("");
+            proveedorSeleccionado = null;
+            campoObservaciones.setText("");
+        } catch (Exception ex) {
+            mostrarMensaje("Error al guardar la compra: " + ex.getMessage());
+        }
     }
 
     private void actualizarTotal() {
         BigDecimal total = BigDecimal.ZERO;
-        DefaultTableModel modeloTabla = itemsComprasTable.getModeloTabla();
+        DefaultTableModel modeloTabla = tablaItemsCompras.getModeloTabla();
         for (int i = 0; i < modeloTabla.getRowCount(); i++) {
             Object subtotalObj = modeloTabla.getValueAt(i, 4);
-            BigDecimal subtotal;
-            if (subtotalObj instanceof BigDecimal) {
-                subtotal = (BigDecimal) subtotalObj;
-            } else {
-                subtotal = new BigDecimal(subtotalObj.toString().replace(",", ""));
-            }
+            BigDecimal subtotal = subtotalObj instanceof BigDecimal ? (BigDecimal) subtotalObj : new BigDecimal(subtotalObj.toString().replace(",", ""));
             total = total.add(subtotal);
         }
-        totalLabel.setText("Total: $" + formatoMoneda.format(total));
+        etiquetaTotal.setText("Total: $" + formatoMoneda.format(total));
     }
 
-    @Override
-    public void onProveedorSeleccionado(String proveedorId) {}
-    @Override
-    public void onItemSeleccionado(String itemCodigo) {}
-    @Override
-    public void onAgregarItem(String codigo, String nombre, int cantidad, String precioUnitario) {}
+    private void mostrarMensaje(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje);
+    }
+
+    private void aplicarFuenteRoboto(Component componente) {
+        Font fuente = new Font("Roboto", Font.PLAIN, 14);
+        if (componente instanceof JLabel) {
+            ((JLabel) componente).setFont(fuente);
+        } else if (componente instanceof JTextField) {
+            ((JTextField) componente).setFont(fuente);
+        } else if (componente instanceof JPanel) {
+            for (Component hijo : ((JPanel) componente).getComponents()) {
+                aplicarFuenteRoboto(hijo);
+            }
+        } else if (componente instanceof JButton) {
+            ((JButton) componente).setFont(fuente);
+        }
+    }
 }

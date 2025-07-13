@@ -17,116 +17,109 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AppViews extends JFrame {
+    private final JPanel fondo;
+    private JPanel panelContenido;
+    private final DIContainer contenedor;
+    private final Font fuenteRoboto = new Font("Roboto", Font.PLAIN, 14);
 
-    private final JPanel bg;
-    private JPanel contenido;
-    private final DIContainer container;
-
-    public AppViews(DIContainer container) {
-        this.container = container;
-
+    public AppViews(DIContainer contenedor) {
+        this.contenedor = contenedor;
         setTitle("HERP");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setMaximumSize(new Dimension(1920, 1080));
         setMinimumSize(new Dimension(800, 600));
         setPreferredSize(new Dimension(800, 700));
         setLocationRelativeTo(null);
-
-        bg = new JPanel(new BorderLayout());
-        setContentPane(bg);
-
-        LoginView loginView = container.getLoginView();
-        bg.add(loginView, BorderLayout.CENTER);
-
-        loginView.addLoginListener(token -> {
-            if (token != null) {
-                bg.removeAll();
-
-                NavbarComponent navbar = new NavbarComponent(container.getPermissionService());
-                SidebarComponent sidebar = new SidebarComponent();
-
-                contenido = new JPanel(new BorderLayout());
-                contenido.setBackground(Color.WHITE);
-                contenido.add(new JLabel("Bienvenido al sistema"), BorderLayout.NORTH);
-
-                navbar.setNavigationListener(destino -> {
-                    contenido.removeAll();
-
-                    switch (destino) {
-                        case "gestion-clientes" -> contenido.add(new GestionClientes(container), BorderLayout.CENTER);
-                        case "gestion-compras" -> contenido.add(new GestionCompras(container), BorderLayout.CENTER);
-                        case "gestion-ventas" -> contenido.add(new GestionVentas(container), BorderLayout.CENTER);
-                        case "gestion-inventario" -> contenido.add(new GestionInventario(container), BorderLayout.CENTER);
-                        case "gestion-terceros" -> contenido.add(new GestionTerceros(container), BorderLayout.CENTER);
-                        case "gestion-usuarios" -> contenido.add(new GestionUsuarios(container), BorderLayout.CENTER);
-                        case "roles-permisos" -> contenido.add(new RolesPermisos(container), BorderLayout.CENTER);
-                        case "auditorias" -> contenido.add(new Auditorias(), BorderLayout.CENTER);
-                    }
-
-                    contenido.revalidate();
-                    contenido.repaint();
-                });
-
-                navbar.setLogoutListener(() -> {
-                    bg.removeAll();
-                    LoginView newLoginView = container.getLoginView();
-                    bg.add(newLoginView, BorderLayout.CENTER);
-                    bg.revalidate();
-                    bg.repaint();
-                    newLoginView.addLoginListener(token2 -> {
-                        if (token2 != null) {
-                            bg.removeAll();
-                            NavbarComponent newNavbar = new NavbarComponent(container.getPermissionService());
-                            SidebarComponent newSidebar = new SidebarComponent();
-                            contenido = new JPanel(new BorderLayout());
-                            contenido.setBackground(Color.WHITE);
-                            contenido.add(new JLabel("Bienvenido al sistema"), BorderLayout.NORTH);
-                            newNavbar.setNavigationListener(navbar.getNavigationListener());
-                            newNavbar.setLogoutListener(this::reiniciarLogin);
-                            bg.add(newNavbar, BorderLayout.NORTH);
-                            bg.add(newSidebar, BorderLayout.WEST);
-                            bg.add(contenido, BorderLayout.CENTER);
-                            bg.revalidate();
-                            bg.repaint();
-                        }
-                    });
-                });
-
-                bg.add(navbar, BorderLayout.NORTH);
-                bg.add(sidebar, BorderLayout.WEST);
-                bg.add(contenido, BorderLayout.CENTER);
-
-                bg.revalidate();
-                bg.repaint();
-            }
-        });
-
+        fondo = new JPanel(new BorderLayout());
+        setContentPane(fondo);
+        mostrarLogin();
         setVisible(true);
     }
 
-    // Método auxiliar para reiniciar el login correctamente
-    private void reiniciarLogin() {
-        bg.removeAll();
-        LoginView loginView = container.getLoginView();
-        bg.add(loginView, BorderLayout.CENTER);
-        bg.revalidate();
-        bg.repaint();
-        loginView.addLoginListener(token -> {
+    private void mostrarLogin() {
+        LoginView vistaLogin = contenedor.getLoginView();
+        fondo.add(vistaLogin, BorderLayout.CENTER);
+        vistaLogin.addLoginListener(token -> {
             if (token != null) {
-                bg.removeAll();
-                NavbarComponent navbar = new NavbarComponent(container.getPermissionService());
-                SidebarComponent sidebar = new SidebarComponent();
-                contenido = new JPanel(new BorderLayout());
-                contenido.setBackground(Color.WHITE);
-                contenido.add(new JLabel("Bienvenido al sistema"), BorderLayout.NORTH);
-                navbar.setNavigationListener(navbar.getNavigationListener());
-                navbar.setLogoutListener(this::reiniciarLogin);
-                bg.add(navbar, BorderLayout.NORTH);
-                bg.add(sidebar, BorderLayout.WEST);
-                bg.add(contenido, BorderLayout.CENTER);
-                bg.revalidate();
-                bg.repaint();
+                mostrarVistaPrincipal();
             }
         });
+    }
+
+    private void mostrarVistaPrincipal() {
+        fondo.removeAll();
+        NavbarComponent barraNavegacion = new NavbarComponent(contenedor.getPermissionService());
+        SidebarComponent barraLateral = new SidebarComponent();
+        panelContenido = crearPanelContenido();
+        barraNavegacion.setNavigationListener(destino -> mostrarVistaDestino(destino));
+        barraNavegacion.setLogoutListener(this::mostrarLogin);
+        fondo.add(barraNavegacion, BorderLayout.NORTH);
+        fondo.add(barraLateral, BorderLayout.WEST);
+        fondo.add(panelContenido, BorderLayout.CENTER);
+        fondo.revalidate();
+        fondo.repaint();
+    }
+
+    private JPanel crearPanelContenido() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        JLabel etiquetaBienvenida = new JLabel("Bienvenido al sistema");
+        etiquetaBienvenida.setFont(new Font("Roboto", Font.PLAIN, 24));
+        etiquetaBienvenida.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(etiquetaBienvenida, BorderLayout.NORTH);
+        return panel;
+    }
+
+    private void mostrarVistaDestino(String destino) {
+        panelContenido.removeAll();
+        JComponent vista = obtenerVista(destino);
+        if (vista != null) {
+            panelContenido.add(vista, BorderLayout.CENTER);
+        }
+        panelContenido.revalidate();
+        panelContenido.repaint();
+    }
+
+    private JComponent obtenerVista(String destino) {
+        if ("gestion-clientes".equals(destino)) {
+            return aplicarFuenteRoboto(new GestionClientes(contenedor));
+        }
+        if ("gestion-compras".equals(destino)) {
+            return aplicarFuenteRoboto(new GestionCompras(contenedor));
+        }
+        if ("gestion-ventas".equals(destino)) {
+            return aplicarFuenteRoboto(new GestionVentas(contenedor));
+        }
+        if ("gestion-inventario".equals(destino)) {
+            return aplicarFuenteRoboto(new GestionInventario(contenedor));
+        }
+        if ("gestion-terceros".equals(destino)) {
+            return aplicarFuenteRoboto(new GestionTerceros(contenedor));
+        }
+        if ("gestion-usuarios".equals(destino)) {
+            return aplicarFuenteRoboto(new GestionUsuarios(contenedor));
+        }
+        if ("roles-permisos".equals(destino)) {
+            return aplicarFuenteRoboto(new RolesPermisos(contenedor));
+        }
+        if ("auditorias".equals(destino)) {
+            return aplicarFuenteRoboto(new Auditorias());
+        }
+        return null;
+    }
+
+    private JComponent aplicarFuenteRoboto(JComponent componente) {
+        for (Component c : componente.getComponents()) {
+            if (c instanceof JLabel label) {
+                label.setFont(fuenteRoboto);
+            }
+            if (c instanceof JTextField campo) {
+                campo.setFont(fuenteRoboto);
+            }
+            if (c instanceof JPasswordField campoPass) {
+                campoPass.setFont(fuenteRoboto);
+            }
+        }
+        return componente;
     }
 }

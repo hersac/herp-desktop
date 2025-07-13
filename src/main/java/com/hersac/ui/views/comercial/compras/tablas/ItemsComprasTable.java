@@ -15,22 +15,23 @@ public class ItemsComprasTable extends JPanel {
         setLayout(new BorderLayout());
         modeloTabla = new DefaultTableModel(new Object[]{"ID", "Nombre", "Cantidad", "Precio Unitario", "Subtotal"}, 0);
         tablaItems = new JTable(modeloTabla);
+        aplicarFuenteRoboto(tablaItems);
         JScrollPane scrollTabla = new JScrollPane(tablaItems);
         scrollTabla.setBorder(BorderFactory.createTitledBorder("Productos Agregados"));
-        DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
-        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
-        tablaItems.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+        DefaultTableCellRenderer alineacionDerecha = new DefaultTableCellRenderer();
+        alineacionDerecha.setHorizontalAlignment(SwingConstants.RIGHT);
+        tablaItems.getColumnModel().getColumn(2).setCellRenderer(alineacionDerecha);
         DefaultTableCellRenderer monedaRenderer = new DefaultTableCellRenderer() {
             @Override
-            public void setValue(Object value) {
-                if (value instanceof Number) {
-                    setText(formatoMoneda.format(((Number) value).doubleValue()));
-                } else {
-                    try {
-                        setText(formatoMoneda.format(Double.parseDouble(value.toString())));
-                    } catch (Exception e) {
-                        setText(value != null ? value.toString() : "");
-                    }
+            public void setValue(Object valor) {
+                if (valor instanceof Number) {
+                    setText(formatoMoneda.format(((Number) valor).doubleValue()));
+                    return;
+                }
+                try {
+                    setText(formatoMoneda.format(Double.parseDouble(valor.toString())));
+                } catch (Exception e) {
+                    setText(valor != null ? valor.toString() : "");
                 }
             }
         };
@@ -47,5 +48,10 @@ public class ItemsComprasTable extends JPanel {
     }
     public void limpiarTabla() {
         modeloTabla.setRowCount(0);
+    }
+    private void aplicarFuenteRoboto(JTable tabla) {
+        Font fuente = new Font("Roboto", Font.PLAIN, 14);
+        tabla.setFont(fuente);
+        tabla.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 14));
     }
 }

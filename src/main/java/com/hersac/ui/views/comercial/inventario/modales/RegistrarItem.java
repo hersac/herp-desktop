@@ -14,55 +14,54 @@ import javax.swing.text.DocumentFilter;
 import java.awt.*;
 
 public class RegistrarItem extends JDialog {
-    private final ItemsListeners listener;
-    private final DIContainer diContainer;
-    private JTextField codigoField;
-    private JTextField nombreField;
-    private JTextField descripcionField;
-    private JTextField precioUnitarioField;
-    private JTextField stockField;
-    private JCheckBox activoCheckBox;
+    private final ItemsListeners oyente;
+    private final DIContainer contenedorDI;
+    private JTextField campoCodigo;
+    private JTextField campoNombre;
+    private JTextField campoDescripcion;
+    private JTextField campoPrecioUnitario;
+    private JTextField campoStock;
+    private JCheckBox cajaActiva;
     private ItemEntity itemRegistrado;
-    private JTextField codigoProductoField;
-    private JTextField nombreProductoField;
+    private JTextField campoCodigoProducto;
+    private JTextField campoNombreProducto;
     private ProductoEntity productoEncontrado;
     private ProductosController productosController;
-    private JTextField categoriaField;
-    private boolean soloLectura = false;
-    private ItemEntity itemOriginal; // Para actualización
-    private JTextField bodegaIdField;
-    private JTextField bodegaNombreField;
+    private JTextField campoCategoria;
+    private ItemEntity itemOriginal;
+    private JTextField campoBodegaId;
+    private JTextField campoBodegaNombre;
     private com.hersac.core.modules.bodegas.entities.BodegaEntity bodegaEncontrada;
 
-    public RegistrarItem(JFrame parent, DIContainer diContainer, ItemsListeners listener) {
-        this(parent, diContainer, listener, null, false);
+    public RegistrarItem(JFrame padre, DIContainer contenedorDI, ItemsListeners oyente) {
+        this(padre, contenedorDI, oyente, null, false);
     }
 
-    public RegistrarItem(JFrame parent, DIContainer diContainer, ItemsListeners listener, ItemEntity item, boolean esActualizacion) {
-        super(parent, esActualizacion ? "Actualizar Item" : "Registrar Item", true);
-        this.listener = listener;
-        this.diContainer = diContainer;
-        this.productosController = diContainer.getProductosController();
+    public RegistrarItem(JFrame padre, DIContainer contenedorDI, ItemsListeners oyente, ItemEntity item, boolean esActualizacion) {
+        super(padre, esActualizacion ? "Actualizar Item" : "Registrar Item", true);
+        this.oyente = oyente;
+        this.contenedorDI = contenedorDI;
+        this.productosController = contenedorDI.getProductosController();
         if (esActualizacion && item != null) {
             this.itemOriginal = item;
         }
         setSize(550, 680);
-        setLocationRelativeTo(parent);
+        setLocationRelativeTo(padre);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
-        JPanel formPanel = crearCampos();
+        JPanel panelFormulario = crearCampos();
         if (item != null) {
             precargarDatos(item);
         }
-        JPanel buttonPanel = crearPanelBotones(esActualizacion);
-        add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        JPanel panelBotones = crearPanelBotones(esActualizacion);
+        add(panelFormulario, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
         setVisible(true);
     }
 
     private JPanel crearCampos() {
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new GridBagLayout());
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.EAST;
@@ -70,175 +69,167 @@ public class RegistrarItem extends JDialog {
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        int labelWidth = 120;
-        int inputMinWidth = 200;
-        int inputHeight = 40;
-        JLabel lblCodigo = new JLabel("Código:");
-        lblCodigo.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblCodigo, gbc);
+        int anchoEtiqueta = 120;
+        int anchoCampo = 200;
+        int altoCampo = 40;
+        JLabel etiquetaCodigo = new JLabel("Código:");
+        etiquetaCodigo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaCodigo.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaCodigo, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        codigoField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        codigoField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(codigoField, gbc);
+        campoCodigo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoCodigo.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoCodigo.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        aplicarFiltroMayusculas(campoCodigo);
+        panel.add(campoCodigo, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblNombre = new JLabel("Nombre:");
-        lblNombre.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblNombre, gbc);
+        JLabel etiquetaNombre = new JLabel("Nombre:");
+        etiquetaNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaNombre.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaNombre, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        nombreField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        nombreField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(nombreField, gbc);
+        campoNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoNombre.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoNombre.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        aplicarFiltroMayusculas(campoNombre);
+        panel.add(campoNombre, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblDescripcion = new JLabel("Descripción:");
-        lblDescripcion.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblDescripcion, gbc);
+        JLabel etiquetaDescripcion = new JLabel("Descripción:");
+        etiquetaDescripcion.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaDescripcion.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaDescripcion, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        descripcionField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        descripcionField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(descripcionField, gbc);
+        campoDescripcion.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoDescripcion.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoDescripcion.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoDescripcion, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblPrecio = new JLabel("Precio Unitario:");
-        lblPrecio.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblPrecio, gbc);
+        JLabel etiquetaPrecio = new JLabel("Precio Unitario:");
+        etiquetaPrecio.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaPrecio.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaPrecio, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        precioUnitarioField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        precioUnitarioField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(precioUnitarioField, gbc);
+        campoPrecioUnitario.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoPrecioUnitario.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoPrecioUnitario.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoPrecioUnitario, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblStock = new JLabel("Stock:");
-        lblStock.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblStock, gbc);
+        JLabel etiquetaStock = new JLabel("Stock:");
+        etiquetaStock.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaStock.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaStock, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        stockField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        stockField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(stockField, gbc);
+        campoStock.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoStock.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoStock.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoStock, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblCategoria = new JLabel("Categoría:");
-        lblCategoria.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblCategoria, gbc);
+        JLabel etiquetaCategoria = new JLabel("Categoría:");
+        etiquetaCategoria.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaCategoria.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaCategoria, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        categoriaField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        categoriaField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(categoriaField, gbc);
+        campoCategoria.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoCategoria.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoCategoria.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoCategoria, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblActivo = new JLabel("Activo:");
-        lblActivo.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblActivo, gbc);
+        JLabel etiquetaActivo = new JLabel("Activo:");
+        etiquetaActivo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaActivo.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaActivo, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        formPanel.add(activoCheckBox, gbc);
+        cajaActiva.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panel.add(cajaActiva, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblBodegaId = new JLabel("Bodega ID:");
-        lblBodegaId.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblBodegaId, gbc);
+        JLabel etiquetaBodegaId = new JLabel("Bodega ID:");
+        etiquetaBodegaId.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaBodegaId.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaBodegaId, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        bodegaIdField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        bodegaIdField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(bodegaIdField, gbc);
+        campoBodegaId.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBodegaId.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoBodegaId.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoBodegaId, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblBodegaNombre = new JLabel("Nombre Bodega:");
-        lblBodegaNombre.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblBodegaNombre, gbc);
+        JLabel etiquetaBodegaNombre = new JLabel("Nombre Bodega:");
+        etiquetaBodegaNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaBodegaNombre.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaBodegaNombre, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        bodegaNombreField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        bodegaNombreField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(bodegaNombreField, gbc);
+        campoBodegaNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBodegaNombre.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoBodegaNombre.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoBodegaNombre, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblCodigoProducto = new JLabel("Código Producto:");
-        lblCodigoProducto.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblCodigoProducto, gbc);
+        JLabel etiquetaCodigoProducto = new JLabel("Código Producto:");
+        etiquetaCodigoProducto.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaCodigoProducto.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaCodigoProducto, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        codigoProductoField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        codigoProductoField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(codigoProductoField, gbc);
+        campoCodigoProducto.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoCodigoProducto.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoCodigoProducto.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoCodigoProducto, gbc);
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel lblNombreProducto = new JLabel("Nombre Producto:");
-        lblNombreProducto.setPreferredSize(new Dimension(labelWidth, inputHeight));
-        formPanel.add(lblNombreProducto, gbc);
+        JLabel etiquetaNombreProducto = new JLabel("Nombre Producto:");
+        etiquetaNombreProducto.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiquetaNombreProducto.setPreferredSize(new Dimension(anchoEtiqueta, altoCampo));
+        panel.add(etiquetaNombreProducto, gbc);
         gbc.gridx = 1;
         gbc.weightx = 1;
-        nombreProductoField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        nombreProductoField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(nombreProductoField, gbc);
-        return formPanel;
-    }
-
-    private void buscarProductoPorCodigo() {
-        String codigo = codigoProductoField.getText().trim();
-        if (!codigo.isEmpty()) {
-            productoEncontrado = productosController.buscarPorCodigo(codigo);
-            if (productoEncontrado != null) {
-                nombreProductoField.setText(productoEncontrado.getNombre());
-            } else {
-                nombreProductoField.setText("No encontrado");
-            }
-        } else {
-            nombreProductoField.setText("");
-        }
-    }
-
-    private void buscarBodega() {
-        String idText = bodegaIdField.getText();
-        bodegaEncontrada = null;
-        bodegaNombreField.setText("");
-        try {
-            Long id = Long.parseLong(idText);
-            var bodegasController = diContainer.getBodegasController();
-            bodegaEncontrada = bodegasController.buscarPorId(id);
-            if (bodegaEncontrada != null) {
-                bodegaNombreField.setText(bodegaEncontrada.getNombre());
-            } else {
-                bodegaNombreField.setText("No encontrada");
-            }
-        } catch (Exception ex) {
-            bodegaNombreField.setText("ID inválido");
-        }
+        campoNombreProducto.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoNombreProducto.setMinimumSize(new Dimension(anchoCampo, altoCampo));
+        campoNombreProducto.setPreferredSize(new Dimension(anchoCampo, altoCampo));
+        panel.add(campoNombreProducto, gbc);
+        return panel;
     }
 
     private JPanel crearPanelBotones(boolean esActualizacion) {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton guardarBtn = new JButton(esActualizacion ? "Actualizar" : "Guardar");
-        guardarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        guardarBtn.setFocusPainted(false);
-        guardarBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        guardarBtn.addActionListener(e -> guardarItem(esActualizacion));
-        buttonPanel.add(guardarBtn);
-        JButton cancelarBtn = new JButton("Cancelar");
-        cancelarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        cancelarBtn.setFocusPainted(false);
-        cancelarBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        cancelarBtn.addActionListener(e -> dispose());
-        buttonPanel.add(cancelarBtn);
-        return buttonPanel;
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton botonGuardar = new JButton(esActualizacion ? "Actualizar" : "Guardar");
+        botonGuardar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonGuardar.setFocusPainted(false);
+        botonGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        botonGuardar.addActionListener(e -> guardarItem(esActualizacion));
+        panel.add(botonGuardar);
+        JButton botonCancelar = new JButton("Cancelar");
+        botonCancelar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonCancelar.setFocusPainted(false);
+        botonCancelar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        botonCancelar.addActionListener(e -> dispose());
+        panel.add(botonCancelar);
+        return panel;
     }
 
     private void guardarItem(boolean esActualizacion) {
@@ -246,22 +237,21 @@ public class RegistrarItem extends JDialog {
         if (esActualizacion && itemOriginal != null) {
             itemRegistrado.setItemId(itemOriginal.getItemId());
         }
-        itemRegistrado.setCodigo(codigoField.getText());
-        itemRegistrado.setNombre(nombreField.getText());
-        itemRegistrado.setDescripcion(descripcionField.getText());
-        itemRegistrado.setCategoria(categoriaField.getText());
+        itemRegistrado.setCodigo(campoCodigo.getText());
+        itemRegistrado.setNombre(campoNombre.getText());
+        itemRegistrado.setDescripcion(campoDescripcion.getText());
+        itemRegistrado.setCategoria(campoCategoria.getText());
         try {
-            itemRegistrado.setPrecioUnitario(Double.parseDouble(precioUnitarioField.getText()));
+            itemRegistrado.setPrecioUnitario(Double.parseDouble(campoPrecioUnitario.getText()));
         } catch (NumberFormatException e) {
             itemRegistrado.setPrecioUnitario(0.0);
         }
         try {
-            itemRegistrado.setStock(Integer.parseInt(stockField.getText()));
+            itemRegistrado.setStock(Integer.parseInt(campoStock.getText()));
         } catch (NumberFormatException e) {
             itemRegistrado.setStock(0);
         }
-        itemRegistrado.setEstaActivo(activoCheckBox.isSelected());
-        // Asignar producto correctamente
+        itemRegistrado.setEstaActivo(cajaActiva.isSelected());
         if (productoEncontrado != null) {
             itemRegistrado.setProducto(productoEncontrado);
         } else if (esActualizacion && itemOriginal != null && itemOriginal.getProducto() != null) {
@@ -271,45 +261,44 @@ public class RegistrarItem extends JDialog {
             itemRegistrado.setBodega(bodegaEncontrada);
         }
         if (esActualizacion) {
-            listener.actualizarItems(itemRegistrado);
+            oyente.actualizarItems(itemRegistrado);
         } else {
-            listener.crearItems(itemRegistrado);
+            oyente.crearItems(itemRegistrado);
         }
         dispose();
     }
 
     private void precargarDatos(ItemEntity item) {
-        codigoField.setText(item.getCodigo());
-        nombreField.setText(item.getNombre());
-        descripcionField.setText(item.getDescripcion());
-        categoriaField.setText(item.getCategoria());
-        precioUnitarioField.setText(String.valueOf(item.getPrecioUnitario()));
-        stockField.setText(String.valueOf(item.getStock()));
-        activoCheckBox.setSelected(item.isEstaActivo());
+        campoCodigo.setText(item.getCodigo());
+        campoNombre.setText(item.getNombre());
+        campoDescripcion.setText(item.getDescripcion());
+        campoCategoria.setText(item.getCategoria());
+        campoPrecioUnitario.setText(String.valueOf(item.getPrecioUnitario()));
+        campoStock.setText(String.valueOf(item.getStock()));
+        cajaActiva.setSelected(item.isEstaActivo());
         if (item.getProducto() != null) {
-            codigoProductoField.setText(item.getProducto().getCodigo());
-            nombreProductoField.setText(item.getProducto().getNombre());
+            campoCodigoProducto.setText(item.getProducto().getCodigo());
+            campoNombreProducto.setText(item.getProducto().getNombre());
         }
         if (item.getBodega() != null) {
-            bodegaIdField.setText(String.valueOf(item.getBodega().getBodegaId()));
-            bodegaNombreField.setText(item.getBodega().getNombre());
+            campoBodegaId.setText(String.valueOf(item.getBodega().getBodegaId()));
+            campoBodegaNombre.setText(item.getBodega().getNombre());
             bodegaEncontrada = item.getBodega();
         }
-        // Ya no se deja en solo lectura, todos los campos quedan editables
     }
 
-    private void aplicarFiltroMayusculas(JTextField field) {
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter() {
+    private void aplicarFiltroMayusculas(JTextField campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
-            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                if (string != null) {
-                    super.insertString(fb, offset, string.toUpperCase(), attr);
+            public void insertString(FilterBypass fb, int offset, String cadena, AttributeSet attr) throws BadLocationException {
+                if (cadena != null) {
+                    super.insertString(fb, offset, cadena.toUpperCase(), attr);
                 }
             }
             @Override
-            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                if (text != null) {
-                    super.replace(fb, offset, length, text.toUpperCase(), attrs);
+            public void replace(FilterBypass fb, int offset, int length, String texto, AttributeSet attrs) throws BadLocationException {
+                if (texto != null) {
+                    super.replace(fb, offset, length, texto.toUpperCase(), attrs);
                 }
             }
         });
@@ -320,22 +309,54 @@ public class RegistrarItem extends JDialog {
     }
 
     {
-        codigoField = new JTextField();
-        nombreField = new JTextField();
-        descripcionField = new JTextField();
-        precioUnitarioField = new JTextField();
-        stockField = new JTextField();
-        categoriaField = new JTextField();
-        activoCheckBox = new JCheckBox("Activo", true);
-        bodegaIdField = new JTextField();
-        bodegaNombreField = new JTextField();
-        bodegaNombreField.setEditable(false);
-        bodegaNombreField.setBackground(new Color(240,240,240));
-        bodegaIdField.addActionListener(e -> buscarBodega());
-        codigoProductoField = new JTextField();
-        nombreProductoField = new JTextField();
-        nombreProductoField.setEditable(false);
-        nombreProductoField.setBackground(new Color(240,240,240));
-        codigoProductoField.addActionListener(e -> buscarProductoPorCodigo());
+        campoCodigo = new JTextField();
+        campoNombre = new JTextField();
+        campoDescripcion = new JTextField();
+        campoPrecioUnitario = new JTextField();
+        campoStock = new JTextField();
+        campoCategoria = new JTextField();
+        cajaActiva = new JCheckBox("Activo", true);
+        campoBodegaId = new JTextField();
+        campoBodegaNombre = new JTextField();
+        campoBodegaNombre.setEditable(false);
+        campoBodegaNombre.setBackground(new Color(240,240,240));
+        campoBodegaId.addActionListener(e -> buscarBodega());
+        campoCodigoProducto = new JTextField();
+        campoNombreProducto = new JTextField();
+        campoNombreProducto.setEditable(false);
+        campoNombreProducto.setBackground(new Color(240,240,240));
+        campoCodigoProducto.addActionListener(e -> buscarProductoPorCodigo());
+    }
+
+    private void buscarProductoPorCodigo() {
+        String codigo = campoCodigoProducto.getText().trim();
+        if (!codigo.isEmpty()) {
+            productoEncontrado = productosController.buscarPorCodigo(codigo);
+            if (productoEncontrado != null) {
+                campoNombreProducto.setText(productoEncontrado.getNombre());
+            } else {
+                campoNombreProducto.setText("No encontrado");
+            }
+        } else {
+            campoNombreProducto.setText("");
+        }
+    }
+
+    private void buscarBodega() {
+        String idText = campoBodegaId.getText();
+        bodegaEncontrada = null;
+        campoBodegaNombre.setText("");
+        try {
+            Long id = Long.parseLong(idText);
+            var bodegasController = contenedorDI.getBodegasController();
+            bodegaEncontrada = bodegasController.buscarPorId(id);
+            if (bodegaEncontrada != null) {
+                campoBodegaNombre.setText(bodegaEncontrada.getNombre());
+            } else {
+                campoBodegaNombre.setText("No encontrada");
+            }
+        } catch (Exception ex) {
+            campoBodegaNombre.setText("ID inválido");
+        }
     }
 }

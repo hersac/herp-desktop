@@ -17,79 +17,80 @@ import java.awt.*;
 import java.util.List;
 
 public class GestionProveedores extends JPanel implements ProveedorListeners {
-    private final ProveedoresController proveedoresController;
-    private final TercerosController tercerosController;
-    private final ProveedoresTable tablaProveedoresTable;
-    private List<ProveedorEntity> listaCompletaProveedores;
-    private FiltroProveedoresForm filtrosForm;
-    private JTextField searchField;
+    private final ProveedoresController controladorProveedores;
+    private final TercerosController controladorTerceros;
+    private final ProveedoresTable tablaProveedores;
+    private List<ProveedorEntity> listaProveedores;
+    private FiltroProveedoresForm filtros;
+    private JTextField campoBusqueda;
 
-    public GestionProveedores(DIContainer diContainer) {
-        this.proveedoresController = diContainer.getProveedoresController();
-        this.tercerosController = diContainer.getTercerosController();
-        this.tablaProveedoresTable = new ProveedoresTable();
-        this.tablaProveedoresTable.setActionListener(this);
+    public GestionProveedores(DIContainer contenedorDI) {
+        this.controladorProveedores = contenedorDI.getProveedoresController();
+        this.controladorTerceros = contenedorDI.getTercerosController();
+        this.tablaProveedores = new ProveedoresTable();
+        this.tablaProveedores.setActionListener(this);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
-        JLabel titleLabel = new JLabel("Gestión de Proveedores");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
-        filtrosForm = new FiltroProveedoresForm();
-        filtrosForm.setOnFiltrosCambiados(this::filtrarProveedores);
-        searchField = new JTextField(25);
-        searchField.setMaximumSize(new Dimension(400, 30));
-        searchField.setAlignmentX(CENTER_ALIGNMENT);
-        searchField.addKeyListener(new java.awt.event.KeyAdapter() {
+        JLabel etiquetaTitulo = new JLabel("Gestión de Proveedores");
+        etiquetaTitulo.setFont(new Font("Roboto", Font.BOLD, 24));
+        etiquetaTitulo.setAlignmentX(CENTER_ALIGNMENT);
+        filtros = new FiltroProveedoresForm();
+        filtros.establecerAlCambiarFiltros(this::filtrarProveedores);
+        campoBusqueda = new JTextField(25);
+        campoBusqueda.setMaximumSize(new Dimension(400, 30));
+        campoBusqueda.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBusqueda.setAlignmentX(CENTER_ALIGNMENT);
+        campoBusqueda.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
                 filtrarProveedores();
             }
         });
-        JButton registrarBtn = new JButton("Registrar Proveedor");
+        JButton botonRegistrar = new JButton("Registrar Proveedor");
         FontIcon icono = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.setIcon(icono);
-        registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
-        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.addActionListener(e -> mostrarRegistrarProveedor());
-        add(titleLabel);
+        botonRegistrar.setIcon(icono);
+        botonRegistrar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonRegistrar.setBackground(ColorsTheme.PRIMARY.get());
+        botonRegistrar.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        botonRegistrar.addActionListener(e -> mostrarRegistrarProveedor());
+        add(etiquetaTitulo);
         add(Box.createVerticalStrut(10));
-        add(filtrosForm);
+        add(filtros);
         add(Box.createVerticalStrut(10));
-        JPanel panelBtnTabla = new JPanel();
-        panelBtnTabla.setLayout(new BoxLayout(panelBtnTabla, BoxLayout.X_AXIS));
-        panelBtnTabla.setOpaque(false);
-        panelBtnTabla.setMaximumSize(new Dimension(900, 40));
-        panelBtnTabla.setPreferredSize(new Dimension(900, 40));
-        panelBtnTabla.add(searchField);
-        panelBtnTabla.add(Box.createHorizontalGlue());
-        panelBtnTabla.add(registrarBtn);
-        JScrollPane scrollPane = new JScrollPane(tablaProveedoresTable);
+        JPanel panelBusquedaBoton = new JPanel();
+        panelBusquedaBoton.setLayout(new BoxLayout(panelBusquedaBoton, BoxLayout.X_AXIS));
+        panelBusquedaBoton.setOpaque(false);
+        panelBusquedaBoton.setMaximumSize(new Dimension(1200, 40));
+        panelBusquedaBoton.setPreferredSize(new Dimension(1200, 40));
+        panelBusquedaBoton.add(campoBusqueda);
+        panelBusquedaBoton.add(Box.createHorizontalGlue());
+        panelBusquedaBoton.add(botonRegistrar);
+        JScrollPane scrollPane = new JScrollPane(tablaProveedores);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setPreferredSize(new Dimension(900, 400));
-        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
-        add(panelBtnTabla);
+        scrollPane.setPreferredSize(new Dimension(1200, 400));
+        scrollPane.setMaximumSize(new Dimension(1200, Integer.MAX_VALUE));
+        add(panelBusquedaBoton);
         add(Box.createVerticalStrut(10));
         add(scrollPane);
         cargarProveedores();
     }
 
     private void mostrarRegistrarProveedor() {
-        RegistrarProveedor dialog = new RegistrarProveedor(null, this, null, tercerosController);
-        dialog.setVisible(true);
+        RegistrarProveedor dialogo = new RegistrarProveedor(null, this, null, controladorTerceros);
+        dialogo.setVisible(true);
     }
 
     private void cargarProveedores() {
-        listaCompletaProveedores = proveedoresController.buscarTodos();
+        listaProveedores = controladorProveedores.buscarTodos();
         filtrarProveedores();
     }
 
     private void filtrarProveedores() {
-        String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
-        String estado = filtrosForm.getEstadoSeleccionado();
-        List<ProveedorEntity> filtrados = listaCompletaProveedores.stream()
+        String texto = campoBusqueda.getText() != null ? campoBusqueda.getText().toLowerCase().trim() : "";
+        String estado = filtros.obtenerEstadoSeleccionado();
+        List<ProveedorEntity> filtrados = listaProveedores.stream()
             .filter(p -> {
                 String nombre = p.getTercero() != null && p.getTercero().getNombre() != null ? p.getTercero().getNombre().toLowerCase() : "";
                 String id = p.getProveedorId() != null ? p.getProveedorId().toString() : "";
@@ -100,23 +101,23 @@ public class GestionProveedores extends JPanel implements ProveedorListeners {
                 return coincideTexto && coincideEstado;
             })
             .toList();
-        tablaProveedoresTable.setProveedores(filtrados);
+        tablaProveedores.setProveedores(filtrados);
     }
 
     @Override
     public void crearProveedor(ProveedorEntity proveedor) {
-        proveedoresController.crear(proveedor);
+        controladorProveedores.crear(proveedor);
         cargarProveedores();
     }
     @Override
     public void verProveedor(ProveedorEntity proveedor) {
-        RegistrarProveedor dialog = new RegistrarProveedor(null, this, proveedor, tercerosController);
-        dialog.setVisible(true);
+        RegistrarProveedor dialogo = new RegistrarProveedor(null, this, proveedor, controladorTerceros);
+        dialogo.setVisible(true);
     }
 
     @Override
     public void actualizarProveedor(ProveedorEntity proveedor) {
-        proveedoresController.actualizar(proveedor.getProveedorId(), proveedor);
+        controladorProveedores.actualizar(proveedor.getProveedorId(), proveedor);
         cargarProveedores();
         JOptionPane.showMessageDialog(this,
                 "Proveedor actualizado exitosamente.",
@@ -125,11 +126,11 @@ public class GestionProveedores extends JPanel implements ProveedorListeners {
 
     @Override
     public void eliminarProveedor(ProveedorEntity proveedor) {
-        int confirm = JOptionPane.showConfirmDialog(this,
+        int confirmacion = JOptionPane.showConfirmDialog(this,
                 "¿Seguro que deseas eliminar al proveedor?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            proveedoresController.eliminar(proveedor.getProveedorId());
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            controladorProveedores.eliminar(proveedor.getProveedorId());
             cargarProveedores();
             JOptionPane.showMessageDialog(this, "Proveedor eliminado correctamente.",
                     "Eliminación exitosa", JOptionPane.INFORMATION_MESSAGE);

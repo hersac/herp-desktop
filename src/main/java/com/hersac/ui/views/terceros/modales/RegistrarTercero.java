@@ -13,128 +13,167 @@ import javax.swing.text.DocumentFilter;
 import java.awt.*;
 
 public class RegistrarTercero extends JDialog {
-    private JTextField idField;
-    private JTextField nombreField;
-    private JComboBox<TiposTerceroEnum> tipoComboBox;
-    private JTextField direccionField;
-    private JTextField telefonoField;
-    private JTextField emailField;
-    private JCheckBox activoCheckBox;
-    private TerceroEntity terceroRegistrado;
-    private final TercerosListeners listener;
+    private JTextField campoId;
+    private JTextField campoNombre;
+    private JComboBox<TiposTerceroEnum> comboTipo;
+    private JTextField campoDireccion;
+    private JTextField campoTelefono;
+    private JTextField campoEmail;
+    private JCheckBox checkActivo;
+    private TerceroEntity tercero;
+    private final TercerosListeners escuchador;
     private final boolean esEdicion;
 
-    public RegistrarTercero(JFrame parent, TercerosListeners listener, TerceroEntity terceroParaEditar) {
-        super(parent, terceroParaEditar != null ? "Actualizar Tercero" : "Registrar Tercero", true);
-        this.listener = listener;
-        this.terceroRegistrado = terceroParaEditar;
-        this.esEdicion = terceroParaEditar != null;
-        initComponents();
+    public RegistrarTercero(JFrame padre, TercerosListeners escuchador, TerceroEntity terceroEditar) {
+        super(padre, terceroEditar != null ? "Actualizar Tercero" : "Registrar Tercero", true);
+        this.escuchador = escuchador;
+        this.tercero = terceroEditar;
+        this.esEdicion = terceroEditar != null;
+        inicializarComponentes();
     }
 
-    private void initComponents() {
+    private void inicializarComponentes() {
         setSize(400, 400);
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
-        JPanel formPanel = new JPanel(new GridLayout(7, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        idField = new JTextField();
-        nombreField = new JTextField();
-        aplicarFiltroMayusculas(nombreField);
-        tipoComboBox = new JComboBox<>();
-        for (TiposTerceroEnum tipo : TiposTerceroEnum.values()) {
-            tipoComboBox.addItem(tipo);
-        }
-        tipoComboBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                if (value instanceof TiposTerceroEnum) {
-                    value = ((TiposTerceroEnum) value).getNombre();
-                }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-        });
-        direccionField = new JTextField();
-        telefonoField = new JTextField();
-        emailField = new JTextField();
-        aplicarFiltroMinusculas(emailField);
-        activoCheckBox = new JCheckBox("Activo", true);
-        formPanel.add(new JLabel("ID:"));
-        formPanel.add(idField);
-        formPanel.add(new JLabel("Nombre:"));
-        formPanel.add(nombreField);
-        formPanel.add(new JLabel("Tipo de Persona:"));
-        formPanel.add(tipoComboBox);
-        formPanel.add(new JLabel("Dirección:"));
-        formPanel.add(direccionField);
-        formPanel.add(new JLabel("Teléfono:"));
-        formPanel.add(telefonoField);
-        formPanel.add(new JLabel("Email:"));
-        formPanel.add(emailField);
-        formPanel.add(new JLabel("¿Está activo?:"));
-        formPanel.add(activoCheckBox);
-        if (esEdicion && terceroRegistrado != null) {
-            cargarDatosEdicion();
-        }
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton guardarBtn = new JButton(esEdicion ? "Actualizar" : "Guardar");
-        JButton cancelarBtn = new JButton("Cancelar");
-        guardarBtn.addActionListener(e -> guardarTercero());
-        cancelarBtn.addActionListener(e -> dispose());
-        buttonPanel.add(guardarBtn);
-        buttonPanel.add(cancelarBtn);
-        add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
-        boolean puedeEditar = true;
-        idField.setEnabled(!esEdicion && puedeEditar);
-        nombreField.setEnabled(puedeEditar);
-        tipoComboBox.setEnabled(puedeEditar);
-        direccionField.setEnabled(puedeEditar);
-        telefonoField.setEnabled(puedeEditar);
-        emailField.setEnabled(puedeEditar);
-        activoCheckBox.setEnabled(puedeEditar);
-        guardarBtn.setEnabled(puedeEditar);
+        JPanel panelFormulario = crearPanelFormulario();
+        JPanel panelBotones = crearPanelBotones();
+        add(panelFormulario, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
+        configurarEdicion();
         setVisible(true);
     }
 
+    private JPanel crearPanelFormulario() {
+        JPanel panel = new JPanel(new GridLayout(7, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        Font fuente = new Font("Roboto", Font.PLAIN, 14);
+        inicializarCampos(fuente);
+        agregarCamposAlPanel(panel, fuente);
+        if (esEdicion && tercero != null) {
+            cargarDatosEdicion();
+        }
+        return panel;
+    }
+
+    private void inicializarCampos(Font fuente) {
+        campoId = new JTextField();
+        campoId.setFont(fuente);
+        campoNombre = new JTextField();
+        campoNombre.setFont(fuente);
+        aplicarFiltroMayusculas(campoNombre);
+        comboTipo = new JComboBox<>();
+        for (TiposTerceroEnum tipo : TiposTerceroEnum.values()) {
+            comboTipo.addItem(tipo);
+        }
+        comboTipo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof TiposTerceroEnum) {
+                    value = ((TiposTerceroEnum) value).getNombre();
+                }
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index,
+                        isSelected, cellHasFocus);
+                label.setFont(fuente);
+                return label;
+            }
+        });
+        campoDireccion = new JTextField();
+        campoDireccion.setFont(fuente);
+        campoTelefono = new JTextField();
+        campoTelefono.setFont(fuente);
+        campoEmail = new JTextField();
+        campoEmail.setFont(fuente);
+        aplicarFiltroMinusculas(campoEmail);
+        checkActivo = new JCheckBox("Activo", true);
+        checkActivo.setFont(fuente);
+    }
+
+    private void agregarCamposAlPanel(JPanel panel, Font fuente) {
+        panel.add(crearLabel("ID:", fuente));
+        panel.add(campoId);
+        panel.add(crearLabel("Nombre:", fuente));
+        panel.add(campoNombre);
+        panel.add(crearLabel("Tipo de Persona:", fuente));
+        panel.add(comboTipo);
+        panel.add(crearLabel("Dirección:", fuente));
+        panel.add(campoDireccion);
+        panel.add(crearLabel("Teléfono:", fuente));
+        panel.add(campoTelefono);
+        panel.add(crearLabel("Email:", fuente));
+        panel.add(campoEmail);
+        panel.add(crearLabel("¿Está activo?:", fuente));
+        panel.add(checkActivo);
+    }
+
+    private JLabel crearLabel(String texto, Font fuente) {
+        JLabel label = new JLabel(texto);
+        label.setFont(fuente);
+        return label;
+    }
+
+    private JPanel crearPanelBotones() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton botonGuardar = new JButton(esEdicion ? "Actualizar" : "Guardar");
+        JButton botonCancelar = new JButton("Cancelar");
+        botonGuardar.addActionListener(e -> guardarTercero());
+        botonCancelar.addActionListener(e -> dispose());
+        panel.add(botonGuardar);
+        panel.add(botonCancelar);
+        botonGuardar.setEnabled(true);
+        return panel;
+    }
+
+    private void configurarEdicion() {
+        campoId.setEnabled(!esEdicion);
+        campoNombre.setEnabled(true);
+        comboTipo.setEnabled(true);
+        campoDireccion.setEnabled(true);
+        campoTelefono.setEnabled(true);
+        campoEmail.setEnabled(true);
+        checkActivo.setEnabled(true);
+    }
+
     private void cargarDatosEdicion() {
-        idField.setText(terceroRegistrado.getTerceroId());
-        idField.setEnabled(false);
-        nombreField.setText(terceroRegistrado.getNombre());
-        tipoComboBox.setSelectedItem(TiposTerceroEnum.fromId(terceroRegistrado.getTipoPersona().getTipoPersonaId()));
-        direccionField.setText(terceroRegistrado.getDireccion());
-        telefonoField.setText(terceroRegistrado.getTelefono());
-        emailField.setText(terceroRegistrado.getEmail());
-        activoCheckBox.setSelected("Activo".equalsIgnoreCase(terceroRegistrado.getEstado()));
+        campoId.setText(tercero.getTerceroId());
+        campoId.setEnabled(false);
+        campoNombre.setText(tercero.getNombre());
+        comboTipo.setSelectedItem(TiposTerceroEnum.fromId(tercero.getTipoPersona().getTipoPersonaId()));
+        campoDireccion.setText(tercero.getDireccion());
+        campoTelefono.setText(tercero.getTelefono());
+        campoEmail.setText(tercero.getEmail());
+        checkActivo.setSelected("Activo".equalsIgnoreCase(tercero.getEstado()));
     }
 
     private void guardarTercero() {
-        if (terceroRegistrado == null) {
-            terceroRegistrado = new TerceroEntity();
+        if (tercero == null) {
+            tercero = new TerceroEntity();
         }
         if (!esEdicion) {
-            terceroRegistrado.setTerceroId(idField.getText());
+            tercero.setTerceroId(campoId.getText());
         }
-        terceroRegistrado.setNombre(nombreField.getText());
-        TiposTerceroEnum tipoSeleccionado = (TiposTerceroEnum) tipoComboBox.getSelectedItem();
+        tercero.setNombre(campoNombre.getText());
+        TiposTerceroEnum tipoSeleccionado = (TiposTerceroEnum) comboTipo.getSelectedItem();
         TipoPersonaEntity tipoPersona = new TipoPersonaEntity();
         tipoPersona.setTipoPersonaId(tipoSeleccionado != null ? tipoSeleccionado.getId() : null);
-        terceroRegistrado.setTipoPersona(tipoPersona);
-        terceroRegistrado.setDireccion(direccionField.getText());
-        terceroRegistrado.setTelefono(telefonoField.getText());
-        terceroRegistrado.setEmail(emailField.getText());
-        terceroRegistrado.setEstado(activoCheckBox.isSelected() ? "Activo" : "Inactivo");
+        tercero.setTipoPersona(tipoPersona);
+        tercero.setDireccion(campoDireccion.getText());
+        tercero.setTelefono(campoTelefono.getText());
+        tercero.setEmail(campoEmail.getText());
+        tercero.setEstado(checkActivo.isSelected() ? "Activo" : "Inactivo");
         if (!esEdicion) {
-            listener.crearTercero(terceroRegistrado);
-        } else {
-            listener.actualizarTercero(terceroRegistrado);
+            escuchador.crearTercero(tercero);
+        }
+        if (esEdicion) {
+            escuchador.actualizarTercero(tercero);
         }
         dispose();
     }
 
-    private void aplicarFiltroMayusculas(JTextField field) {
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter() {
+    private void aplicarFiltroMayusculas(JTextField campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
                 if (string != null) {
@@ -150,8 +189,8 @@ public class RegistrarTercero extends JDialog {
         });
     }
 
-    private void aplicarFiltroMinusculas(JTextField field) {
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter() {
+    private void aplicarFiltroMinusculas(JTextField campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
                 if (string != null) {
@@ -167,7 +206,7 @@ public class RegistrarTercero extends JDialog {
         });
     }
 
-    public TerceroEntity getTerceroRegistrado() {
-        return terceroRegistrado;
+    public TerceroEntity getTercero() {
+        return tercero;
     }
 }

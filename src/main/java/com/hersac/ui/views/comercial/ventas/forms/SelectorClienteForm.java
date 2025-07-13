@@ -5,34 +5,44 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class SelectorClienteForm extends JPanel {
-    private JTextField clienteIdField;
-    private JTextField clienteNombreField;
-    private JButton buscarClienteBtn;
+    private JTextField campoIdCliente;
+    private JTextField campoNombreCliente;
+    private JButton botonBuscarCliente;
 
     public SelectorClienteForm() {
         setLayout(new FlowLayout(FlowLayout.LEFT));
         setBorder(BorderFactory.createTitledBorder("Seleccionar Cliente"));
-        add(new JLabel("Cédula del cliente:"));
-        clienteIdField = new JTextField(10);
-        add(clienteIdField);
-        add(new JLabel("Nombre:"));
-        clienteNombreField = new JTextField(30);
-        clienteNombreField.setEditable(false);
-        add(clienteNombreField);
-        buscarClienteBtn = new JButton("Buscar");
-        add(buscarClienteBtn);
+        JLabel etiquetaId = new JLabel("Cédula del cliente:");
+        etiquetaId.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(etiquetaId);
+        campoIdCliente = new JTextField(10);
+        campoIdCliente.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(campoIdCliente);
+        JLabel etiquetaNombre = new JLabel("Nombre:");
+        etiquetaNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(etiquetaNombre);
+        campoNombreCliente = new JTextField(30);
+        campoNombreCliente.setEditable(false);
+        campoNombreCliente.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(campoNombreCliente);
+        botonBuscarCliente = new JButton("Buscar");
+        botonBuscarCliente.setFont(new Font("Roboto", Font.BOLD, 14));
+        add(botonBuscarCliente);
     }
 
+    public void setFuenteRoboto() {
+        setFont(new Font("Roboto", Font.PLAIN, 14));
+    }
     public void setClienteNombre(String nombre) {
-        clienteNombreField.setText(nombre);
+        campoNombreCliente.setText(nombre);
     }
     public String getClienteId() {
-        return clienteIdField.getText();
+        return campoIdCliente.getText();
     }
     public void setClienteId(String id) {
-        clienteIdField.setText(id);
+        campoIdCliente.setText(id);
     }
     public void addBuscarListener(ActionListener listener) {
-        buscarClienteBtn.addActionListener(listener);
+        botonBuscarCliente.addActionListener(listener);
     }
 }

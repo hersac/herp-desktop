@@ -8,142 +8,144 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 
 public class FiltrosMovimientosForm extends JPanel {
-    private JComboBox<String> tipoMovimientoCombo;
-    private JComboBox<String> productoCombo;
-    private JComboBox<String> bodegaCombo;
-    private JComboBox<String> usuarioCombo;
-    private JComboBox<String> tipoReferenciaCombo;
-    private DatePicker fechaDesdePicker;
-    private DatePicker fechaHastaPicker;
-    private Runnable onFiltrosCambiados;
+    private JComboBox<String> comboTipoMovimiento;
+    private JComboBox<String> comboProducto;
+    private JComboBox<String> comboBodega;
+    private JComboBox<String> comboUsuario;
+    private JComboBox<String> comboTipoReferencia;
+    private DatePicker selectorFechaDesde;
+    private DatePicker selectorFechaHasta;
+    private Runnable alCambiarFiltros;
 
     public FiltrosMovimientosForm() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
-        JPanel filtrosPanel = new JPanel(new GridBagLayout());
-        filtrosPanel.setOpaque(false);
+        JPanel panelFiltros = new JPanel(new GridBagLayout());
+        panelFiltros.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
         gbc.gridy = 0;
-        // Fecha desde
-        DatePickerSettings desdeSettings = createDateSettings();
-        fechaDesdePicker = new DatePicker(desdeSettings);
-        fechaDesdePicker.setPreferredSize(new Dimension(120, 28));
-        fechaDesdePicker.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
-        fechaDesdePicker.addDateChangeListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 0, "Desde:", fechaDesdePicker);
-        // Fecha hasta
-        DatePickerSettings hastaSettings = createDateSettings();
-        fechaHastaPicker = new DatePicker(hastaSettings);
-        fechaHastaPicker.setPreferredSize(new Dimension(120, 28));
-        fechaHastaPicker.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
-        fechaHastaPicker.addDateChangeListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 1, "Hasta:", fechaHastaPicker);
-        // Tipo movimiento
-        tipoMovimientoCombo = new JComboBox<>(new String[] {"Todos", "ENTRADA", "SALIDA"});
-        tipoMovimientoCombo.setPreferredSize(new Dimension(120, 28));
-        tipoMovimientoCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 2, "Tipo Movimiento:", tipoMovimientoCombo);
-        // Producto
-        productoCombo = new JComboBox<>(new String[] {"Todos"});
-        productoCombo.setPreferredSize(new Dimension(180, 28));
-        productoCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 3, "Producto:", productoCombo);
-        // Bodega
-        bodegaCombo = new JComboBox<>(new String[] {"Todas"});
-        bodegaCombo.setPreferredSize(new Dimension(180, 28));
-        bodegaCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 4, "Bodega:", bodegaCombo);
-        // Usuario
-        usuarioCombo = new JComboBox<>(new String[] {"Todos"});
-        usuarioCombo.setPreferredSize(new Dimension(180, 28));
-        usuarioCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 5, "Usuario:", usuarioCombo);
-        // Tipo referencia
-        tipoReferenciaCombo = new JComboBox<>(new String[] {"Todos", "COMPRA", "VENTA"});
-        tipoReferenciaCombo.setPreferredSize(new Dimension(120, 28));
-        tipoReferenciaCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 6, "Referencia:", tipoReferenciaCombo);
+        DatePickerSettings desdeSettings = crearConfiguracionFecha();
+        selectorFechaDesde = new DatePicker(desdeSettings);
+        selectorFechaDesde.setPreferredSize(new Dimension(120, 28));
+        selectorFechaDesde.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
+        selectorFechaDesde.addDateChangeListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 0, "Desde:", selectorFechaDesde);
+        DatePickerSettings hastaSettings = crearConfiguracionFecha();
+        selectorFechaHasta = new DatePicker(hastaSettings);
+        selectorFechaHasta.setPreferredSize(new Dimension(120, 28));
+        selectorFechaHasta.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
+        selectorFechaHasta.addDateChangeListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 1, "Hasta:", selectorFechaHasta);
+        comboTipoMovimiento = new JComboBox<>(new String[] {"Todos", "ENTRADA", "SALIDA"});
+        comboTipoMovimiento.setPreferredSize(new Dimension(120, 28));
+        comboTipoMovimiento.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboTipoMovimiento.addActionListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 2, "Tipo Movimiento:", comboTipoMovimiento);
+        comboProducto = new JComboBox<>(new String[] {"Todos"});
+        comboProducto.setPreferredSize(new Dimension(180, 28));
+        comboProducto.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboProducto.addActionListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 3, "Producto:", comboProducto);
+        comboBodega = new JComboBox<>(new String[] {"Todas"});
+        comboBodega.setPreferredSize(new Dimension(180, 28));
+        comboBodega.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboBodega.addActionListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 4, "Bodega:", comboBodega);
+        comboUsuario = new JComboBox<>(new String[] {"Todos"});
+        comboUsuario.setPreferredSize(new Dimension(180, 28));
+        comboUsuario.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboUsuario.addActionListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 5, "Usuario:", comboUsuario);
+        comboTipoReferencia = new JComboBox<>(new String[] {"Todos", "COMPRA", "VENTA"});
+        comboTipoReferencia.setPreferredSize(new Dimension(120, 28));
+        comboTipoReferencia.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboTipoReferencia.addActionListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 6, "Referencia:", comboTipoReferencia);
         add(Box.createVerticalStrut(10));
-        add(filtrosPanel);
+        add(panelFiltros);
     }
 
-    private void addFiltro(JPanel panel, GridBagConstraints gbc, int x, String labelText, JComponent component) {
+    private void agregarFiltro(JPanel panel, GridBagConstraints gbc, int x, String textoEtiqueta, JComponent componente) {
         gbc.gridx = x * 2;
-        JLabel label = new JLabel(labelText);
-        label.setPreferredSize(new Dimension(90, 28));
-        panel.add(label, gbc);
+        JLabel etiqueta = new JLabel(textoEtiqueta);
+        etiqueta.setPreferredSize(new Dimension(90, 28));
+        etiqueta.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panel.add(etiqueta, gbc);
         gbc.gridx = x * 2 + 1;
-        panel.add(component, gbc);
+        if (componente instanceof JTextField) {
+            componente.setFont(new Font("Roboto", Font.PLAIN, 14));
+        }
+        panel.add(componente, gbc);
     }
 
-    private DatePickerSettings createDateSettings() {
-        DatePickerSettings settings = new DatePickerSettings();
-        settings.setAllowEmptyDates(true);
-        settings.setFormatForDatesCommonEra("yyyy-MM-dd");
-        settings.setFormatForDatesBeforeCommonEra("yyyy-MM-dd");
-        return settings;
+    private DatePickerSettings crearConfiguracionFecha() {
+        DatePickerSettings configuracion = new DatePickerSettings();
+        configuracion.setAllowEmptyDates(true);
+        configuracion.setFormatForDatesCommonEra("yyyy-MM-dd");
+        configuracion.setFormatForDatesBeforeCommonEra("yyyy-MM-dd");
+        return configuracion;
     }
 
     private void notificarCambio() {
-        if (onFiltrosCambiados != null) {
-            onFiltrosCambiados.run();
+        if (alCambiarFiltros != null) {
+            alCambiarFiltros.run();
         }
     }
 
-    public void setOnFiltrosCambiados(Runnable listener) {
-        this.onFiltrosCambiados = listener;
+    public void establecerAlCambiarFiltros(Runnable listener) {
+        this.alCambiarFiltros = listener;
     }
 
-    public LocalDate getFechaDesde() {
-        return fechaDesdePicker.getDate();
+    public LocalDate obtenerFechaDesde() {
+        return selectorFechaDesde.getDate();
     }
 
-    public LocalDate getFechaHasta() {
-        return fechaHastaPicker.getDate();
+    public LocalDate obtenerFechaHasta() {
+        return selectorFechaHasta.getDate();
     }
 
-    public String getTipoMovimientoSeleccionado() {
-        return (String) tipoMovimientoCombo.getSelectedItem();
+    public String obtenerTipoMovimientoSeleccionado() {
+        return (String) comboTipoMovimiento.getSelectedItem();
     }
 
-    public String getProductoSeleccionado() {
-        return (String) productoCombo.getSelectedItem();
+    public String obtenerProductoSeleccionado() {
+        return (String) comboProducto.getSelectedItem();
     }
 
-    public String getBodegaSeleccionada() {
-        return (String) bodegaCombo.getSelectedItem();
+    public String obtenerBodegaSeleccionada() {
+        return (String) comboBodega.getSelectedItem();
     }
 
-    public String getUsuarioSeleccionado() {
-        return (String) usuarioCombo.getSelectedItem();
+    public String obtenerUsuarioSeleccionado() {
+        return (String) comboUsuario.getSelectedItem();
     }
 
-    public String getTipoReferenciaSeleccionado() {
-        return (String) tipoReferenciaCombo.getSelectedItem();
+    public String obtenerTipoReferenciaSeleccionado() {
+        return (String) comboTipoReferencia.getSelectedItem();
     }
 
-    public void setProductos(List<String> productos) {
-        productoCombo.setModel(new DefaultComboBoxModel<>(productos.toArray(new String[0])));
-        productoCombo.insertItemAt("Todos", 0);
-        productoCombo.setSelectedIndex(0);
+    public void establecerProductos(List<String> productos) {
+        comboProducto.setModel(new DefaultComboBoxModel<>(productos.toArray(new String[0])));
+        comboProducto.insertItemAt("Todos", 0);
+        comboProducto.setSelectedIndex(0);
     }
 
-    public void setBodegas(List<String> bodegas) {
-        bodegaCombo.setModel(new DefaultComboBoxModel<>(bodegas.toArray(new String[0])));
-        bodegaCombo.insertItemAt("Todas", 0);
-        bodegaCombo.setSelectedIndex(0);
+    public void establecerBodegas(List<String> bodegas) {
+        comboBodega.setModel(new DefaultComboBoxModel<>(bodegas.toArray(new String[0])));
+        comboBodega.insertItemAt("Todas", 0);
+        comboBodega.setSelectedIndex(0);
     }
 
-    public void setUsuarios(List<String> usuarios) {
-        usuarioCombo.setModel(new DefaultComboBoxModel<>(usuarios.toArray(new String[0])));
-        usuarioCombo.insertItemAt("Todos", 0);
-        usuarioCombo.setSelectedIndex(0);
+    public void establecerUsuarios(List<String> usuarios) {
+        comboUsuario.setModel(new DefaultComboBoxModel<>(usuarios.toArray(new String[0])));
+        comboUsuario.insertItemAt("Todos", 0);
+        comboUsuario.setSelectedIndex(0);
     }
 
-    public void setReferencias(List<String> referencias) {
-        tipoReferenciaCombo.setModel(new DefaultComboBoxModel<>(referencias.toArray(new String[0])));
-        tipoReferenciaCombo.insertItemAt("Todos", 0);
-        tipoReferenciaCombo.setSelectedIndex(0);
+    public void establecerReferencias(List<String> referencias) {
+        comboTipoReferencia.setModel(new DefaultComboBoxModel<>(referencias.toArray(new String[0])));
+        comboTipoReferencia.insertItemAt("Todos", 0);
+        comboTipoReferencia.setSelectedIndex(0);
     }
 }

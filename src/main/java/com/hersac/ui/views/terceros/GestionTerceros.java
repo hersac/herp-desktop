@@ -5,7 +5,6 @@ import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.core.modules.terceros.entities.TerceroEntity;
 import com.hersac.core.modules.terceros.entities.relations.TipoPersonaEntity;
 import com.hersac.ui.controllers.terceros.TercerosController;
-import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.ui.globals.enums.ColorsTheme;
 import com.hersac.ui.views.terceros.forms.FiltrosTercerosForm;
 import com.hersac.ui.views.terceros.listeners.TercerosListeners;
@@ -21,110 +20,118 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class GestionTerceros extends JPanel implements TercerosListeners {
-    private final TercerosController tercerosController;
-    private final PermissionService permissionService;
-    private JFrame frame = new JFrame("Registrar Tercero");
-    private final TercerosTable tablaTercerosTable;
-    private List<TerceroEntity> listaCompletaTerceros;
-    private FiltrosTercerosForm filtrosForm;
-    private JTextField searchField;
+    private final TercerosController controladorTerceros;
+    private final PermissionService servicioPermisos;
+    private JFrame ventana = new JFrame("Registrar Tercero");
+    private final TercerosTable tablaTerceros;
+    private List<TerceroEntity> listaTerceros;
+    private FiltrosTercerosForm formularioFiltros;
+    private JTextField campoBusqueda;
 
-    public GestionTerceros(DIContainer diContainer) {
-        this.tercerosController = diContainer.getTercerosController();
-        this.permissionService = diContainer.getPermissionService();
-        this.tablaTercerosTable = new TercerosTable(permissionService);
+    public GestionTerceros(DIContainer contenedorDI) {
+        this.controladorTerceros = contenedorDI.getTercerosController();
+        this.servicioPermisos = contenedorDI.getPermissionService();
+        this.tablaTerceros = new TercerosTable(servicioPermisos);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
-        JLabel titleLabel = new JLabel("Gestión de Terceros");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
-        filtrosForm = new FiltrosTercerosForm();
-        filtrosForm.setOnFiltrosCambiados(this::filtrarTerceros);
-        JButton registrarBtn = new JButton("Registrar Tercero");
-        FontIcon iconVer = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
-        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.setIcon(iconVer);
-        registrarBtn.setEnabled(true);
-        registrarBtn.setVisible(true);
-        registrarBtn.addActionListener(e -> {
-            new RegistrarTercero(frame, this, null);
-        });
-        searchField = new JTextField(25);
-        searchField.setMaximumSize(new Dimension(400, 30));
-        searchField.setAlignmentX(CENTER_ALIGNMENT);
-        searchField.addKeyListener(new KeyAdapter() {
+        JLabel etiquetaTitulo = new JLabel("Gestión de Terceros");
+        etiquetaTitulo.setFont(new Font("Roboto", Font.BOLD, 24));
+        etiquetaTitulo.setAlignmentX(CENTER_ALIGNMENT);
+        formularioFiltros = new FiltrosTercerosForm();
+        formularioFiltros.setOnFiltrosCambiados(this::filtrarTerceros);
+        JButton botonRegistrar = new JButton("Registrar Tercero");
+        FontIcon iconoAgregar = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
+        botonRegistrar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonRegistrar.setBackground(ColorsTheme.PRIMARY.get());
+        botonRegistrar.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        botonRegistrar.setIcon(iconoAgregar);
+        botonRegistrar.addActionListener(e -> new RegistrarTercero(ventana, this, null));
+        campoBusqueda = new JTextField(25);
+        campoBusqueda.setMaximumSize(new Dimension(400, 30));
+        campoBusqueda.setAlignmentX(CENTER_ALIGNMENT);
+        campoBusqueda.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBusqueda.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 filtrarTerceros();
             }
         });
-        JPanel panelBtn = new JPanel();
-        panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
-        panelBtn.setOpaque(false);
-        panelBtn.setPreferredSize(new Dimension(900, 40));
-        panelBtn.setMaximumSize(new Dimension(900, 40));
-        panelBtn.add(searchField);
-        panelBtn.add(Box.createHorizontalGlue());
-        panelBtn.add(registrarBtn);
-        JPanel panelBtnExpansible = new JPanel();
-        panelBtnExpansible.setLayout(new BoxLayout(panelBtnExpansible, BoxLayout.X_AXIS));
-        panelBtnExpansible.setOpaque(false);
-        panelBtnExpansible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-        panelBtnExpansible.add(panelBtn);
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-        JScrollPane scrollPane = new JScrollPane(tablaTercerosTable);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setAlignmentX(CENTER_ALIGNMENT);
-        scrollPane.setPreferredSize(new Dimension(900, 400));
-        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
+        JPanel panelBotones = new JPanel();
+        panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.X_AXIS));
+        panelBotones.setOpaque(false);
+        panelBotones.setPreferredSize(new Dimension(900, 40));
+        panelBotones.setMaximumSize(new Dimension(900, 40));
+        panelBotones.add(campoBusqueda);
+        panelBotones.add(Box.createHorizontalGlue());
+        panelBotones.add(botonRegistrar);
+        JPanel panelBotonesExpandible = new JPanel();
+        panelBotonesExpandible.setLayout(new BoxLayout(panelBotonesExpandible, BoxLayout.X_AXIS));
+        panelBotonesExpandible.setOpaque(false);
+        panelBotonesExpandible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBotonesExpandible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBotonesExpandible.add(Box.createHorizontalGlue());
+        panelBotonesExpandible.add(panelBotones);
+        panelBotonesExpandible.add(Box.createHorizontalGlue());
+        JScrollPane panelScroll = new JScrollPane(tablaTerceros);
+        panelScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        panelScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        panelScroll.setAlignmentX(CENTER_ALIGNMENT);
+        panelScroll.setPreferredSize(new Dimension(900, 400));
+        panelScroll.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(titleLabel);
+        add(etiquetaTitulo);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(filtrosForm);
+        add(formularioFiltros);
         add(Box.createRigidArea(new Dimension(0, 100)));
-        add(panelBtnExpansible);
+        add(panelBotonesExpandible);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(scrollPane);
+        add(panelScroll);
         add(Box.createVerticalGlue());
+        this.listaTerceros = obtenerTerceros();
+        tablaTerceros.setTerceros(listaTerceros);
+        tablaTerceros.setEscuchadorTerceros(this);
+        aplicarFuenteRoboto();
+    }
 
-        this.listaCompletaTerceros = obtenerTerceros();
-        tablaTercerosTable.setTerceros(listaCompletaTerceros);
-        tablaTercerosTable.setActionListener(this);
+    private void aplicarFuenteRoboto() {
+        Font fuenteRoboto = new Font("Roboto", Font.PLAIN, 14);
+        for (Component componente : getComponents()) {
+            if (componente instanceof JLabel label) {
+                label.setFont(fuenteRoboto);
+            }
+            if (componente instanceof JTextField textField) {
+                textField.setFont(fuenteRoboto);
+            }
+        }
     }
 
     private void filtrarTerceros() {
-        String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
-        String estado = filtrosForm.getEstadoSeleccionado();
-        TipoPersonaEntity tipoSeleccionado = filtrosForm.getTipoSeleccionado();
-        final Integer tipoIdSeleccionado = (tipoSeleccionado != null) ? tipoSeleccionado.getTipoPersonaId() : null;
-        List<TerceroEntity> filtrados = listaCompletaTerceros.stream()
-            .filter(t -> {
-                String idStr = String.valueOf(t.getTerceroId());
-                String nombre = t.getNombre() != null ? t.getNombre().toLowerCase() : "";
-                String estadoTercero = t.getEstado() != null ? t.getEstado().toLowerCase() : "";
-                Integer tipoId = t.getTipoPersona() != null ? t.getTipoPersona().getTipoPersonaId() : null;
-                String tipoNombre = t.getTipoPersona() != null && t.getTipoPersona().getNombre() != null ? t.getTipoPersona().getNombre().toLowerCase() : "";
+        String texto = campoBusqueda.getText() != null ? campoBusqueda.getText().toLowerCase().trim() : "";
+        String estado = formularioFiltros.getEstadoSeleccionado();
+        TipoPersonaEntity tipoSeleccionado = formularioFiltros.getTipoSeleccionado();
+        Integer tipoIdSeleccionado = tipoSeleccionado != null ? tipoSeleccionado.getTipoPersonaId() : null;
+        List<TerceroEntity> filtrados = listaTerceros.stream()
+            .filter(tercero -> {
+                String idStr = String.valueOf(tercero.getTerceroId());
+                String nombre = tercero.getNombre() != null ? tercero.getNombre().toLowerCase() : "";
+                String estadoTercero = tercero.getEstado() != null ? tercero.getEstado().toLowerCase() : "";
+                Integer tipoId = tercero.getTipoPersona() != null ? tercero.getTipoPersona().getTipoPersonaId() : null;
+                String tipoNombre = tercero.getTipoPersona() != null && tercero.getTipoPersona().getNombre() != null ? tercero.getTipoPersona().getNombre().toLowerCase() : "";
                 boolean coincideTexto = texto.isEmpty() || idStr.contains(texto) || nombre.contains(texto) || estadoTercero.contains(texto) || tipoNombre.contains(texto);
-                boolean coincideEstado = estado.equals("Todos") || estadoTercero.equals(estado.toLowerCase());
+                boolean coincideEstado = "Todos".equals(estado) || estadoTercero.equals(estado.toLowerCase());
                 boolean coincideTipo = tipoIdSeleccionado == null || (tipoId != null && tipoIdSeleccionado.equals(tipoId));
                 return coincideTexto && coincideEstado && coincideTipo;
             })
             .toList();
-        tablaTercerosTable.setTerceros(filtrados);
+        tablaTerceros.setTerceros(filtrados);
     }
 
-    // Métodos de TercerosListeners
     @Override
     public void crearTercero(TerceroEntity tercero) {
-        tercerosController.crear(tercero);
-        this.listaCompletaTerceros = obtenerTerceros();
-        tablaTercerosTable.setTerceros(listaCompletaTerceros);
+        controladorTerceros.crear(tercero);
+        this.listaTerceros = obtenerTerceros();
+        tablaTerceros.setTerceros(listaTerceros);
         JOptionPane.showMessageDialog(this,
                 "Tercero creado exitosamente:\n\nNombre: " + tercero.getNombre() + "\nID: " + tercero.getTerceroId(),
                 "Tercero Creado", JOptionPane.INFORMATION_MESSAGE);
@@ -132,14 +139,14 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
 
     @Override
     public void verTercero(TerceroEntity tercero) {
-        new com.hersac.ui.views.terceros.modales.RegistrarTercero(frame, this, tercero);
+        new RegistrarTercero(ventana, this, tercero);
     }
 
     @Override
     public void actualizarTercero(TerceroEntity tercero) {
-        tercerosController.actualizar(tercero.getTerceroId(), tercero);
-        this.listaCompletaTerceros = obtenerTerceros();
-        tablaTercerosTable.setTerceros(listaCompletaTerceros);
+        controladorTerceros.actualizar(tercero.getTerceroId(), tercero);
+        this.listaTerceros = obtenerTerceros();
+        tablaTerceros.setTerceros(listaTerceros);
         JOptionPane.showMessageDialog(this,
                 "Tercero actualizado exitosamente:\n\nNombre: " + tercero.getNombre() + "\nID: " + tercero.getTerceroId(),
                 "Tercero Actualizado", JOptionPane.INFORMATION_MESSAGE);
@@ -147,19 +154,19 @@ public class GestionTerceros extends JPanel implements TercerosListeners {
 
     @Override
     public void eliminarTercero(TerceroEntity tercero) {
-        int confirm = JOptionPane.showConfirmDialog(this,
+        int confirmacion = JOptionPane.showConfirmDialog(this,
                 "¿Seguro que deseas eliminar al tercero " + tercero.getNombre() + "?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            tercerosController.eliminar(tercero.getTerceroId());
-            this.listaCompletaTerceros = obtenerTerceros();
-            tablaTercerosTable.setTerceros(listaCompletaTerceros);
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            controladorTerceros.eliminar(tercero.getTerceroId());
+            this.listaTerceros = obtenerTerceros();
+            tablaTerceros.setTerceros(listaTerceros);
             JOptionPane.showMessageDialog(this, "Tercero eliminado correctamente.",
                     "Eliminación exitosa", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     private List<TerceroEntity> obtenerTerceros() {
-        return tercerosController.buscarTodos();
+        return controladorTerceros.buscarTodos();
     }
 }

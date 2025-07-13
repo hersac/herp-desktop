@@ -2,22 +2,8 @@ package com.hersac.ui.views.usuarios.gestion.modales;
 
 import java.awt.*;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
-
+import javax.swing.*;
+import javax.swing.text.*;
 import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.core.modules.departamentos.entities.DepartamentoEntity;
@@ -26,49 +12,35 @@ import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import com.hersac.ui.views.usuarios.gestion.listeners.UsuariosListeners;
 
 public class RegistrarUsuario extends JDialog {
-    private JTextField nombreField;
-    private JTextField correoField;
-    private JPasswordField contrasenaField;
-    private JCheckBox activoCheckBox;
-    private JComboBox<DepartamentoEntity> departamentoCombo;
-    private JComboBox<RolEntity> rolCombo;
-    private UsuarioEntity usuarioRegistrado;
-    private final UsuariosListeners listener;
-    private final boolean esEdicion;
+    private JTextField nombre;
+    private JTextField correo;
+    private JPasswordField contrasena;
+    private JCheckBox activo;
+    private JComboBox<DepartamentoEntity> departamento;
+    private JComboBox<RolEntity> rol;
+    private UsuarioEntity usuario;
+    private final UsuariosListeners oyente;
+    private final boolean edicion;
 
     public RegistrarUsuario(JFrame parent, List<DepartamentoEntity> departamentos, List<RolEntity> roles,
-            UsuariosListeners listener, UsuarioEntity usuarioParaEditar) {
-        super(parent, usuarioParaEditar != null ? "Actualizar Usuario" : "Registrar Usuario", true);
-        this.listener = listener;
-        this.usuarioRegistrado = usuarioParaEditar;
-        this.esEdicion = usuarioParaEditar != null;
-        initComponents(departamentos, roles);
+            UsuariosListeners oyente, UsuarioEntity usuarioEditar) {
+        super(parent, usuarioEditar != null ? "Actualizar Usuario" : "Registrar Usuario", true);
+        this.oyente = oyente;
+        this.usuario = usuarioEditar;
+        this.edicion = usuarioEditar != null;
+        inicializar(departamentos, roles);
     }
 
-    private void initComponents(List<DepartamentoEntity> departamentos, List<RolEntity> roles) {
+    private void inicializar(List<DepartamentoEntity> departamentos, List<RolEntity> roles) {
         configurarVentana();
-        JPanel formPanel = crearCampos(departamentos, roles);
-        if (esEdicion && usuarioRegistrado != null) {
-            cargarDatosEdicion();
-        }
-        JPanel buttonPanel = crearPanelBotones();
-        add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
-        PermissionService permissionService = new PermissionService(null);
-        boolean puedeEditar = permissionService.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
-        if (!puedeEditar) {
-            nombreField.setEnabled(false);
-            correoField.setEnabled(false);
-            contrasenaField.setEnabled(false);
-            activoCheckBox.setEnabled(false);
-            departamentoCombo.setEnabled(false);
-            rolCombo.setEnabled(false);
-            for (Component comp : buttonPanel.getComponents()) {
-                if (comp instanceof JButton btn && !btn.getText().equals("Cancelar")) {
-                    btn.setEnabled(false);
-                }
-            }
-        }
+        JPanel panelFormulario = crearCampos(departamentos, roles);
+        if (edicion && usuario != null) cargarDatosEdicion();
+        JPanel panelBotones = crearPanelBotones();
+        add(panelFormulario, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
+        PermissionService permisoServicio = new PermissionService(null);
+        boolean puedeEditar = permisoServicio.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
+        if (!puedeEditar) deshabilitarCampos(panelBotones);
         setVisible(true);
     }
 
@@ -80,117 +52,124 @@ public class RegistrarUsuario extends JDialog {
     }
 
     private JPanel crearCampos(List<DepartamentoEntity> departamentos, List<RolEntity> roles) {
-        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        nombreField = new JTextField();
-        aplicarFiltroMayusculas(nombreField);
-        correoField = new JTextField();
-        aplicarFiltroMinusculas(correoField);
-        contrasenaField = new JPasswordField();
-        activoCheckBox = new JCheckBox("Activo", true);
-        departamentoCombo = new JComboBox<>();
-        rolCombo = new JComboBox<>();
-
-        departamentos.forEach(departamentoCombo::addItem);
-        roles.forEach(rolCombo::addItem);
-
-        formPanel.add(new JLabel("Nombre:"));
-        formPanel.add(nombreField);
-        formPanel.add(new JLabel("Correo:"));
-        formPanel.add(correoField);
-        formPanel.add(new JLabel("Contraseña:"));
-        formPanel.add(contrasenaField);
-        formPanel.add(new JLabel("Departamento:"));
-        formPanel.add(departamentoCombo);
-        formPanel.add(new JLabel("Rol:"));
-        formPanel.add(rolCombo);
-        formPanel.add(new JLabel("¿Está activo?:"));
-        formPanel.add(activoCheckBox);
-        return formPanel;
+        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        Font roboto = new Font("Roboto", Font.PLAIN, 14);
+        nombre = new JTextField();
+        nombre.setFont(roboto);
+        aplicarFiltroMayusculas(nombre);
+        correo = new JTextField();
+        correo.setFont(roboto);
+        aplicarFiltroMinusculas(correo);
+        contrasena = new JPasswordField();
+        contrasena.setFont(roboto);
+        activo = new JCheckBox("Activo", true);
+        activo.setFont(roboto);
+        departamento = new JComboBox<>();
+        departamento.setFont(roboto);
+        rol = new JComboBox<>();
+        rol.setFont(roboto);
+        departamentos.forEach(departamento::addItem);
+        roles.forEach(rol::addItem);
+        panel.add(crearLabel("Nombre:", roboto));
+        panel.add(nombre);
+        panel.add(crearLabel("Correo:", roboto));
+        panel.add(correo);
+        panel.add(crearLabel("Contraseña:", roboto));
+        panel.add(contrasena);
+        panel.add(crearLabel("Departamento:", roboto));
+        panel.add(departamento);
+        panel.add(crearLabel("Rol:", roboto));
+        panel.add(rol);
+        panel.add(crearLabel("¿Está activo?:", roboto));
+        panel.add(activo);
+        return panel;
     }
 
-    private void aplicarFiltroMayusculas(JTextField field) {
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter() {
+    private JLabel crearLabel(String texto, Font fuente) {
+        JLabel label = new JLabel(texto);
+        label.setFont(fuente);
+        return label;
+    }
+
+    private void aplicarFiltroMayusculas(JTextField campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                if (string != null) {
-                    super.insertString(fb, offset, string.toUpperCase(), attr);
-                }
+                if (string != null) super.insertString(fb, offset, string.toUpperCase(), attr);
             }
             @Override
             public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                if (text != null) {
-                    super.replace(fb, offset, length, text.toUpperCase(), attrs);
-                }
+                if (text != null) super.replace(fb, offset, length, text.toUpperCase(), attrs);
             }
         });
     }
 
-    private void aplicarFiltroMinusculas(JTextField field) {
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter() {
+    private void aplicarFiltroMinusculas(JTextField campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                if (string != null) {
-                    super.insertString(fb, offset, string.toLowerCase(), attr);
-                }
+                if (string != null) super.insertString(fb, offset, string.toLowerCase(), attr);
             }
             @Override
             public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                if (text != null) {
-                    super.replace(fb, offset, length, text.toLowerCase(), attrs);
-                }
+                if (text != null) super.replace(fb, offset, length, text.toLowerCase(), attrs);
             }
         });
     }
 
     private void cargarDatosEdicion() {
-        nombreField.setText(usuarioRegistrado.getNombre());
-        correoField.setText(usuarioRegistrado.getCorreo());
-        contrasenaField.setText(usuarioRegistrado.getContrasena());
-        activoCheckBox.setSelected(usuarioRegistrado.getEstaActivo());
-        departamentoCombo.setSelectedItem(usuarioRegistrado.getDepartamento());
-        rolCombo.setSelectedItem(usuarioRegistrado.getRol());
+        nombre.setText(usuario.getNombre());
+        correo.setText(usuario.getCorreo());
+        contrasena.setText(usuario.getContrasena());
+        activo.setSelected(usuario.getEstaActivo());
+        departamento.setSelectedItem(usuario.getDepartamento());
+        rol.setSelectedItem(usuario.getRol());
     }
 
     private JPanel crearPanelBotones() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton guardarBtn = new JButton(esEdicion ? "Actualizar" : "Guardar");
-        JButton cancelarBtn = new JButton("Cancelar");
-        guardarBtn.addActionListener(e -> guardarUsuario());
-        cancelarBtn.addActionListener(e -> dispose());
-        buttonPanel.add(guardarBtn);
-        buttonPanel.add(cancelarBtn);
-        return buttonPanel;
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton guardar = new JButton(edicion ? "Actualizar" : "Guardar");
+        JButton cancelar = new JButton("Cancelar");
+        guardar.addActionListener(e -> guardarUsuario());
+        cancelar.addActionListener(e -> dispose());
+        panel.add(guardar);
+        panel.add(cancelar);
+        return panel;
+    }
+
+    private void deshabilitarCampos(JPanel panelBotones) {
+        nombre.setEnabled(false);
+        correo.setEnabled(false);
+        contrasena.setEnabled(false);
+        activo.setEnabled(false);
+        departamento.setEnabled(false);
+        rol.setEnabled(false);
+        for (Component comp : panelBotones.getComponents()) {
+            if (comp instanceof JButton boton && !boton.getText().equals("Cancelar")) boton.setEnabled(false);
+        }
     }
 
     private void guardarUsuario() {
-        DepartamentoEntity departamentoSeleccionado = (DepartamentoEntity) departamentoCombo.getSelectedItem();
-        RolEntity rolSeleccionado = (RolEntity) rolCombo.getSelectedItem();
-
-        if (usuarioRegistrado == null) {
-            usuarioRegistrado = new UsuarioEntity();
+        DepartamentoEntity dep = (DepartamentoEntity) departamento.getSelectedItem();
+        RolEntity rolSel = (RolEntity) rol.getSelectedItem();
+        if (usuario == null) usuario = new UsuarioEntity();
+        usuario.setNombre(nombre.getText());
+        usuario.setCorreo(correo.getText());
+        usuario.setContrasena(new String(contrasena.getPassword()));
+        usuario.setEstaActivo(activo.isSelected());
+        usuario.setDepartamento(dep);
+        usuario.setRol(rolSel);
+        usuario.setUsuarioActualizacion(UsuarioEntity.builder().usuarioId(1L).build());
+        if (!edicion) {
+            usuario.setUsuarioCreacion(UsuarioEntity.builder().usuarioId(1L).build());
+            oyente.crearUsuario(usuario);
         }
-
-        usuarioRegistrado.setNombre(nombreField.getText());
-        usuarioRegistrado.setCorreo(correoField.getText());
-        usuarioRegistrado.setContrasena(new String(contrasenaField.getPassword()));
-        usuarioRegistrado.setEstaActivo(activoCheckBox.isSelected());
-        usuarioRegistrado.setDepartamento(departamentoSeleccionado);
-        usuarioRegistrado.setRol(rolSeleccionado);
-        usuarioRegistrado.setUsuarioActualizacion(UsuarioEntity.builder().usuarioId(1L).build());
-
-        if (!esEdicion) {
-            usuarioRegistrado.setUsuarioCreacion(UsuarioEntity.builder().usuarioId(1L).build());
-            listener.crearUsuario(usuarioRegistrado);
-        } else {
-            listener.actualizarUsuario(usuarioRegistrado);
-        }
-
+        if (edicion) oyente.actualizarUsuario(usuario);
         dispose();
     }
 
     public UsuarioEntity getUsuarioRegistrado() {
-        return usuarioRegistrado;
+        return usuario;
     }
 }

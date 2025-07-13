@@ -17,77 +17,67 @@ import java.awt.event.*;
 import java.net.URL;
 
 public class LoginView extends JPanel {
-
-    private final AuthenticationController authController;
-    private LoginListener loginListener;
+    private final AuthenticationController controladorAutenticacion;
+    private LoginListener escuchaLogin;
     private String token;
 
     private static final Color COLOR_FONDO = ColorsTheme.BACKGROUND.get();
-    private static final Color COLOR_PRIMARY = ColorsTheme.PRIMARY.get();
-    private static final Color COLOR_PRIMARY_LIGHT = ColorsTheme.PRIMARY_LIGTH.get();
-    private static final Color COLOR_TEXT_PLACEHOLDER = ColorsTheme.TEXT_SECONDARY.get();
-    private static final Color COLOR_SECUNDARY = ColorsTheme.SECONDARY.get();
-    private static final Font FONT_TITLE = new Font("Roboto", Font.BOLD, 18);
-    private static final Font FONT_SUBTITLE = new Font("Roboto", Font.BOLD, 14);
-    private static final Font FONT_INPUT = new Font("Roboto", Font.PLAIN, 12);
-    private static final Font FONT_PASSWORD = new Font("Roboto", Font.BOLD, 10);
-    private static final Font FONT_BUTTON = new Font("Roboto", Font.BOLD, 12);
+    private static final Color COLOR_PRIMARIO = ColorsTheme.PRIMARY.get();
+    private static final Color COLOR_PRIMARIO_CLARO = ColorsTheme.PRIMARY_LIGTH.get();
+    private static final Color COLOR_TEXTO_PLACEHOLDER = ColorsTheme.TEXT_SECONDARY.get();
+    private static final Color COLOR_SECUNDARIO = ColorsTheme.SECONDARY.get();
+    private static final Font FUENTE_TITULO = new Font("Roboto", Font.BOLD, 18);
+    private static final Font FUENTE_SUBTITULO = new Font("Roboto", Font.BOLD, 14);
+    private static final Font FUENTE_INPUT = new Font("Roboto", Font.PLAIN, 12);
+    private static final Font FUENTE_PASSWORD = new Font("Roboto", Font.BOLD, 10);
+    private static final Font FUENTE_BOTON = new Font("Roboto", Font.BOLD, 12);
 
-    public LoginView(AuthenticationController authController) {
-        this.authController = authController;
-        initUI();
+    public LoginView(AuthenticationController controladorAutenticacion) {
+        this.controladorAutenticacion = controladorAutenticacion;
+        inicializarUI();
     }
 
-    public void initUI() {
-
+    public void inicializarUI() {
         setLayout(new GridLayout(1, 2));
-
-        JPanel panelIzquierdo = buildPanelIzquierdo();
-        JPanel panelDerecho = buildPanelDerecho();
-
+        JPanel panelIzquierdo = construirPanelIzquierdo();
+        JPanel panelDerecho = construirPanelDerecho();
         add(panelIzquierdo);
         add(panelDerecho);
-
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Component clickedComponent = getComponentAt(e.getPoint());
-                if (!(clickedComponent instanceof JTextField)) {
+                Component componenteClic = getComponentAt(e.getPoint());
+                if (!(componenteClic instanceof JTextField)) {
                     requestFocusInWindow();
                 }
             }
         });
     }
 
-    private JPanel buildPanelIzquierdo() {
+    private JPanel construirPanelIzquierdo() {
         JPanel panel = new JPanel(new GridLayout(4, 1));
         panel.setBorder(new EmptyBorder(20, 10, 20, 10));
         panel.setBackground(COLOR_FONDO);
-
-        JLabel tituloLogin = buildLabel("HERP", FONT_TITLE, COLOR_PRIMARY, SwingConstants.CENTER);
-        JLabel subtituloLogin = buildLabel("El ERP que tu negocio necesita", FONT_SUBTITLE, COLOR_SECUNDARY, SwingConstants.CENTER);
-
-        JPanel titulosContent = new JPanel();
-        titulosContent.setLayout(new BoxLayout(titulosContent, BoxLayout.Y_AXIS));
-        titulosContent.setOpaque(false);
-        tituloLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
-        subtituloLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
-        titulosContent.add(tituloLogin);
-        titulosContent.add(subtituloLogin);
-
-        JPanel loginFormContent = buildLoginFormContent();
-
+        JLabel etiquetaTitulo = construirEtiqueta("HERP", FUENTE_TITULO, COLOR_PRIMARIO, SwingConstants.CENTER);
+        JLabel etiquetaSubtitulo = construirEtiqueta("El ERP que tu negocio necesita", FUENTE_SUBTITULO, COLOR_SECUNDARIO, SwingConstants.CENTER);
+        JPanel contenidoTitulos = new JPanel();
+        contenidoTitulos.setLayout(new BoxLayout(contenidoTitulos, BoxLayout.Y_AXIS));
+        contenidoTitulos.setOpaque(false);
+        etiquetaTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        etiquetaSubtitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        contenidoTitulos.add(etiquetaTitulo);
+        contenidoTitulos.add(etiquetaSubtitulo);
+        JPanel contenidoFormulario = construirContenidoFormulario();
         panel.add(Box.createVerticalStrut(10));
-        panel.add(titulosContent);
-        panel.add(loginFormContent);
+        panel.add(contenidoTitulos);
+        panel.add(contenidoFormulario);
         panel.add(Box.createVerticalStrut(10));
-
         return panel;
     }
 
-    private JPanel buildLoginFormContent() {
-        JTextField correoField = buildTextField();
-        correoField.addKeyListener(new KeyAdapter() {
+    private JPanel construirContenidoFormulario() {
+        JTextField campoCorreo = construirCampoTexto();
+        campoCorreo.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
@@ -96,23 +86,19 @@ public class LoginView extends JPanel {
                 }
             }
         });
-        seleccionarInputText(correoField);
-
-        JPasswordField contrasenaField = buildPasswordField();
-        seleccionarInputPass(contrasenaField);
-
-        JLabel submitBtn = buildSubmitButton(() -> {
-            String correo = correoField.getText();
-            String contrasena = new String(contrasenaField.getPassword());
-
-            RequestEntity request = new RequestEntity(correo, contrasena);
+        seleccionarInputTexto(campoCorreo);
+        JPasswordField campoContrasena = construirCampoPassword();
+        seleccionarInputPassword(campoContrasena);
+        JLabel botonAcceder = construirBotonAcceder(() -> {
+            String correo = campoCorreo.getText();
+            String contrasena = new String(campoContrasena.getPassword());
+            RequestEntity solicitud = new RequestEntity(correo, contrasena);
             try {
-                ResponseEntity response = authController.login(request);
-                if (response == null) {
-                    return;
+                ResponseEntity respuesta = controladorAutenticacion.login(solicitud);
+                if (respuesta != null) {
+                    token = respuesta.getToken();
+                    manejarLogin();
                 }
-                token = response.getToken();
-                handleLogin();
             } catch (UsuarioNoEncontradoException ex) {
                 mostrarMensajeError(ex.getMessage());
             } catch (UsuarioBloqueadoException ex) {
@@ -123,186 +109,169 @@ public class LoginView extends JPanel {
                 mostrarMensajeError("Error inesperado al intentar iniciar sesión");
             }
         });
-
-        JPanel loginFormContent = new JPanel(new GridLayout(4, 1));
-        loginFormContent.setOpaque(false);
-        loginFormContent.add(correoField);
-        loginFormContent.add(contrasenaField);
-        loginFormContent.add(Box.createVerticalStrut(10));
-        loginFormContent.add(submitBtn);
-
-        return loginFormContent;
+        JPanel contenidoFormulario = new JPanel(new GridLayout(4, 1));
+        contenidoFormulario.setOpaque(false);
+        contenidoFormulario.add(campoCorreo);
+        contenidoFormulario.add(campoContrasena);
+        contenidoFormulario.add(Box.createVerticalStrut(10));
+        contenidoFormulario.add(botonAcceder);
+        return contenidoFormulario;
     }
 
-    private JPanel buildPanelDerecho() {
+    private JPanel construirPanelDerecho() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(getImagenLogin(), BorderLayout.CENTER);
+        panel.add(obtenerImagenLogin(), BorderLayout.CENTER);
         return panel;
     }
 
-    private JLabel buildLabel(String text, Font font, Color color, int alignment) {
-        JLabel label = new JLabel(text);
-        label.setFont(font);
-        label.setForeground(color);
-        label.setHorizontalAlignment(alignment);
-        return label;
+    private JLabel construirEtiqueta(String texto, Font fuente, Color color, int alineacion) {
+        JLabel etiqueta = new JLabel(texto);
+        etiqueta.setFont(new Font("Roboto", fuente.getStyle(), fuente.getSize()));
+        etiqueta.setForeground(color);
+        etiqueta.setHorizontalAlignment(alineacion);
+        return etiqueta;
     }
 
-    private JTextField buildTextField() {
-        JTextField field = new JTextField("hello@example.com");
-        field.setOpaque(false);
-        field.setFont(FONT_INPUT);
-        field.setForeground(COLOR_TEXT_PLACEHOLDER);
-        field.setBorder(BorderFactory.createCompoundBorder(
-            new MatteBorder(0, 0, 1, 0, COLOR_PRIMARY),
+    private JTextField construirCampoTexto() {
+        JTextField campo = new JTextField("hello@example.com");
+        campo.setOpaque(false);
+        campo.setFont(FUENTE_INPUT);
+        campo.setForeground(COLOR_TEXTO_PLACEHOLDER);
+        campo.setBorder(BorderFactory.createCompoundBorder(
+            new MatteBorder(0, 0, 1, 0, COLOR_PRIMARIO),
             new EmptyBorder(2, 10, 2, 10)
         ));
-        return field;
+        campo.setFont(new Font("Roboto", Font.PLAIN, 12));
+        return campo;
     }
 
-    private JPasswordField buildPasswordField() {
-        JPasswordField field = new JPasswordField("******");
-        field.setOpaque(false);
-        field.setFont(FONT_PASSWORD);
-        field.setForeground(COLOR_TEXT_PLACEHOLDER);
-        field.setBorder(BorderFactory.createCompoundBorder(
-            new MatteBorder(0, 0, 1, 0, COLOR_PRIMARY),
+    private JPasswordField construirCampoPassword() {
+        JPasswordField campo = new JPasswordField("******");
+        campo.setOpaque(false);
+        campo.setFont(FUENTE_PASSWORD);
+        campo.setForeground(COLOR_TEXTO_PLACEHOLDER);
+        campo.setBorder(BorderFactory.createCompoundBorder(
+            new MatteBorder(0, 0, 1, 0, COLOR_PRIMARIO),
             new EmptyBorder(2, 10, 2, 10)
         ));
-        return field;
+        campo.setFont(new Font("Roboto", Font.BOLD, 10));
+        return campo;
     }
 
-    private JLabel buildSubmitButton(Runnable onClick) {
-        JLabel btn = new JLabel("Acceder");
-        btn.setHorizontalAlignment(SwingConstants.CENTER);
-        btn.setFont(FONT_BUTTON);
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(COLOR_PRIMARY);
-        btn.setOpaque(true);
-
-        btn.addMouseListener(new MouseAdapter() {
+    private JLabel construirBotonAcceder(Runnable alClic) {
+        JLabel boton = new JLabel("Acceder");
+        boton.setHorizontalAlignment(SwingConstants.CENTER);
+        boton.setFont(FUENTE_BOTON);
+        boton.setForeground(Color.WHITE);
+        boton.setBackground(COLOR_PRIMARIO);
+        boton.setOpaque(true);
+        boton.setFont(new Font("Roboto", Font.BOLD, 12));
+        boton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
-
             @Override
             public void mousePressed(MouseEvent e) {
-                btn.setBackground(COLOR_PRIMARY_LIGHT);
+                boton.setBackground(COLOR_PRIMARIO_CLARO);
             }
-
             @Override
             public void mouseReleased(MouseEvent e) {
-                btn.setBackground(COLOR_PRIMARY);
+                boton.setBackground(COLOR_PRIMARIO);
             }
-
             @Override
             public void mouseExited(MouseEvent e) {
-                btn.setBackground(COLOR_PRIMARY);
+                boton.setBackground(COLOR_PRIMARIO);
             }
-
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (onClick != null) {
-                    onClick.run();
+                if (alClic != null) {
+                    alClic.run();
                 }
             }
         });
-
-        return btn;
+        return boton;
     }
 
-    private void seleccionarInputText(JTextField textField) {
-        final String placeholder = textField.getText();
-
-        textField.setForeground(COLOR_TEXT_PLACEHOLDER);
-
-        textField.addFocusListener(new FocusAdapter() {
+    private void seleccionarInputTexto(JTextField campoTexto) {
+        final String placeholder = campoTexto.getText();
+        campoTexto.setForeground(COLOR_TEXTO_PLACEHOLDER);
+        campoTexto.setFont(new Font("Roboto", Font.PLAIN, 12));
+        campoTexto.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (textField.getText().equals(placeholder)) {
-                    textField.setText("");
-                    textField.setForeground(Color.WHITE);
-                    textField.setCaretColor(Color.WHITE);
+                if (campoTexto.getText().equals(placeholder)) {
+                    campoTexto.setText("");
+                    campoTexto.setForeground(Color.WHITE);
+                    campoTexto.setCaretColor(Color.WHITE);
                 }
             }
-
             @Override
             public void focusLost(FocusEvent e) {
-                if (textField.getText().trim().isEmpty()) {
-                    textField.setText(placeholder);
-                    textField.setForeground(COLOR_TEXT_PLACEHOLDER);
+                if (campoTexto.getText().trim().isEmpty()) {
+                    campoTexto.setText(placeholder);
+                    campoTexto.setForeground(COLOR_TEXTO_PLACEHOLDER);
                 }
             }
         });
     }
 
-    private void seleccionarInputPass(JPasswordField passwordField) {
-        final String placeholder = new String(passwordField.getPassword());
-
-        passwordField.addFocusListener(new FocusAdapter() {
+    private void seleccionarInputPassword(JPasswordField campoPassword) {
+        final String placeholder = new String(campoPassword.getPassword());
+        campoPassword.setFont(new Font("Roboto", Font.BOLD, 10));
+        campoPassword.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (new String(passwordField.getPassword()).equals(placeholder)) {
-                    passwordField.setText("");
-                    passwordField.setForeground(Color.WHITE);
-                    passwordField.setCaretColor(Color.WHITE);
+                if (new String(campoPassword.getPassword()).equals(placeholder)) {
+                    campoPassword.setText("");
+                    campoPassword.setForeground(Color.WHITE);
+                    campoPassword.setCaretColor(Color.WHITE);
                 }
             }
-
             @Override
             public void focusLost(FocusEvent e) {
-                if (new String(passwordField.getPassword()).trim().isEmpty()) {
-                    passwordField.setText(placeholder);
-                    passwordField.setForeground(COLOR_TEXT_PLACEHOLDER);
+                if (new String(campoPassword.getPassword()).trim().isEmpty()) {
+                    campoPassword.setText(placeholder);
+                    campoPassword.setForeground(COLOR_TEXTO_PLACEHOLDER);
                 }
             }
         });
     }
 
-    private JLabel getImagenLogin() {
+    private JLabel obtenerImagenLogin() {
         URL url = getClass().getResource("/images/imageLogin.jpg");
         if (url == null) {
             throw new RuntimeException("Error al cargar la imagen de login");
         }
-
         ImageIcon iconoOriginal = new ImageIcon(url);
-
         return new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-
                 Image imagen = iconoOriginal.getImage();
                 if (imagen != null) {
-                    int panelWidth = getWidth();
-                    int panelHeight = getHeight();
-
-                    int imgWidth = imagen.getWidth(null);
-                    int imgHeight = imagen.getHeight(null);
-
-                    double scale = Math.max((double) panelWidth / imgWidth, (double) panelHeight / imgHeight);
-                    int newWidth = (int) (imgWidth * scale);
-                    int newHeight = (int) (imgHeight * scale);
-
-                    int x = (panelWidth - newWidth) / 2;
-                    int y = (panelHeight - newHeight) / 2;
-
-                    g.drawImage(imagen, x, y, newWidth, newHeight, this);
+                    int anchoPanel = getWidth();
+                    int altoPanel = getHeight();
+                    int anchoImg = imagen.getWidth(null);
+                    int altoImg = imagen.getHeight(null);
+                    double escala = Math.max((double) anchoPanel / anchoImg, (double) altoPanel / altoImg);
+                    int nuevoAncho = (int) (anchoImg * escala);
+                    int nuevoAlto = (int) (altoImg * escala);
+                    int x = (anchoPanel - nuevoAncho) / 2;
+                    int y = (altoPanel - nuevoAlto) / 2;
+                    g.drawImage(imagen, x, y, nuevoAncho, nuevoAlto, this);
                 }
             }
         };
     }
 
-    public void addLoginListener(LoginListener loginListener) {
-        this.loginListener = loginListener;
+    public void addLoginListener(LoginListener escuchaLogin) {
+        this.escuchaLogin = escuchaLogin;
     }
 
-    private void handleLogin() {
-        if (token != null && !token.isEmpty()) {
-            if (loginListener != null) {
-                loginListener.onLoginSuccess(token);
-            }
+    private void manejarLogin() {
+        if (token != null && !token.isEmpty() && escuchaLogin != null) {
+            escuchaLogin.onLoginSuccess(token);
         }
     }
 

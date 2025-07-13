@@ -8,39 +8,50 @@ import java.awt.*;
 
 public class IconoPanelCircular extends JPanel {
 
-    private final Icon icon;
+    private final Icon icono;
 
-    public IconoPanelCircular(Icon icon) {
-        this.icon = icon;
+    public IconoPanelCircular(Icon icono) {
+        this.icono = icono;
         setOpaque(false);
         setPreferredSize(new Dimension(30, 30));
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    protected void paintComponent(Graphics graficos) {
+        super.paintComponent(graficos);
 
-        int diameter = Math.min(getWidth(), getHeight());
-        int x = (getWidth() - diameter) / 2;
-        int y = (getHeight() - diameter) / 2;
+        int diametro = Math.min(getWidth(), getHeight());
+        int posicionX = (getWidth() - diametro) / 2;
+        int posicionY = (getHeight() - diametro) / 2;
 
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Graphics2D graficos2D = (Graphics2D) graficos.create();
+        graficos2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2.setColor(ColorsTheme.BACKGROUND.get());
-        g2.fillOval(x, y, diameter, diameter);
+        graficos2D.setColor(ColorsTheme.BACKGROUND.get());
+        graficos2D.fillOval(posicionX, posicionY, diametro, diametro);
 
-        if (icon instanceof FontIcon fontIcon) {
-            fontIcon.setIconSize(diameter - 12);
-            int fx = (getWidth() - fontIcon.getIconWidth()) / 2;
-            int fy = (getHeight() - fontIcon.getIconHeight()) / 2;
-            fontIcon.paintIcon(this, g2, fx, fy);
-        } else {
-            int ix = (getWidth() - icon.getIconWidth()) / 2;
-            int iy = (getHeight() - icon.getIconHeight()) / 2;
-            icon.paintIcon(this, g2, ix, iy);
+        if (icono instanceof FontIcon fontIcono) {
+            fontIcono.setIconSize(diametro - 12);
+            int fx = (getWidth() - fontIcono.getIconWidth()) / 2;
+            int fy = (getHeight() - fontIcono.getIconHeight()) / 2;
+            fontIcono.paintIcon(this, graficos2D, fx, fy);
+        }
+        if (!(icono instanceof FontIcon)) {
+            int ix = (getWidth() - icono.getIconWidth()) / 2;
+            int iy = (getHeight() - icono.getIconHeight()) / 2;
+            icono.paintIcon(this, graficos2D, ix, iy);
         }
 
-        g2.dispose();
+        graficos2D.dispose();
+    }
+
+    public static void aplicarFuenteRoboto(Component componente) {
+        Font fuenteRoboto = new Font("Roboto", Font.PLAIN, 12);
+        if (componente instanceof JLabel etiqueta) {
+            etiqueta.setFont(fuenteRoboto);
+        }
+        if (componente instanceof JTextField campoTexto) {
+            campoTexto.setFont(fuenteRoboto);
+        }
     }
 }

@@ -3,7 +3,6 @@ package com.hersac.ui.views.comercial.clientes.tablas;
 import com.hersac.core.modules.clientes.entities.ClienteEntity;
 import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.ui.views.comercial.clientes.listeners.ClientesListeners;
-
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -15,7 +14,6 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.EventObject;
 import java.util.List;
 
 public class ClientesTable extends JPanel {
@@ -34,115 +32,94 @@ public class ClientesTable extends JPanel {
         String[] columnas = {"ID", "Nombre", "Tipo", "Estado", "Acciones"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 4;
+            public boolean isCellEditable(int fila, int columna) {
+                return columna == 4;
             }
         };
         tablaClientes = new JTable(modeloTabla);
         tablaClientes.setRowHeight(40);
         tablaClientes.setShowGrid(false);
-        tablaClientes.getColumnModel().getColumn(4).setCellRenderer(new AccionesRenderer());
-        tablaClientes.getColumnModel().getColumn(4).setCellEditor(new AccionesEditor());
+        tablaClientes.getColumnModel().getColumn(4).setCellRenderer(new RenderAcciones());
+        tablaClientes.getColumnModel().getColumn(4).setCellEditor(new EditorAcciones());
         tablaClientes.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                int column = tablaClientes.columnAtPoint(e.getPoint());
-                int row = tablaClientes.rowAtPoint(e.getPoint());
-                if (column == 4 && row >= 0 && tablaClientes.isCellEditable(row, column)) {
-                    tablaClientes.editCellAt(row, column);
+            public void mouseClicked(MouseEvent evento) {
+                int columna = tablaClientes.columnAtPoint(evento.getPoint());
+                int fila = tablaClientes.rowAtPoint(evento.getPoint());
+                if (columna == 4 && fila >= 0 && tablaClientes.isCellEditable(fila, columna)) {
+                    tablaClientes.editCellAt(fila, columna);
                     tablaClientes.getEditorComponent().requestFocusInWindow();
                 }
             }
         });
         add(new JScrollPane(tablaClientes), BorderLayout.CENTER);
+        aplicarFuenteRoboto(tablaClientes);
     }
 
     public void setActionListener(ClientesListeners listener) {
         this.clientesListeners = listener;
     }
 
-    private class AccionesRenderer implements TableCellRenderer {
+    private class RenderAcciones implements TableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus,
-                int row, int column) {
-            if (value instanceof ClienteEntity cliente) {
+        public Component getTableCellRendererComponent(JTable tabla, Object valor, boolean seleccionado, boolean tieneFoco, int fila, int columna) {
+            if (valor instanceof ClienteEntity cliente) {
                 JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
                 panel.setOpaque(false);
-                boolean puedeVer = true;
-                boolean puedeEditar = true;
-                boolean puedeEliminar = true;
-                if (puedeVer) {
-                    JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver cliente", new Color(60, 130, 200));
-                    panel.add(btnVer);
-                }
-                if (puedeEditar) {
-                    boolean activo = Boolean.TRUE.equals(cliente.isEsta_activo());
-                    JButton btnToggle = crearIconoBoton(
-                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                        activo ? "Inactivar" : "Activar",
-                        activo ? new Color(0, 180, 0) : Color.RED);
-                    panel.add(btnToggle);
-                }
-                if (puedeEliminar) {
-                    JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar cliente", Color.RED);
-                    panel.add(btnEliminar);
-                }
-                panel.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                JButton btnVer = crearBotonIcono(FontAwesomeSolid.EYE, "Ver cliente", new Color(60, 130, 200));
+                JButton btnToggle = crearBotonIcono(
+                        cliente.isEsta_activo() ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                        cliente.isEsta_activo() ? "Inactivar" : "Activar",
+                        cliente.isEsta_activo() ? new Color(0, 180, 0) : Color.RED);
+                JButton btnEliminar = crearBotonIcono(FontAwesomeSolid.TRASH_ALT, "Eliminar cliente", Color.RED);
+                panel.add(btnVer);
+                panel.add(btnToggle);
+                panel.add(btnEliminar);
+                panel.setBackground(seleccionado ? tabla.getSelectionBackground() : tabla.getBackground());
+                aplicarFuenteRoboto(panel);
                 return panel;
             }
-            return new JLabel("");
+            JLabel label = new JLabel("");
+            aplicarFuenteRoboto(label);
+            return label;
         }
     }
 
-    private class AccionesEditor extends AbstractCellEditor implements TableCellEditor {
+    private class EditorAcciones extends AbstractCellEditor implements TableCellEditor {
         private final JPanel panel;
         private ClienteEntity cliente;
-        public AccionesEditor() {
+        public EditorAcciones() {
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
             panel.setOpaque(false);
         }
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
-            if (value instanceof ClienteEntity) {
-                cliente = (ClienteEntity) value;
+        public Component getTableCellEditorComponent(JTable tabla, Object valor, boolean seleccionado, int fila, int columna) {
+            if (valor instanceof ClienteEntity) {
+                cliente = (ClienteEntity) valor;
                 panel.removeAll();
-                boolean activo = Boolean.TRUE.equals(cliente.isEsta_activo());
-                boolean puedeVer = true;
-                boolean puedeEditar = true;
-                boolean puedeEliminar = true;
-                if (puedeVer) {
-                    JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver cliente", new Color(60, 130, 200), e -> {
-                        if (clientesListeners != null)
-                            clientesListeners.verCliente(cliente);
-                        fireEditingStopped();
-                    });
-                    panel.add(btnVer);
-                }
-                if (puedeEditar) {
-                    JButton btnToggle = crearBotonAccion(
-                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                        activo ? "Inactivar" : "Activar",
-                        activo ? new Color(0, 180, 0) : Color.RED,
+                JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver cliente", new Color(60, 130, 200), e -> {
+                    if (clientesListeners != null) clientesListeners.verCliente(cliente);
+                    fireEditingStopped();
+                });
+                JButton btnToggle = crearBotonAccion(
+                        cliente.isEsta_activo() ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                        cliente.isEsta_activo() ? "Inactivar" : "Activar",
+                        cliente.isEsta_activo() ? new Color(0, 180, 0) : Color.RED,
                         e -> {
                             cliente.setEsta_activo(!cliente.isEsta_activo());
-                            modeloTabla.setValueAt(cliente.isEsta_activo() ? "Activo" : "Inactivo", row, 3);
-                            modeloTabla.setValueAt(cliente, row, 4);
-                            if (clientesListeners != null)
-                                clientesListeners.actualizarCliente(cliente);
+                            modeloTabla.setValueAt(cliente.isEsta_activo() ? "Activo" : "Inactivo", fila, 3);
+                            modeloTabla.setValueAt(cliente, fila, 4);
+                            if (clientesListeners != null) clientesListeners.actualizarCliente(cliente);
                             fireEditingStopped();
                         });
-                    panel.add(btnToggle);
-                }
-                if (puedeEliminar) {
-                    JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar cliente", Color.RED, e -> {
-                        if (clientesListeners != null)
-                            clientesListeners.eliminarCliente(cliente);
-                        fireEditingStopped();
-                    });
-                    panel.add(btnEliminar);
-                }
+                JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar cliente", Color.RED, e -> {
+                    if (clientesListeners != null) clientesListeners.eliminarCliente(cliente);
+                    fireEditingStopped();
+                });
+                panel.add(btnVer);
+                panel.add(btnToggle);
+                panel.add(btnEliminar);
+                aplicarFuenteRoboto(panel);
             }
             return panel;
         }
@@ -151,68 +128,56 @@ public class ClientesTable extends JPanel {
             return cliente;
         }
         @Override
-        public boolean isCellEditable(EventObject e) {
-            return !(e instanceof MouseEvent) || ((MouseEvent) e).getClickCount() == 1;
+        public boolean isCellEditable(java.util.EventObject evento) {
+            return !(evento instanceof MouseEvent) || ((MouseEvent) evento).getClickCount() == 1;
         }
     }
 
-    private JPanel crearPanelAcciones(ClienteEntity cliente) {
-        boolean activo = Boolean.TRUE.equals(cliente.isEsta_activo());
-        JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver cliente", new Color(60, 130, 200));
-        JButton btnToggle = crearIconoBoton(
-                activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                activo ? "Inactivar" : "Activar",
-                activo ? new Color(0, 180, 0) : Color.RED);
-        JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar cliente", Color.RED);
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        panel.setOpaque(false);
-        panel.add(btnVer);
-        panel.add(btnToggle);
-        panel.add(btnEliminar);
-        return panel;
-    }
-
-    private JButton crearIconoBoton(FontAwesomeSolid icono, String tooltip, Color color) {
+    private JButton crearBotonIcono(FontAwesomeSolid icono, String tooltip, Color color) {
         FontIcon icon = FontIcon.of(icono, 18, color);
-        JButton button = new JButton(icon);
-        button.setToolTipText(tooltip);
-        button.setBorderPainted(false);
-        button.setFocusPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(false);
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(36, 36));
-        return button;
+        JButton boton = new JButton(icon);
+        boton.setToolTipText(tooltip);
+        boton.setBorderPainted(false);
+        boton.setFocusPainted(false);
+        boton.setContentAreaFilled(false);
+        boton.setOpaque(false);
+        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        boton.setPreferredSize(new Dimension(36, 36));
+        aplicarFuenteRoboto(boton);
+        return boton;
     }
 
-    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener action) {
-        JButton button = crearIconoBoton(icono, tooltip, color);
-        button.addActionListener(action);
-        return button;
-    }
-
-    private ClienteEntity getCliente(int row) {
-        if (row >= 0 && row < modeloTabla.getRowCount()) {
-            Object id = modeloTabla.getValueAt(row, 0);
-            for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-                if (modeloTabla.getValueAt(i, 0).equals(id)) {
-                    return (ClienteEntity) modeloTabla.getValueAt(i, 4);
-                }
-            }
-        }
-        return null;
+    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener accion) {
+        JButton boton = crearBotonIcono(icono, tooltip, color);
+        boton.addActionListener(accion);
+        return boton;
     }
 
     public void setClientes(List<ClienteEntity> clientes) {
         modeloTabla.setRowCount(0);
         for (ClienteEntity cliente : clientes) {
             modeloTabla.addRow(new Object[]{
-                cliente.getClienteId(),
-                cliente.getTercero() != null ? cliente.getTercero().getNombre() : "",
-                cliente.getTercero() != null ? cliente.getTercero().getTipoPersona() : "",
-                cliente.isEsta_activo() ? "Activo" : "Inactivo",
-                cliente
+                    cliente.getClienteId(),
+                    cliente.getTercero() != null ? cliente.getTercero().getNombre() : "",
+                    cliente.getTercero() != null ? cliente.getTercero().getTipoPersona() : "",
+                    cliente.isEsta_activo() ? "Activo" : "Inactivo",
+                    cliente
             });
+        }
+    }
+
+    private void aplicarFuenteRoboto(Component componente) {
+        Font fuenteRoboto = new Font("Roboto", Font.PLAIN, 14);
+        if (componente instanceof JLabel label) {
+            label.setFont(fuenteRoboto);
+        } else if (componente instanceof JButton boton) {
+            boton.setFont(fuenteRoboto);
+        } else if (componente instanceof JPanel panel) {
+            for (Component hijo : panel.getComponents()) {
+                aplicarFuenteRoboto(hijo);
+            }
+        } else if (componente instanceof JTable tabla) {
+            tabla.setFont(fuenteRoboto);
         }
     }
 }

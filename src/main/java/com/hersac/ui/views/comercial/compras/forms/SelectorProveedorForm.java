@@ -5,34 +5,50 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class SelectorProveedorForm extends JPanel {
-    private JTextField proveedorIdField;
-    private JTextField proveedorNombreField;
-    private JButton buscarProveedorBtn;
+    private JTextField campoIdProveedor;
+    private JTextField campoNombreProveedor;
+    private JButton botonBuscarProveedor;
 
     public SelectorProveedorForm() {
         setLayout(new FlowLayout(FlowLayout.LEFT));
         setBorder(BorderFactory.createTitledBorder("Seleccionar Proveedor"));
-        add(new JLabel("Cédula del proveedor:"));
-        proveedorIdField = new JTextField(10);
-        add(proveedorIdField);
-        add(new JLabel("Nombre:"));
-        proveedorNombreField = new JTextField(30);
-        proveedorNombreField.setEditable(false);
-        add(proveedorNombreField);
-        buscarProveedorBtn = new JButton("Buscar");
-        add(buscarProveedorBtn);
+        JLabel etiquetaId = new JLabel("Cédula del proveedor:");
+        etiquetaId.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(etiquetaId);
+        campoIdProveedor = new JTextField(10);
+        campoIdProveedor.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(campoIdProveedor);
+        JLabel etiquetaNombre = new JLabel("Nombre:");
+        etiquetaNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(etiquetaNombre);
+        campoNombreProveedor = new JTextField(30);
+        campoNombreProveedor.setEditable(false);
+        campoNombreProveedor.setFont(new Font("Roboto", Font.PLAIN, 14));
+        add(campoNombreProveedor);
+        botonBuscarProveedor = new JButton("Buscar");
+        botonBuscarProveedor.setFont(new Font("Roboto", Font.BOLD, 14));
+        add(botonBuscarProveedor);
     }
 
+    public void setNombreProveedor(String nombre) {
+        campoNombreProveedor.setText(nombre);
+    }
     public void setProveedorNombre(String nombre) {
-        proveedorNombreField.setText(nombre);
+        setNombreProveedor(nombre);
     }
-    public String getProveedorId() {
-        return proveedorIdField.getText();
+    public String getIdProveedor() {
+        return campoIdProveedor.getText();
     }
-    public void setProveedorId(String id) {
-        proveedorIdField.setText(id);
+    public void setIdProveedor(String id) {
+        campoIdProveedor.setText(id);
     }
     public void addBuscarListener(ActionListener listener) {
-        buscarProveedorBtn.addActionListener(listener);
+        botonBuscarProveedor.addActionListener(listener);
+    }
+    public String getProveedorId() {
+        return getIdProveedor();
+    }
+    public void setProveedorId(String id) {
+        setIdProveedor(id);
     }
 }

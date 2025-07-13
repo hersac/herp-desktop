@@ -18,108 +18,115 @@ import java.awt.*;
 import java.util.List;
 
 public class GestionClientes extends JPanel implements ClientesListeners {
-    private final PermissionService permissionService;
-    private final ClientesController clientesController;
-    private final TercerosController tercerosController;
-    private final ClientesTable tablaClientesTable;
-    private List<ClienteEntity> listaCompletaClientes;
-    private FiltrosClientesForm filtrosForm;
-    private JTextField searchField;
+    private final PermissionService servicioPermisos;
+    private final ClientesController controladorClientes;
+    private final TercerosController controladorTerceros;
+    private final ClientesTable tablaClientes;
+    private List<ClienteEntity> listaClientes;
+    private FiltrosClientesForm formularioFiltros;
+    private JTextField campoBusqueda;
 
     public GestionClientes(DIContainer diContainer) {
-        this.permissionService = diContainer.getPermissionService();
-        this.clientesController = diContainer.getClientesController();
-        this.tercerosController = diContainer.getTercerosController();
-        this.tablaClientesTable = new ClientesTable(permissionService);
-        this.tablaClientesTable.setActionListener(this);
+        this.servicioPermisos = diContainer.getPermissionService();
+        this.controladorClientes = diContainer.getClientesController();
+        this.controladorTerceros = diContainer.getTercerosController();
+        this.tablaClientes = new ClientesTable(servicioPermisos);
+        this.tablaClientes.setActionListener(this);
+        inicializarInterfaz();
+        cargarClientes();
+    }
+
+    private void inicializarInterfaz() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
-        JLabel titleLabel = new JLabel("Gestión de Clientes");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
-        filtrosForm = new FiltrosClientesForm();
-        filtrosForm.setOnFiltrosCambiados(this::filtrarClientes);
-        searchField = new JTextField(25);
-        searchField.setMaximumSize(new Dimension(400, 30));
-        searchField.setAlignmentX(CENTER_ALIGNMENT);
-        searchField.addKeyListener(new java.awt.event.KeyAdapter() {
+        JLabel etiquetaTitulo = new JLabel("Gestión de Clientes");
+        etiquetaTitulo.setFont(new Font("Roboto", Font.BOLD, 24));
+        etiquetaTitulo.setAlignmentX(CENTER_ALIGNMENT);
+        formularioFiltros = new FiltrosClientesForm();
+        formularioFiltros.establecerAlCambiarFiltros(this::filtrarClientes);
+        campoBusqueda = new JTextField(25);
+        campoBusqueda.setMaximumSize(new Dimension(400, 30));
+        campoBusqueda.setAlignmentX(CENTER_ALIGNMENT);
+        campoBusqueda.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBusqueda.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyReleased(java.awt.event.KeyEvent e) {
                 filtrarClientes();
             }
         });
-        JButton registrarBtn = new JButton("Registrar Cliente");
+        JButton botonRegistrar = new JButton("Registrar Cliente");
         FontIcon icono = FontIcon.of(FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.setIcon(icono);
-        registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
-        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.addActionListener(e -> mostrarRegistrarCliente());
-        add(titleLabel);
+        botonRegistrar.setIcon(icono);
+        botonRegistrar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonRegistrar.setBackground(ColorsTheme.PRIMARY.get());
+        botonRegistrar.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        botonRegistrar.addActionListener(e -> mostrarRegistrarCliente());
+        add(etiquetaTitulo);
         add(Box.createVerticalStrut(10));
-        add(filtrosForm);
+        add(formularioFiltros);
         add(Box.createVerticalStrut(10));
-        JPanel panelBtnTabla = new JPanel();
-        panelBtnTabla.setLayout(new BoxLayout(panelBtnTabla, BoxLayout.X_AXIS));
-        panelBtnTabla.setOpaque(false);
-        panelBtnTabla.setMaximumSize(new Dimension(900, 40));
-        panelBtnTabla.setPreferredSize(new Dimension(900, 40));
-        panelBtnTabla.add(searchField);
-        panelBtnTabla.add(Box.createHorizontalGlue());
-        panelBtnTabla.add(registrarBtn);
-        JScrollPane scrollPane = new JScrollPane(tablaClientesTable);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setPreferredSize(new Dimension(900, 400));
-        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
-        add(panelBtnTabla);
+        JPanel panelBotonTabla = new JPanel();
+        panelBotonTabla.setLayout(new BoxLayout(panelBotonTabla, BoxLayout.X_AXIS));
+        panelBotonTabla.setOpaque(false);
+        panelBotonTabla.setMaximumSize(new Dimension(900, 40));
+        panelBotonTabla.setPreferredSize(new Dimension(900, 40));
+        panelBotonTabla.add(campoBusqueda);
+        panelBotonTabla.add(Box.createHorizontalGlue());
+        panelBotonTabla.add(botonRegistrar);
+        JScrollPane panelScroll = new JScrollPane(tablaClientes);
+        panelScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        panelScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        panelScroll.setPreferredSize(new Dimension(900, 400));
+        panelScroll.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
+        add(panelBotonTabla);
         add(Box.createVerticalStrut(10));
-        add(scrollPane);
-        cargarClientes();
+        add(panelScroll);
     }
 
     private void mostrarRegistrarCliente() {
-        RegistrarCliente dialog = new RegistrarCliente(null, this, null, permissionService, tercerosController);
-        dialog.setVisible(true);
+        RegistrarCliente dialogo = new RegistrarCliente(null, this, null, servicioPermisos, controladorTerceros);
+        dialogo.setVisible(true);
     }
 
     private void cargarClientes() {
-        listaCompletaClientes = clientesController.buscarTodos();
+        listaClientes = controladorClientes.buscarTodos();
         filtrarClientes();
     }
 
     private void filtrarClientes() {
-        String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
-        String estado = filtrosForm.getEstadoSeleccionado();
-        List<ClienteEntity> filtrados = listaCompletaClientes.stream()
-            .filter(c -> {
-                String nombre = c.getTercero() != null && c.getTercero().getNombre() != null ? c.getTercero().getNombre().toLowerCase() : "";
-                String id = c.getClienteId() != null ? c.getClienteId().toString() : "";
+        String texto = campoBusqueda.getText() != null ? campoBusqueda.getText().toLowerCase().trim() : "";
+        String estado = formularioFiltros.obtenerEstadoSeleccionado();
+        List<ClienteEntity> filtrados = listaClientes.stream()
+            .filter(cliente -> {
+                String nombre = cliente.getTercero() != null && cliente.getTercero().getNombre() != null ? cliente.getTercero().getNombre().toLowerCase() : "";
+                String id = cliente.getClienteId() != null ? cliente.getClienteId().toString() : "";
                 boolean coincideTexto = texto.isEmpty() || nombre.contains(texto) || id.contains(texto);
-                boolean coincideEstado = estado.equals("Todos")
-                    || (estado.equals("Activo") && c.isEsta_activo())
-                    || (estado.equals("Inactivo") && !c.isEsta_activo());
-                return coincideTexto && coincideEstado;
+                boolean activo = cliente.isEsta_activo();
+                if (estado.equals("Todos")) return coincideTexto;
+                if (estado.equals("Activo") && activo) return coincideTexto;
+                if (estado.equals("Inactivo") && !activo) return coincideTexto;
+                return false;
             })
             .toList();
-        tablaClientesTable.setClientes(filtrados);
+        tablaClientes.setClientes(filtrados);
     }
 
     @Override
     public void crearCliente(ClienteEntity cliente) {
-        clientesController.crear(cliente);
+        controladorClientes.crear(cliente);
         cargarClientes();
     }
+
     @Override
     public void verCliente(ClienteEntity cliente) {
-        RegistrarCliente dialog = new RegistrarCliente(null, this, cliente, permissionService, tercerosController);
-        dialog.setVisible(true);
+        RegistrarCliente dialogo = new RegistrarCliente(null, this, cliente, servicioPermisos, controladorTerceros);
+        dialogo.setVisible(true);
     }
 
     @Override
     public void actualizarCliente(ClienteEntity cliente) {
-        clientesController.actualizar(cliente.getClienteId(), cliente);
+        controladorClientes.actualizar(cliente.getClienteId(), cliente);
         cargarClientes();
         JOptionPane.showMessageDialog(this,
                 "Cliente actualizado exitosamente.",
@@ -128,11 +135,11 @@ public class GestionClientes extends JPanel implements ClientesListeners {
 
     @Override
     public void eliminarCliente(ClienteEntity cliente) {
-        int confirm = JOptionPane.showConfirmDialog(this,
+        int confirmar = JOptionPane.showConfirmDialog(this,
                 "¿Seguro que deseas eliminar al cliente?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            clientesController.eliminar(cliente.getClienteId());
+        if (confirmar == JOptionPane.YES_OPTION) {
+            controladorClientes.eliminar(cliente.getClienteId());
             cargarClientes();
             JOptionPane.showMessageDialog(this, "Cliente eliminado correctamente.",
                     "Eliminación exitosa", JOptionPane.INFORMATION_MESSAGE);

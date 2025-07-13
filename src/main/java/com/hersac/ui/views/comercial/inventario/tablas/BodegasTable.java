@@ -10,41 +10,38 @@ import java.awt.event.ActionListener;
 import java.util.Comparator;
 import java.util.EventObject;
 import java.util.List;
-
-import com.hersac.ui.views.comercial.inventario.contenidos.bodegas.GestionBodegas;
-import com.hersac.ui.views.comercial.inventario.modales.RegistrarBodega;
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
-import org.kordamp.ikonli.swing.FontIcon;
 import com.hersac.ui.views.comercial.inventario.listeners.BodegasListeners;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class BodegasTable extends JPanel {
     private final JTable tablaBodegas;
     private final DefaultTableModel modeloTabla;
-    private BodegasListeners bodegasListeners;
+    private BodegasListeners bodegasOyente;
 
     public BodegasTable() {
         setLayout(new BorderLayout());
         String[] columnas = { "ID", "Nombre", "Estado", "Fecha Creación", "Acciones" };
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 4;
+            public boolean isCellEditable(int fila, int columna) {
+                return columna == 4;
             }
         };
         tablaBodegas = new JTable(modeloTabla);
         tablaBodegas.setRowHeight(40);
         tablaBodegas.setShowGrid(false);
-        tablaBodegas.getColumnModel().getColumn(4).setCellRenderer(new AccionesRenderer());
+        tablaBodegas.getColumnModel().getColumn(4).setCellRenderer(new AccionesRenderizador());
         tablaBodegas.getColumnModel().getColumn(4).setCellEditor(new AccionesEditor());
         tablaBodegas.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int column = tablaBodegas.columnAtPoint(e.getPoint());
-                int row = tablaBodegas.rowAtPoint(e.getPoint());
-                if (column == 4 && row >= 0 && tablaBodegas.isCellEditable(row, column)) {
-                    tablaBodegas.editCellAt(row, column);
+                int columna = tablaBodegas.columnAtPoint(e.getPoint());
+                int fila = tablaBodegas.rowAtPoint(e.getPoint());
+                if (columna == 4 && fila >= 0 && tablaBodegas.isCellEditable(fila, columna)) {
+                    tablaBodegas.editCellAt(fila, columna);
                     tablaBodegas.getEditorComponent().requestFocusInWindow();
                 }
             }
@@ -71,29 +68,27 @@ public class BodegasTable extends JPanel {
         }
     }
 
-    public void setActionListener(BodegasListeners listener) {
-        this.bodegasListeners = listener;
+    public void setActionListener(BodegasListeners oyente) {
+        this.bodegasOyente = oyente;
     }
 
-    private class AccionesRenderer implements TableCellRenderer {
+    private class AccionesRenderizador implements TableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus,
-                int row, int column) {
-            if (value instanceof BodegaEntity bodega) {
+        public Component getTableCellRendererComponent(JTable tabla, Object valor, boolean seleccionado, boolean tieneFoco, int fila, int columna) {
+            if (valor instanceof BodegaEntity bodega) {
                 JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
                 panel.setOpaque(false);
-                JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver bodega", new Color(60, 130, 200));
+                JButton btnVer = crearBotonIcono(FontAwesomeSolid.EYE, "Ver bodega", new Color(60, 130, 200));
                 panel.add(btnVer);
                 boolean activa = Boolean.TRUE.equals(bodega.getEstaActiva());
-                JButton btnToggle = crearIconoBoton(
+                JButton btnToggle = crearBotonIcono(
                     activa ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
                     activa ? "Inactivar" : "Activar",
                     activa ? new Color(0, 180, 0) : Color.RED);
                 panel.add(btnToggle);
-                JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar bodega", Color.RED);
+                JButton btnEliminar = crearBotonIcono(FontAwesomeSolid.TRASH_ALT, "Eliminar bodega", Color.RED);
                 panel.add(btnEliminar);
-                panel.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                panel.setBackground(seleccionado ? tabla.getSelectionBackground() : tabla.getBackground());
                 return panel;
             }
             return new JLabel("");
@@ -108,18 +103,13 @@ public class BodegasTable extends JPanel {
             panel.setOpaque(false);
         }
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
-            if (value instanceof BodegaEntity) {
-                bodega = (BodegaEntity) value;
+        public Component getTableCellEditorComponent(JTable tabla, Object valor, boolean seleccionado, int fila, int columna) {
+            if (valor instanceof BodegaEntity) {
+                bodega = (BodegaEntity) valor;
                 panel.removeAll();
                 boolean activa = Boolean.TRUE.equals(bodega.getEstaActiva());
                 JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver bodega", new Color(60, 130, 200), e -> {
-                    JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(BodegasTable.this);
-                    GestionBodegas gestion = (GestionBodegas)bodegasListeners;
-                    new RegistrarBodega(parentFrame,
-                        gestion.getDIContainer(),
-                        bodegasListeners, bodega, true);
+                    if (bodegasOyente != null) bodegasOyente.verBodega(bodega);
                     fireEditingStopped();
                 });
                 panel.add(btnVer);
@@ -129,14 +119,12 @@ public class BodegasTable extends JPanel {
                     activa ? new Color(0, 180, 0) : Color.RED,
                     e -> {
                         bodega.setEstaActiva(!activa);
-                        if (bodegasListeners != null)
-                            bodegasListeners.actualizarBodega(bodega);
+                        if (bodegasOyente != null) bodegasOyente.actualizarBodega(bodega);
                         fireEditingStopped();
                     });
                 panel.add(btnToggle);
                 JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar bodega", Color.RED, e -> {
-                    if (bodegasListeners != null)
-                        bodegasListeners.eliminarBodega(bodega);
+                    if (bodegasOyente != null) bodegasOyente.eliminarBodega(bodega);
                     fireEditingStopped();
                 });
                 panel.add(btnEliminar);
@@ -153,23 +141,22 @@ public class BodegasTable extends JPanel {
         }
     }
 
-    private JButton crearIconoBoton(FontAwesomeSolid icono, String tooltip, Color color) {
+    private JButton crearBotonIcono(FontAwesomeSolid icono, String tooltip, Color color) {
         FontIcon icon = FontIcon.of(icono, 18, color);
-        JButton button = new JButton(icon);
-        button.setToolTipText(tooltip);
-        button.setBorderPainted(false);
-        button.setFocusPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(false);
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(36, 36));
-        return button;
+        JButton boton = new JButton(icon);
+        boton.setToolTipText(tooltip);
+        boton.setBorderPainted(false);
+        boton.setFocusPainted(false);
+        boton.setContentAreaFilled(false);
+        boton.setOpaque(false);
+        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        boton.setPreferredSize(new Dimension(36, 36));
+        return boton;
     }
 
-    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener action) {
-        JButton button = crearIconoBoton(icono, tooltip, color);
-        button.addActionListener(action);
-        return button;
+    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener accion) {
+        JButton boton = crearBotonIcono(icono, tooltip, color);
+        boton.addActionListener(accion);
+        return boton;
     }
 }
-

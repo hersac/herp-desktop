@@ -6,9 +6,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.swing.*;
-
 import com.hersac.core.di.DIContainer;
 import com.hersac.core.modules.movimientosinventarios.entities.MovimientoInventarioEntity;
 import com.hersac.ui.controllers.movimientosinventarios.MovimientosInventariosController;
@@ -18,118 +16,107 @@ import com.hersac.ui.views.comercial.inventario.modales.RegistrarMovimiento;
 import com.hersac.ui.views.comercial.inventario.tablas.MovimientosInventarioTable;
 
 public class GestionMovimientosInventarios extends JPanel {
-    private final MovimientosInventariosController movimientosController;
-    private final MovimientosInventarioTable tablaMovimientosTable = new MovimientosInventarioTable();
-    private List<MovimientoInventarioEntity> listaCompletaMovimientos;
-    private JTextField searchField;
-    private final DIContainer diContainer;
-    private FiltrosMovimientosForm filtrosMovimientosForm;
+    private final MovimientosInventariosController controladorMovimientos;
+    private final MovimientosInventarioTable tablaMovimientos = new MovimientosInventarioTable();
+    private List<MovimientoInventarioEntity> listaMovimientos;
+    private JTextField campoBusqueda;
+    private final DIContainer contenedorDI;
+    private FiltrosMovimientosForm formularioFiltros;
 
     public GestionMovimientosInventarios(DIContainer diContainer) {
-        this.diContainer = diContainer;
-        this.movimientosController = diContainer.getMovimientosInventariosController();
+        this.contenedorDI = diContainer;
+        this.controladorMovimientos = diContainer.getMovimientosInventariosController();
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
-        JLabel titleLabel = new JLabel("Gestión de Movimientos de Inventario");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
-        filtrosMovimientosForm = new FiltrosMovimientosForm();
-        filtrosMovimientosForm.setOnFiltrosCambiados(this::filtrarMovimientos);
-        JButton registrarBtn = new JButton("Registrar Movimiento");
-        registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
+        JLabel etiquetaTitulo = new JLabel("Gestión de Movimientos de Inventario");
+        etiquetaTitulo.setFont(new Font("Roboto", Font.BOLD, 24));
+        etiquetaTitulo.setAlignmentX(CENTER_ALIGNMENT);
+        formularioFiltros = new FiltrosMovimientosForm();
+        formularioFiltros.establecerAlCambiarFiltros(this::filtrarMovimientos);
+        JButton botonRegistrar = new JButton("Registrar Movimiento");
+        botonRegistrar.setFont(new Font("Roboto", Font.PLAIN, 14));
         org.kordamp.ikonli.swing.FontIcon iconoPlus = org.kordamp.ikonli.swing.FontIcon.of(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.PLUS, 18, ColorsTheme.TEXT_PRIMARY.get());
-        registrarBtn.setIcon(iconoPlus);
-        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
-        registrarBtn.setForeground(ColorsTheme.TEXT_PRIMARY.get());
-        searchField = new JTextField(25);
-        searchField.setMaximumSize(new Dimension(400, 30));
-        searchField.setAlignmentX(CENTER_ALIGNMENT);
-        searchField.addKeyListener(new KeyAdapter() {
+        botonRegistrar.setIcon(iconoPlus);
+        botonRegistrar.setBackground(ColorsTheme.PRIMARY.get());
+        botonRegistrar.setForeground(ColorsTheme.TEXT_PRIMARY.get());
+        campoBusqueda = new JTextField(25);
+        campoBusqueda.setMaximumSize(new Dimension(400, 30));
+        campoBusqueda.setAlignmentX(CENTER_ALIGNMENT);
+        campoBusqueda.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBusqueda.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 filtrarMovimientos();
             }
         });
-        JPanel panelBtn = new JPanel();
-        panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
-        panelBtn.setOpaque(false);
-        panelBtn.setPreferredSize(new Dimension(1200, 40));
-        panelBtn.setMaximumSize(new Dimension(1200, 40));
-        panelBtn.add(searchField);
-        panelBtn.add(Box.createHorizontalGlue());
-        panelBtn.add(registrarBtn);
-        JPanel panelBtnExpansible = new JPanel();
-        panelBtnExpansible.setLayout(new BoxLayout(panelBtnExpansible, BoxLayout.X_AXIS));
-        panelBtnExpansible.setOpaque(false);
-        panelBtnExpansible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-        panelBtnExpansible.add(panelBtn);
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-        JScrollPane scrollPane = new JScrollPane(tablaMovimientosTable);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setAlignmentX(CENTER_ALIGNMENT);
-        scrollPane.setPreferredSize(new Dimension(1200, 400));
-        scrollPane.setMaximumSize(new Dimension(1200, Integer.MAX_VALUE));
+        JPanel panelBotones = new JPanel();
+        panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.X_AXIS));
+        panelBotones.setOpaque(false);
+        panelBotones.setPreferredSize(new Dimension(1200, 40));
+        panelBotones.setMaximumSize(new Dimension(1200, 40));
+        panelBotones.add(campoBusqueda);
+        panelBotones.add(Box.createHorizontalGlue());
+        panelBotones.add(botonRegistrar);
+        JPanel panelBotonesExpansible = new JPanel();
+        panelBotonesExpansible.setLayout(new BoxLayout(panelBotonesExpansible, BoxLayout.X_AXIS));
+        panelBotonesExpansible.setOpaque(false);
+        panelBotonesExpansible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBotonesExpansible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        panelBotonesExpansible.add(Box.createHorizontalGlue());
+        panelBotonesExpansible.add(panelBotones);
+        panelBotonesExpansible.add(Box.createHorizontalGlue());
+        JScrollPane panelScroll = new JScrollPane(tablaMovimientos);
+        panelScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        panelScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        panelScroll.setAlignmentX(CENTER_ALIGNMENT);
+        panelScroll.setPreferredSize(new Dimension(1200, 400));
+        panelScroll.setMaximumSize(new Dimension(1200, Integer.MAX_VALUE));
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(titleLabel);
+        add(etiquetaTitulo);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(filtrosMovimientosForm);
+        add(formularioFiltros);
         add(Box.createRigidArea(new Dimension(0, 100)));
-        add(panelBtnExpansible);
+        add(panelBotonesExpansible);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(scrollPane);
+        add(panelScroll);
         add(Box.createVerticalGlue());
-        List<MovimientoInventarioEntity> listaMovimientos = obtenerMovimientos();
-        this.listaCompletaMovimientos = listaMovimientos;
-        tablaMovimientosTable.setMovimientos(listaMovimientos);
-        registrarBtn.addActionListener(e -> {
+        listaMovimientos = obtenerMovimientos();
+        tablaMovimientos.establecerMovimientos(listaMovimientos);
+        botonRegistrar.addActionListener(e -> {
             RegistrarMovimiento modal = new RegistrarMovimiento(
-                (JFrame) SwingUtilities.getWindowAncestor(this), null, diContainer
+                (JFrame) SwingUtilities.getWindowAncestor(this), null, contenedorDI
             );
             MovimientoInventarioEntity nuevoMovimiento = modal.getMovimientoRegistrado();
             if (nuevoMovimiento != null) {
-                movimientosController.crear(nuevoMovimiento);
-                listaCompletaMovimientos = obtenerMovimientos();
-                tablaMovimientosTable.setMovimientos(listaCompletaMovimientos);
+                controladorMovimientos.crear(nuevoMovimiento);
+                listaMovimientos = obtenerMovimientos();
+                tablaMovimientos.establecerMovimientos(listaMovimientos);
             }
         });
-
-        add(filtrosMovimientosForm);
     }
 
     private List<MovimientoInventarioEntity> obtenerMovimientos() {
-        return movimientosController.buscarTodos();
-    }
-
-    public DIContainer getDIContainer() {
-        return diContainer;
+        return controladorMovimientos.buscarTodos();
     }
 
     private void filtrarMovimientos() {
-        final String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
-        final String tipoMovimiento = filtrosMovimientosForm.getTipoMovimientoSeleccionado();
-        final String producto = filtrosMovimientosForm.getProductoSeleccionado();
-        final String bodega = filtrosMovimientosForm.getBodegaSeleccionada();
-        final String usuario = filtrosMovimientosForm.getUsuarioSeleccionado();
-        final String tipoReferencia = filtrosMovimientosForm.getTipoReferenciaSeleccionado();
-        final java.time.LocalDate desde = filtrosMovimientosForm.getFechaDesde();
-        final java.time.LocalDate hasta = filtrosMovimientosForm.getFechaHasta();
-        List<MovimientoInventarioEntity> filtrados = listaCompletaMovimientos.stream()
+        String texto = campoBusqueda.getText() != null ? campoBusqueda.getText().toLowerCase().trim() : "";
+        String tipoMovimiento = formularioFiltros.obtenerTipoMovimientoSeleccionado();
+        String producto = formularioFiltros.obtenerProductoSeleccionado();
+        String bodega = formularioFiltros.obtenerBodegaSeleccionada();
+        String usuario = formularioFiltros.obtenerUsuarioSeleccionado();
+        String tipoReferencia = formularioFiltros.obtenerTipoReferenciaSeleccionado();
+        java.time.LocalDate desde = formularioFiltros.obtenerFechaDesde();
+        java.time.LocalDate hasta = formularioFiltros.obtenerFechaHasta();
+        List<MovimientoInventarioEntity> filtrados = listaMovimientos.stream()
                 .filter(m -> {
                     String idStr = String.valueOf(m.getMovimientoInventarioId());
                     String tipo = m.getTipoMovimiento() != null ? m.getTipoMovimiento().toLowerCase() : "";
                     String item = m.getItem() != null ? m.getItem().getNombre().toLowerCase() : "";
                     String bodegaStr = m.getBodega() != null ? m.getBodega().getNombre().toLowerCase() : "";
                     String usuarioStr = m.getUsuarioCreacion() != null ? m.getUsuarioCreacion().getNombre().toLowerCase() : "";
-                    String referenciaStr = null;
-                    switch(m.getReferenciaTipo()) {
-                        case 1: referenciaStr = "COMPRA"; break;
-                        case 2: referenciaStr = "VENTA"; break;
-                        default: referenciaStr = "";
-                    }
+                    String referenciaStr = m.getReferenciaTipo() == 1 ? "COMPRA" : m.getReferenciaTipo() == 2 ? "VENTA" : "";
                     boolean coincideTexto = texto.isEmpty()
                         || idStr.contains(texto)
                         || tipo.contains(texto)
@@ -146,16 +133,18 @@ public class GestionMovimientosInventarios extends JPanel {
                     if (desde != null && hasta != null && m.getFechaCreacion() != null) {
                         java.time.LocalDate fecha = m.getFechaCreacion().toLocalDate();
                         coincideFecha = (fecha.compareTo(desde) >= 0 && fecha.compareTo(hasta) <= 0);
-                    } else if (desde != null && m.getFechaCreacion() != null) {
+                    }
+                    if (desde != null && m.getFechaCreacion() != null && hasta == null) {
                         java.time.LocalDate fecha = m.getFechaCreacion().toLocalDate();
                         coincideFecha = fecha.compareTo(desde) >= 0;
-                    } else if (hasta != null && m.getFechaCreacion() != null) {
+                    }
+                    if (hasta != null && m.getFechaCreacion() != null && desde == null) {
                         java.time.LocalDate fecha = m.getFechaCreacion().toLocalDate();
                         coincideFecha = fecha.compareTo(hasta) <= 0;
                     }
                     return coincideTexto && coincideTipo && coincideProducto && coincideBodega && coincideUsuario && coincideReferencia && coincideFecha;
                 })
                 .collect(Collectors.toList());
-        tablaMovimientosTable.setMovimientos(filtrados);
+        tablaMovimientos.establecerMovimientos(filtrados);
     }
 }

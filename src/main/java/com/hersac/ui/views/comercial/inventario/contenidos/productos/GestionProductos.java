@@ -21,103 +21,87 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GestionProductos extends JPanel implements ProductosListeners {
-    private JFrame frame = new JFrame("Registrar Producto");
-    private final ProductosController productosController;
-    private final ProductosTable tablaProductosTable = new ProductosTable();
-    private List<ProductoEntity> listaCompletaProductos;
-    private FiltrosProductosForm filtrosForm;
-    private JTextField searchField;
+    private JFrame ventana;
+    private final ProductosController controladorProductos;
+    private final ProductosTable tablaProductos;
+    private List<ProductoEntity> listaProductos;
+    private FiltrosProductosForm filtros;
+    private JTextField campoBusqueda;
 
-    public GestionProductos(DIContainer diContainer) {
-        this.productosController = diContainer.getProductosController();
-        this.tablaProductosTable.setActionListener(this);
+    public GestionProductos(DIContainer contenedorDI) {
+        this.ventana = new JFrame("Registrar Producto");
+        this.controladorProductos = contenedorDI.getProductosController();
+        this.tablaProductos = new ProductosTable();
+        this.tablaProductos.setActionListener(this);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
-
-        JLabel titleLabel = new JLabel("Gestión de Productos");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
-
-        filtrosForm = new FiltrosProductosForm();
-
-        JButton registrarBtn = new JButton("Registrar Producto");
-        FontIcon iconRegistrar = FontIcon.of(FontAwesomeSolid.PLUS, 18, Color.WHITE);
-        registrarBtn.setFont(new Font("Roboto", Font.PLAIN, 14));
-        registrarBtn.setBackground(ColorsTheme.PRIMARY.get());
-        registrarBtn.setForeground(Color.WHITE);
-        registrarBtn.setIcon(iconRegistrar);
-        registrarBtn.setFocusPainted(false);
-        registrarBtn.setBorderPainted(false);
-        registrarBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        registrarBtn.setAlignmentX(CENTER_ALIGNMENT);
-
-        searchField = new JTextField(25);
-        searchField.setMaximumSize(new Dimension(400, 30));
-        searchField.setAlignmentX(CENTER_ALIGNMENT);
-        searchField.addKeyListener(new KeyAdapter() {
+        JLabel etiquetaTitulo = new JLabel("Gestión de Productos");
+        etiquetaTitulo.setFont(new Font("Roboto", Font.BOLD, 24));
+        etiquetaTitulo.setAlignmentX(CENTER_ALIGNMENT);
+        filtros = new FiltrosProductosForm();
+        JButton botonRegistrar = new JButton("Registrar Producto");
+        FontIcon icono = FontIcon.of(FontAwesomeSolid.PLUS, 18, Color.WHITE);
+        botonRegistrar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonRegistrar.setBackground(ColorsTheme.PRIMARY.get());
+        botonRegistrar.setForeground(Color.WHITE);
+        botonRegistrar.setIcon(icono);
+        botonRegistrar.setFocusPainted(false);
+        botonRegistrar.setBorderPainted(false);
+        botonRegistrar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        botonRegistrar.setAlignmentX(CENTER_ALIGNMENT);
+        campoBusqueda = new JTextField(25);
+        campoBusqueda.setMaximumSize(new Dimension(400, 30));
+        campoBusqueda.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBusqueda.setAlignmentX(CENTER_ALIGNMENT);
+        campoBusqueda.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
                 filtrarProductos();
             }
         });
-        filtrosForm.setOnFiltrosCambiados(this::filtrarProductos);
-
-        JPanel panelBtn = new JPanel();
-        panelBtn.setLayout(new BoxLayout(panelBtn, BoxLayout.X_AXIS));
-        panelBtn.setOpaque(false);
-        panelBtn.setPreferredSize(new Dimension(1200, 40));
-        panelBtn.setMaximumSize(new Dimension(1200, 40));
-        panelBtn.add(searchField);
-        panelBtn.add(Box.createHorizontalGlue());
-        panelBtn.add(registrarBtn);
-
-        JPanel panelBtnExpansible = new JPanel();
-        panelBtnExpansible.setLayout(new BoxLayout(panelBtnExpansible, BoxLayout.X_AXIS));
-        panelBtnExpansible.setOpaque(false);
-        panelBtnExpansible.setPreferredSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-        panelBtnExpansible.add(panelBtn);
-        panelBtnExpansible.add(Box.createHorizontalGlue());
-
-        JScrollPane scrollPane = new JScrollPane(tablaProductosTable);
+        filtros.establecerAlCambiarFiltros(this::filtrarProductos);
+        JPanel panelBoton = new JPanel();
+        panelBoton.setLayout(new BoxLayout(panelBoton, BoxLayout.X_AXIS));
+        panelBoton.setOpaque(false);
+        panelBoton.setPreferredSize(new Dimension(1200, 40));
+        panelBoton.setMaximumSize(new Dimension(1200, 40));
+        panelBoton.add(campoBusqueda);
+        panelBoton.add(Box.createHorizontalGlue());
+        panelBoton.add(botonRegistrar);
+        JScrollPane scrollPane = new JScrollPane(tablaProductos);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setAlignmentX(CENTER_ALIGNMENT);
         scrollPane.setPreferredSize(new Dimension(1200, 400));
         scrollPane.setMaximumSize(new Dimension(1200, Integer.MAX_VALUE));
-
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(titleLabel);
+        add(etiquetaTitulo);
         add(Box.createRigidArea(new Dimension(0, 10)));
-        add(filtrosForm);
+        add(filtros);
         add(Box.createRigidArea(new Dimension(0, 20)));
-        add(panelBtnExpansible);
+        add(panelBoton);
         add(Box.createRigidArea(new Dimension(0, 10)));
         add(scrollPane);
         add(Box.createVerticalGlue());
-
-        List<ProductoEntity> listaProductos = obtenerProductos();
-        this.listaCompletaProductos = listaProductos;
-        tablaProductosTable.setProductos(listaProductos);
+        listaProductos = obtenerProductos();
+        tablaProductos.setProductos(listaProductos);
         actualizarUnidadesFiltro();
-
-        registrarBtn.addMouseListener(new MouseAdapter() {
+        botonRegistrar.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                new RegistrarProducto(frame, GestionProductos.this, null);
+                new RegistrarProducto(ventana, GestionProductos.this, null);
             }
             @Override
             public void mouseEntered(MouseEvent e) {
-                registrarBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                botonRegistrar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
         });
     }
 
     @Override
     public void crearProducto(ProductoEntity producto) {
-        productosController.crear(producto);
+        controladorProductos.crear(producto);
         actualizarTabla();
         actualizarUnidadesFiltro();
         JOptionPane.showMessageDialog(this,
@@ -127,12 +111,12 @@ public class GestionProductos extends JPanel implements ProductosListeners {
 
     @Override
     public void verProducto(ProductoEntity producto) {
-        new RegistrarProducto(frame, this, producto);
+        new RegistrarProducto(ventana, this, producto);
     }
 
     @Override
     public void actualizarProducto(ProductoEntity producto) {
-        productosController.actualizar(producto.getProductoId(), producto);
+        controladorProductos.actualizar(producto.getProductoId(), producto);
         actualizarTabla();
         actualizarUnidadesFiltro();
         JOptionPane.showMessageDialog(this,
@@ -142,11 +126,11 @@ public class GestionProductos extends JPanel implements ProductosListeners {
 
     @Override
     public void eliminarProducto(ProductoEntity producto) {
-        int confirm = JOptionPane.showConfirmDialog(this,
+        int confirmacion = JOptionPane.showConfirmDialog(this,
                 "¿Seguro que deseas eliminar el producto " + producto.getNombre() + "?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            productosController.eliminar(producto.getProductoId());
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            controladorProductos.eliminar(producto.getProductoId());
             actualizarTabla();
             JOptionPane.showMessageDialog(this, "Producto eliminado correctamente.",
                     "Eliminación exitosa", JOptionPane.INFORMATION_MESSAGE);
@@ -154,25 +138,25 @@ public class GestionProductos extends JPanel implements ProductosListeners {
     }
 
     private void actualizarTabla() {
-        this.listaCompletaProductos = obtenerProductos();
+        listaProductos = obtenerProductos();
         filtrarProductos();
     }
 
     private void actualizarUnidadesFiltro() {
-        List<String> unidades = listaCompletaProductos.stream()
+        List<String> unidades = listaProductos.stream()
             .map(ProductoEntity::getUnidadMedida)
             .filter(u -> u != null && !u.isEmpty())
             .distinct()
             .sorted()
             .toList();
-        filtrosForm.setUnidades(unidades);
+        filtros.establecerUnidades(unidades);
     }
 
     private void filtrarProductos() {
-        final String texto = searchField.getText() != null ? searchField.getText().toLowerCase().trim() : "";
-        final String estado = filtrosForm.getEstadoSeleccionado();
-        final String unidadSeleccionada = filtrosForm.getUnidadSeleccionada() != null ? filtrosForm.getUnidadSeleccionada() : "Todas";
-        List<ProductoEntity> filtrados = listaCompletaProductos.stream()
+        String texto = campoBusqueda.getText() != null ? campoBusqueda.getText().toLowerCase().trim() : "";
+        String estado = filtros.obtenerEstadoSeleccionado();
+        String unidadSeleccionada = filtros.obtenerUnidadSeleccionada() != null ? filtros.obtenerUnidadSeleccionada() : "Todas";
+        List<ProductoEntity> filtrados = listaProductos.stream()
                 .filter(p -> {
                     String productoIdStr = String.valueOf(p.getProductoId());
                     String nombre = p.getNombre() != null ? p.getNombre().toLowerCase() : "";
@@ -194,11 +178,10 @@ public class GestionProductos extends JPanel implements ProductosListeners {
                     return coincideTexto && coincideEstado && coincideUnidad;
                 })
                 .collect(Collectors.toList());
-
-        tablaProductosTable.setProductos(filtrados);
+        tablaProductos.setProductos(filtrados);
     }
 
     private List<ProductoEntity> obtenerProductos() {
-        return productosController.buscarTodos();
+        return controladorProductos.buscarTodos();
     }
 }

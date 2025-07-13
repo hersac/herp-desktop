@@ -12,24 +12,24 @@ import java.net.URL;
 
 public class SidebarComponent extends JPanel {
 
-    private final Color BACKGROUND_COLOR = ColorsTheme.BACKGROUND.get();
-    private final Color TEXT_COLOR = ColorsTheme.TEXT_PRIMARY.get();
+    private final Color COLOR_FONDO = ColorsTheme.BACKGROUND.get();
+    private final Color COLOR_TEXTO = ColorsTheme.TEXT_PRIMARY.get();
 
     public SidebarComponent() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setPreferredSize(new Dimension(150, 0));
-        setBackground(BACKGROUND_COLOR);
+        setBackground(COLOR_FONDO);
 
-        Font labelFont = new Font("Roboto", Font.BOLD, 14);
+        Font fuenteLabel = new Font("Roboto", Font.BOLD, 14);
 
         add(crearSeccionSuperior());
-        add(createOptionPanel("Módulos", labelFont));
+        add(crearPanelOpcion("Informes", fuenteLabel));
         add(Box.createVerticalStrut(10));
-        add(createOptionPanel("Compañía", labelFont));
+        add(crearPanelOpcion("Calendario", fuenteLabel));
         add(Box.createVerticalStrut(10));
-        add(createOptionPanel("Terceros", labelFont));
+        add(crearPanelOpcion("Integraciones", fuenteLabel));
         add(Box.createVerticalStrut(10));
-        add(createOptionPanel("Reportes", labelFont));
+        add(crearPanelOpcion("Socios", fuenteLabel));
     }
 
     private JPanel crearSeccionSuperior() {
@@ -38,58 +38,59 @@ public class SidebarComponent extends JPanel {
         panelSuperior.setOpaque(false);
         panelSuperior.setMaximumSize(new Dimension(150, 130));
 
-        URL avatarURL = getClass().getResource("/images/avatar.jpeg");
-        ImageIcon avatarIcon = new ImageIcon(avatarURL);
+        URL urlAvatar = getClass().getResource("/images/avatar.jpeg");
+        ImageIcon iconoAvatar = new ImageIcon(urlAvatar);
 
-        Icon iconConfiguraciones = FontIcon.of(FontAwesomeSolid.COG, 16, TEXT_COLOR);
-        Icon iconNotificaciones = FontIcon.of(FontAwesomeSolid.BELL, 16, TEXT_COLOR);
+        Icon iconoConfiguraciones = FontIcon.of(FontAwesomeSolid.COG, 16, COLOR_TEXTO);
+        Icon iconoNotificaciones = FontIcon.of(FontAwesomeSolid.BELL, 16, COLOR_TEXTO);
 
-        JPanel panelAvatar = new AvatarPanelCircular(avatarIcon);
-        JPanel panelConfiguraciones = new IconoPanelCircular(iconConfiguraciones);
-        JPanel panelNotificaciones = new IconoPanelCircular(iconNotificaciones);
+        JPanel panelAvatar = new AvatarPanelCircular(iconoAvatar);
+        JPanel panelConfiguraciones = new IconoPanelCircular(iconoConfiguraciones);
+        JPanel panelNotificaciones = new IconoPanelCircular(iconoNotificaciones);
 
-        abrirOpcion(panelAvatar, () -> System.out.println("Avatar clicked"));
-        abrirOpcion(panelConfiguraciones, () -> System.out.println("Configuraciones clicked"));
-        abrirOpcion(panelNotificaciones, () -> System.out.println("Notificaciones clicked"));
+        agregarAccion(panelAvatar, () -> System.out.println("Avatar clickeado"));
+        agregarAccion(panelConfiguraciones, () -> System.out.println("Configuraciones clickeado"));
+        agregarAccion(panelNotificaciones, () -> System.out.println("Notificaciones clickeado"));
 
-        JPanel panelContenedorAvatar = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        panelContenedorAvatar.setOpaque(false);
-        panelContenedorAvatar.add(panelAvatar);
+        JPanel contenedorAvatar = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        contenedorAvatar.setOpaque(false);
+        contenedorAvatar.add(panelAvatar);
 
-        JPanel panelContenedorBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        panelContenedorBotones.setOpaque(false);
-        panelContenedorBotones.add(panelConfiguraciones);
-        panelContenedorBotones.add(panelNotificaciones);
+        JPanel contenedorBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        contenedorBotones.setOpaque(false);
+        contenedorBotones.add(panelConfiguraciones);
+        contenedorBotones.add(panelNotificaciones);
 
-        panelSuperior.add(panelContenedorAvatar);
+        panelSuperior.add(contenedorAvatar);
         panelSuperior.add(Box.createVerticalStrut(10));
-        panelSuperior.add(panelContenedorBotones);
+        panelSuperior.add(contenedorBotones);
 
         return panelSuperior;
     }
 
-    private JPanel createOptionPanel(String text, Font font) {
-        JPanel optionPanel = new JPanel(new GridBagLayout());
-        optionPanel.setPreferredSize(new Dimension(150, 50));
-        optionPanel.setMaximumSize(new Dimension(150, 50));
-        optionPanel.setBackground(BACKGROUND_COLOR);
+    private JPanel crearPanelOpcion(String texto, Font fuente) {
+        JPanel panelOpcion = new JPanel(new GridBagLayout());
+        panelOpcion.setPreferredSize(new Dimension(150, 50));
+        panelOpcion.setMaximumSize(new Dimension(150, 50));
+        panelOpcion.setBackground(COLOR_FONDO);
 
-        JLabel label = new JLabel(text);
-        label.setFont(font);
-        label.setForeground(TEXT_COLOR);
-        label.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel etiqueta = new JLabel(texto);
+        etiqueta.setFont(fuente);
+        etiqueta.setForeground(COLOR_TEXTO);
+        etiqueta.setHorizontalAlignment(SwingConstants.CENTER);
+        etiqueta.setFont(new Font("Roboto", Font.BOLD, 14));
 
-        optionPanel.add(label);
-        abrirOpcion(optionPanel, () -> System.out.println(text + " clicked"));
+        panelOpcion.add(etiqueta);
+        agregarAccion(panelOpcion, () -> System.out.println(texto + " clickeado"));
 
-        return optionPanel;
+        return panelOpcion;
     }
 
-    private void abrirOpcion(JPanel panel, Runnable action) {
+    private void agregarAccion(JPanel panel, Runnable accion) {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                action.run();
+                accion.run();
             }
 
             @Override

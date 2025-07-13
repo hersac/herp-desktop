@@ -11,33 +11,33 @@ import com.hersac.core.modules.usuarios.entities.UsuarioEntity;
 import com.hersac.ui.views.comercial.inventario.listeners.ProductosListeners;
 
 public class RegistrarProducto extends JDialog {
-    private JTextField codigoField;
-    private JTextField nombreField;
-    private JTextField descripcionField;
-    private JTextField unidadMedidaField;
-    private JTextField precioBaseField;
-    private JCheckBox activoCheckBox;
+    private JTextField campoCodigo;
+    private JTextField campoNombre;
+    private JTextField campoDescripcion;
+    private JTextField campoUnidadMedida;
+    private JTextField campoPrecioBase;
+    private JCheckBox cajaActiva;
     private ProductoEntity productoRegistrado;
-    private final ProductosListeners listener;
+    private final ProductosListeners oyente;
     private final boolean esEdicion;
 
-    public RegistrarProducto(JFrame parent, ProductosListeners listener, ProductoEntity productoParaEditar) {
-        super(parent, productoParaEditar != null ? "Actualizar Producto" : "Registrar Producto", true);
-        this.listener = listener;
+    public RegistrarProducto(JFrame padre, ProductosListeners oyente, ProductoEntity productoParaEditar) {
+        super(padre, productoParaEditar != null ? "Actualizar Producto" : "Registrar Producto", true);
+        this.oyente = oyente;
         this.productoRegistrado = productoParaEditar;
         this.esEdicion = productoParaEditar != null;
-        initComponents();
+        inicializarComponentes();
     }
 
-    private void initComponents() {
+    private void inicializarComponentes() {
         configurarVentana();
-        JPanel formPanel = crearCampos();
+        JPanel panelFormulario = crearCampos();
         if (esEdicion && productoRegistrado != null) {
             cargarDatosEdicion();
         }
-        JPanel buttonPanel = crearPanelBotones();
-        add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        JPanel panelBotones = crearPanelBotones();
+        add(panelFormulario, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
         setVisible(true);
     }
 
@@ -49,92 +49,108 @@ public class RegistrarProducto extends JDialog {
     }
 
     private JPanel crearCampos() {
-        JPanel formPanel = new JPanel(new GridLayout(6, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        codigoField = new JTextField();
-        aplicarFiltroMayusculas(codigoField);
-        nombreField = new JTextField();
-        aplicarFiltroMayusculas(nombreField);
-        descripcionField = new JTextField();
-        unidadMedidaField = new JTextField();
-        aplicarFiltroMayusculas(unidadMedidaField);
-        precioBaseField = new JTextField();
-        activoCheckBox = new JCheckBox("Activo", true);
-
-        formPanel.add(new JLabel("Código:"));
-        formPanel.add(codigoField);
-        formPanel.add(new JLabel("Nombre:"));
-        formPanel.add(nombreField);
-        formPanel.add(new JLabel("Descripción:"));
-        formPanel.add(descripcionField);
-        formPanel.add(new JLabel("Unidad de Medida:"));
-        formPanel.add(unidadMedidaField);
-        formPanel.add(new JLabel("Precio Base:"));
-        formPanel.add(precioBaseField);
-        formPanel.add(new JLabel("¿Está activo?:"));
-        formPanel.add(activoCheckBox);
-        return formPanel;
+        JPanel panel = new JPanel(new GridLayout(6, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        campoCodigo = new JTextField();
+        campoCodigo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        aplicarFiltroMayusculas(campoCodigo);
+        campoNombre = new JTextField();
+        campoNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        aplicarFiltroMayusculas(campoNombre);
+        campoDescripcion = new JTextField();
+        campoDescripcion.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoUnidadMedida = new JTextField();
+        campoUnidadMedida.setFont(new Font("Roboto", Font.PLAIN, 14));
+        aplicarFiltroMayusculas(campoUnidadMedida);
+        campoPrecioBase = new JTextField();
+        campoPrecioBase.setFont(new Font("Roboto", Font.PLAIN, 14));
+        cajaActiva = new JCheckBox("Activo", true);
+        cajaActiva.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panel.add(crearEtiqueta("Código:"));
+        panel.add(campoCodigo);
+        panel.add(crearEtiqueta("Nombre:"));
+        panel.add(campoNombre);
+        panel.add(crearEtiqueta("Descripción:"));
+        panel.add(campoDescripcion);
+        panel.add(crearEtiqueta("Unidad de Medida:"));
+        panel.add(campoUnidadMedida);
+        panel.add(crearEtiqueta("Precio Base:"));
+        panel.add(campoPrecioBase);
+        panel.add(crearEtiqueta("¿Está activo?:"));
+        panel.add(cajaActiva);
+        return panel;
     }
 
-    private void aplicarFiltroMayusculas(JTextField field) {
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DocumentFilter() {
+    private JLabel crearEtiqueta(String texto) {
+        JLabel etiqueta = new JLabel(texto);
+        etiqueta.setFont(new Font("Roboto", Font.PLAIN, 14));
+        return etiqueta;
+    }
+
+    private void aplicarFiltroMayusculas(JTextField campo) {
+        ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
-            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                if (string != null) {
-                    super.insertString(fb, offset, string.toUpperCase(), attr);
+            public void insertString(FilterBypass fb, int offset, String cadena, AttributeSet attr) throws BadLocationException {
+                if (cadena != null) {
+                    super.insertString(fb, offset, cadena.toUpperCase(), attr);
                 }
             }
             @Override
-            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                if (text != null) {
-                    super.replace(fb, offset, length, text.toUpperCase(), attrs);
+            public void replace(FilterBypass fb, int offset, int length, String texto, AttributeSet attrs) throws BadLocationException {
+                if (texto != null) {
+                    super.replace(fb, offset, length, texto.toUpperCase(), attrs);
                 }
             }
         });
     }
 
     private void cargarDatosEdicion() {
-        codigoField.setText(productoRegistrado.getCodigo());
-        nombreField.setText(productoRegistrado.getNombre());
-        descripcionField.setText(productoRegistrado.getDescripcion());
-        unidadMedidaField.setText(productoRegistrado.getUnidadMedida());
-        precioBaseField.setText(String.valueOf(productoRegistrado.getPrecioBase()));
-        activoCheckBox.setSelected(productoRegistrado.isEstadoActivo());
+        campoCodigo.setText(productoRegistrado.getCodigo());
+        campoNombre.setText(productoRegistrado.getNombre());
+        campoDescripcion.setText(productoRegistrado.getDescripcion());
+        campoUnidadMedida.setText(productoRegistrado.getUnidadMedida());
+        campoPrecioBase.setText(String.valueOf(productoRegistrado.getPrecioBase()));
+        cajaActiva.setSelected(productoRegistrado.isEstadoActivo());
     }
 
     private JPanel crearPanelBotones() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton guardarBtn = new JButton(esEdicion ? "Actualizar" : "Guardar");
-        JButton cancelarBtn = new JButton("Cancelar");
-        guardarBtn.addActionListener(e -> guardarProducto());
-        cancelarBtn.addActionListener(e -> dispose());
-        buttonPanel.add(guardarBtn);
-        buttonPanel.add(cancelarBtn);
-        return buttonPanel;
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton botonGuardar = new JButton(esEdicion ? "Actualizar" : "Guardar");
+        botonGuardar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonGuardar.setFocusPainted(false);
+        botonGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        botonGuardar.addActionListener(e -> guardarProducto());
+        panel.add(botonGuardar);
+        JButton botonCancelar = new JButton("Cancelar");
+        botonCancelar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonCancelar.setFocusPainted(false);
+        botonCancelar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        botonCancelar.addActionListener(e -> dispose());
+        panel.add(botonCancelar);
+        return panel;
     }
 
     private void guardarProducto() {
         if (productoRegistrado == null) {
             productoRegistrado = new ProductoEntity();
         }
-        productoRegistrado.setCodigo(codigoField.getText());
-        productoRegistrado.setNombre(nombreField.getText());
-        productoRegistrado.setDescripcion(descripcionField.getText());
-        productoRegistrado.setUnidadMedida(unidadMedidaField.getText());
+        productoRegistrado.setCodigo(campoCodigo.getText());
+        productoRegistrado.setNombre(campoNombre.getText());
+        productoRegistrado.setDescripcion(campoDescripcion.getText());
+        productoRegistrado.setUnidadMedida(campoUnidadMedida.getText());
         try {
-            productoRegistrado.setPrecioBase(Double.parseDouble(precioBaseField.getText()));
+            productoRegistrado.setPrecioBase(Double.parseDouble(campoPrecioBase.getText()));
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Precio base inválido", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        productoRegistrado.setEstadoActivo(activoCheckBox.isSelected());
+        productoRegistrado.setEstadoActivo(cajaActiva.isSelected());
         productoRegistrado.setUsuarioActualizacion(UsuarioEntity.builder().usuarioId(1L).build());
         if (!esEdicion) {
             productoRegistrado.setUsuarioCreacion(UsuarioEntity.builder().usuarioId(1L).build());
-            if (listener != null) listener.crearProducto(productoRegistrado);
+            if (oyente != null) oyente.crearProducto(productoRegistrado);
         } else {
-            if (listener != null) listener.actualizarProducto(productoRegistrado);
+            if (oyente != null) oyente.actualizarProducto(productoRegistrado);
         }
         dispose();
     }

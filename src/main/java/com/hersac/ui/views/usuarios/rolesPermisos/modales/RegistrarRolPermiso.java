@@ -2,25 +2,23 @@ package com.hersac.ui.views.usuarios.rolesPermisos.modales;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 import com.hersac.core.modules.roles.entities.RolEntity;
 import com.hersac.core.modules.permisos.entities.PermisoEntity;
 import com.hersac.ui.views.usuarios.rolesPermisos.tablas.PermisosTable;
 
 public class RegistrarRolPermiso extends JDialog {
-    public JTextField nombreField;
-    public JTextArea descripcionArea;
-    public JCheckBox activoCheck;
-    public JButton guardarBtn;
+    public JTextField campoNombre;
+    public JTextArea areaDescripcion;
+    public JCheckBox checkActivo;
+    public JButton botonGuardar;
     public boolean guardado = false;
     public RolEntity rolCreado;
     public List<Long> permisosSeleccionados;
-    public PermisosTable permisosTable;
-    public JComboBox<String> moduloSelector;
+    public PermisosTable tablaPermisos;
+    public JComboBox<String> selectorModulo;
     private static final String[] MODULOS = {"Comercial", "Financiero", "Usuarios", "Terceros"};
     private static final String[][] SUBMODULOS = {
         {"Clientes", "Ventas", "Compras", "Inventario", "Reportes (Comercial)"},
@@ -28,132 +26,139 @@ public class RegistrarRolPermiso extends JDialog {
         {"Gestión de usuarios", "Roles y permisos", "Auditoría"},
         {"Terceros"}
     };
-    private Map<String, Boolean[]> permisosSeleccionadosMap = new HashMap<>();
+    private Map<String, Boolean[]> mapaPermisosSeleccionados = new HashMap<>();
 
-    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos) {
-        super(parent, "Registrar Rol", true);
+    public RegistrarRolPermiso(JFrame padre, List<PermisoEntity> permisos) {
+        super(padre, "Registrar Rol", true);
         setLayout(new BorderLayout(10, 10));
         setSize(500, 600);
-        setLocationRelativeTo(parent);
+        setLocationRelativeTo(padre);
 
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel panelFormulario = new JPanel();
+        panelFormulario.setLayout(new BoxLayout(panelFormulario, BoxLayout.Y_AXIS));
+        panelFormulario.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel nombreLabel = new JLabel("Nombre del Rol:");
-        nombreLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        formPanel.add(nombreLabel);
-        nombreField = new JTextField();
-        nombreField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        nombreField.setPreferredSize(new Dimension(200, 30));
-        nombreField.setMinimumSize(new Dimension(100, 30));
-        formPanel.add(nombreField);
+        JLabel etiquetaNombre = new JLabel("Nombre del Rol:");
+        etiquetaNombre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        etiquetaNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelFormulario.add(etiquetaNombre);
+        campoNombre = new JTextField();
+        campoNombre.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        campoNombre.setPreferredSize(new Dimension(200, 30));
+        campoNombre.setMinimumSize(new Dimension(100, 30));
+        campoNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelFormulario.add(campoNombre);
 
-        JLabel descLabel = new JLabel("Descripción:");
-        descLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        formPanel.add(descLabel);
-        descripcionArea = new JTextArea(3, 20);
-        descripcionArea.setFont(nombreField.getFont());
-        descripcionArea.setLineWrap(true);
-        descripcionArea.setWrapStyleWord(true);
-        JScrollPane descripcionScroll = new JScrollPane(descripcionArea);
-        descripcionScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        descripcionScroll.setPreferredSize(new Dimension(200, 30));
-        descripcionScroll.setMinimumSize(new Dimension(100, 30));
-        formPanel.add(descripcionScroll);
+        JLabel etiquetaDescripcion = new JLabel("Descripción:");
+        etiquetaDescripcion.setAlignmentX(Component.LEFT_ALIGNMENT);
+        etiquetaDescripcion.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelFormulario.add(etiquetaDescripcion);
+        areaDescripcion = new JTextArea(3, 20);
+        areaDescripcion.setFont(new Font("Roboto", Font.PLAIN, 14));
+        areaDescripcion.setLineWrap(true);
+        areaDescripcion.setWrapStyleWord(true);
+        JScrollPane scrollDescripcion = new JScrollPane(areaDescripcion);
+        scrollDescripcion.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        scrollDescripcion.setPreferredSize(new Dimension(200, 30));
+        scrollDescripcion.setMinimumSize(new Dimension(100, 30));
+        panelFormulario.add(scrollDescripcion);
 
-        JLabel moduloLabel = new JLabel("Selecciona módulo:");
-        moduloLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        formPanel.add(moduloLabel);
-        moduloSelector = new JComboBox<>(MODULOS);
-        moduloSelector.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        moduloSelector.setPreferredSize(new Dimension(200, 30));
-        moduloSelector.setMinimumSize(new Dimension(100, 30));
-        formPanel.add(moduloSelector);
+        JLabel etiquetaModulo = new JLabel("Selecciona módulo:");
+        etiquetaModulo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        etiquetaModulo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelFormulario.add(etiquetaModulo);
+        selectorModulo = new JComboBox<>(MODULOS);
+        selectorModulo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        selectorModulo.setPreferredSize(new Dimension(200, 30));
+        selectorModulo.setMinimumSize(new Dimension(100, 30));
+        selectorModulo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelFormulario.add(selectorModulo);
 
-        permisosTable = new PermisosTable(SUBMODULOS[0]);
-        permisosTable.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
-        permisosTable.setPreferredSize(new Dimension(400, 200));
-        permisosTable.setMinimumSize(new Dimension(200, 200));
-        formPanel.add(permisosTable);
+        tablaPermisos = new PermisosTable(SUBMODULOS[0]);
+        tablaPermisos.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
+        tablaPermisos.setPreferredSize(new Dimension(400, 200));
+        tablaPermisos.setMinimumSize(new Dimension(200, 200));
+        panelFormulario.add(tablaPermisos);
 
         precargarPermisos(permisos);
 
-        moduloSelector.addActionListener(e -> {
+        selectorModulo.addActionListener(e -> {
             guardarSeleccionActual();
-            int idx = moduloSelector.getSelectedIndex();
-            permisosTable.setSubmodulos(SUBMODULOS[idx], permisosSeleccionadosMap);
+            int idx = selectorModulo.getSelectedIndex();
+            tablaPermisos.setSubmodulos(SUBMODULOS[idx], mapaPermisosSeleccionados);
         });
 
-        activoCheck = new JCheckBox("Activo", true);
-        formPanel.add(activoCheck);
+        checkActivo = new JCheckBox("Activo", true);
+        checkActivo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panelFormulario.add(checkActivo);
 
-        JPanel paddingPanel = new JPanel(new BorderLayout());
-        paddingPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        paddingPanel.add(formPanel, BorderLayout.CENTER);
+        JPanel panelPadding = new JPanel(new BorderLayout());
+        panelPadding.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelPadding.add(panelFormulario, BorderLayout.CENTER);
 
-        add(paddingPanel, BorderLayout.CENTER);
+        add(panelPadding, BorderLayout.CENTER);
 
-        guardarBtn = new JButton("Guardar");
-        guardarBtn.addActionListener(e -> {
-            if (nombreField.getText().trim().isEmpty()) {
+        botonGuardar = new JButton("Guardar");
+        botonGuardar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonGuardar.addActionListener(e -> {
+            if (campoNombre.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "El nombre del rol es obligatorio.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             guardarSeleccionActual();
             rolCreado = RolEntity.builder()
                     .rolId(null)
-                    .nombre(nombreField.getText().trim())
-                    .descripcion(descripcionArea.getText().trim())
-                    .estaActivo(activoCheck.isSelected())
+                    .nombre(campoNombre.getText().trim())
+                    .descripcion(areaDescripcion.getText().trim())
+                    .estaActivo(checkActivo.isSelected())
                     .build();
             permisosSeleccionados = obtenerPermisosSeleccionados(permisos);
             guardado = true;
             setVisible(false);
         });
 
-        JPanel btnPanel = new JPanel();
-        btnPanel.add(guardarBtn);
+        JPanel panelBoton = new JPanel();
+        panelBoton.add(botonGuardar);
 
-        add(btnPanel, BorderLayout.SOUTH);
+        add(panelBoton, BorderLayout.SOUTH);
     }
 
-    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, Map<String, Boolean[]> permisosSeleccionadosMap) {
-        this(parent, permisos);
-        if (permisosSeleccionadosMap != null) {
-            this.permisosSeleccionadosMap = new HashMap<>(permisosSeleccionadosMap);
-            permisosTable.setSubmodulos(SUBMODULOS[moduloSelector.getSelectedIndex()], this.permisosSeleccionadosMap);
+    public RegistrarRolPermiso(JFrame padre, List<PermisoEntity> permisos, Map<String, Boolean[]> mapaPermisosSeleccionados) {
+        this(padre, permisos);
+        if (mapaPermisosSeleccionados != null) {
+            this.mapaPermisosSeleccionados = new HashMap<>(mapaPermisosSeleccionados);
+            tablaPermisos.setSubmodulos(SUBMODULOS[selectorModulo.getSelectedIndex()], this.mapaPermisosSeleccionados);
         }
     }
 
-    public RegistrarRolPermiso(JFrame parent, List<PermisoEntity> permisos, Map<String, Boolean[]> permisosSeleccionadosMap, boolean esEdicion) {
-        this(parent, permisos, permisosSeleccionadosMap);
+    public RegistrarRolPermiso(JFrame padre, List<PermisoEntity> permisos, Map<String, Boolean[]> mapaPermisosSeleccionados, boolean esEdicion) {
+        this(padre, permisos, mapaPermisosSeleccionados);
         if (!esEdicion) {
-            nombreField.setEnabled(false);
-            descripcionArea.setEnabled(false);
-            activoCheck.setEnabled(false);
-            guardarBtn.setEnabled(false);
-            moduloSelector.setEnabled(false);
-            if (permisosTable != null) {
-                permisosTable.setEnabled(false);
+            campoNombre.setEnabled(false);
+            areaDescripcion.setEnabled(false);
+            checkActivo.setEnabled(false);
+            botonGuardar.setEnabled(false);
+            selectorModulo.setEnabled(false);
+            if (tablaPermisos != null) {
+                tablaPermisos.setEnabled(false);
             }
         }
     }
 
-    public boolean isGuardado() { return guardado; }
-    public RolEntity getRolCreado() { return rolCreado; }
+    public boolean estaGuardado() { return guardado; }
+    public RolEntity obtenerRolCreado() { return rolCreado; }
     private void guardarSeleccionActual() {
-        String[] submodulosActuales = permisosTable.getSubmodulos();
-        Map<String, Boolean[]> seleccionados = permisosTable.getSeleccionadosMap();
+        String[] submodulosActuales = tablaPermisos.getSubmodulos();
+        Map<String, Boolean[]> seleccionados = tablaPermisos.getSeleccionadosMap();
         for (String sub : submodulosActuales) {
-            permisosSeleccionadosMap.put(sub, seleccionados.get(sub));
+            mapaPermisosSeleccionados.put(sub, seleccionados.get(sub));
         }
     }
 
     private void precargarPermisos(List<PermisoEntity> permisos) {
         for (String[] submodulosPorModulo : SUBMODULOS) {
             for (String sub : submodulosPorModulo) {
-                permisosSeleccionadosMap.put(sub, new Boolean[]{false, false, false, false});
+                mapaPermisosSeleccionados.put(sub, new Boolean[]{false, false, false, false});
             }
         }
         int[] basePermisoPorModulo = {1, 21, 41, 53};
@@ -163,26 +168,32 @@ public class RegistrarRolPermiso extends JDialog {
                 Boolean[] checks = new Boolean[]{false, false, false, false};
                 for (int j = 0; j < 4; j++) {
                     final int idPermisoFinal = idPermiso;
-                    boolean tienePermiso = permisos.stream().anyMatch(p -> p.getPermisoId() != null && p.getPermisoId() == idPermisoFinal);
+                    boolean tienePermiso = false;
+                    for (PermisoEntity p : permisos) {
+                        if (p.getPermisoId() != null && p.getPermisoId() == idPermisoFinal) {
+                            tienePermiso = true;
+                            break;
+                        }
+                    }
                     checks[j] = tienePermiso;
                     idPermiso++;
                 }
-                permisosSeleccionadosMap.put(submodulo, checks);
+                mapaPermisosSeleccionados.put(submodulo, checks);
             }
         }
-        if (moduloSelector != null && permisosTable != null) {
-            int idx = moduloSelector.getSelectedIndex();
-            permisosTable.setSubmodulos(SUBMODULOS[idx], permisosSeleccionadosMap);
+        if (selectorModulo != null && tablaPermisos != null) {
+            int idx = selectorModulo.getSelectedIndex();
+            tablaPermisos.setSubmodulos(SUBMODULOS[idx], mapaPermisosSeleccionados);
         }
     }
 
     private List<Long> obtenerPermisosSeleccionados(List<PermisoEntity> permisos) {
         List<Long> seleccionados = new ArrayList<>();
-        int[] basePermisoPorModulo = {1, 21, 41, 53}; // 53 es el id base para Terceros
+        int[] basePermisoPorModulo = {1, 21, 41, 53};
         for (int moduloIdx = 0; moduloIdx < MODULOS.length; moduloIdx++) {
             int idPermiso = basePermisoPorModulo[moduloIdx];
             for (String submodulo : SUBMODULOS[moduloIdx]) {
-                Boolean[] checks = permisosSeleccionadosMap.get(submodulo);
+                Boolean[] checks = mapaPermisosSeleccionados.get(submodulo);
                 if (checks != null) {
                     for (int j = 0; j < 4; j++) {
                         if (checks[j] != null && checks[j]) {
@@ -198,7 +209,7 @@ public class RegistrarRolPermiso extends JDialog {
         return seleccionados;
     }
 
-    public List<Long> getPermisosSeleccionados() {
+    public List<Long> obtenerPermisosSeleccionadosLista() {
         return permisosSeleccionados != null ? permisosSeleccionados : new ArrayList<>();
     }
 }

@@ -8,94 +8,100 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 
 public class FiltrosItemsForm extends JPanel {
-    private JComboBox<String> estadoCombo;
-    private JComboBox<String> categoriaCombo;
-    private DatePicker fechaDesdePicker;
-    private DatePicker fechaHastaPicker;
-    private Runnable onFiltrosCambiados;
+    private JComboBox<String> comboEstado;
+    private JComboBox<String> comboCategoria;
+    private DatePicker selectorFechaDesde;
+    private DatePicker selectorFechaHasta;
+    private Runnable alCambiarFiltros;
 
     public FiltrosItemsForm() {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setOpaque(false);
-        JPanel filtrosPanel = new JPanel(new GridBagLayout());
-        filtrosPanel.setOpaque(false);
+        JPanel panelFiltros = new JPanel(new GridBagLayout());
+        panelFiltros.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 10, 5, 10);
         gbc.gridy = 0;
-        categoriaCombo = new JComboBox<>();
-        categoriaCombo.setPreferredSize(new Dimension(130, 28));
-        categoriaCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 0, "Categoría:", categoriaCombo);
-        estadoCombo = new JComboBox<>(new String[] { "Todos", "Activos", "Inactivos" });
-        estadoCombo.setPreferredSize(new Dimension(120, 28));
-        estadoCombo.addActionListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 1, "Estado:", estadoCombo);
-        DatePickerSettings desdeSettings = createDateSettings();
-        fechaDesdePicker = new DatePicker(desdeSettings);
-        fechaDesdePicker.setPreferredSize(new Dimension(120, 28));
-        fechaDesdePicker.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
-        fechaDesdePicker.addDateChangeListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 2, "Desde:", fechaDesdePicker);
-        DatePickerSettings hastaSettings = createDateSettings();
-        fechaHastaPicker = new DatePicker(hastaSettings);
-        fechaHastaPicker.setPreferredSize(new Dimension(120, 28));
-        fechaHastaPicker.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
-        fechaHastaPicker.addDateChangeListener(e -> notificarCambio());
-        addFiltro(filtrosPanel, gbc, 3, "Hasta:", fechaHastaPicker);
+        comboCategoria = new JComboBox<>();
+        comboCategoria.setPreferredSize(new Dimension(130, 28));
+        comboCategoria.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboCategoria.addActionListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 0, "Categoría:", comboCategoria);
+        comboEstado = new JComboBox<>(new String[] { "Todos", "Activos", "Inactivos" });
+        comboEstado.setPreferredSize(new Dimension(120, 28));
+        comboEstado.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboEstado.addActionListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 1, "Estado:", comboEstado);
+        DatePickerSettings desdeSettings = crearConfiguracionFecha();
+        selectorFechaDesde = new DatePicker(desdeSettings);
+        selectorFechaDesde.setPreferredSize(new Dimension(120, 28));
+        selectorFechaDesde.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
+        selectorFechaDesde.addDateChangeListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 2, "Desde:", selectorFechaDesde);
+        DatePickerSettings hastaSettings = crearConfiguracionFecha();
+        selectorFechaHasta = new DatePicker(hastaSettings);
+        selectorFechaHasta.setPreferredSize(new Dimension(120, 28));
+        selectorFechaHasta.getSettings().setDateRangeLimits(LocalDate.of(2000, 1, 1), LocalDate.of(2100, 12, 31));
+        selectorFechaHasta.addDateChangeListener(e -> notificarCambio());
+        agregarFiltro(panelFiltros, gbc, 3, "Hasta:", selectorFechaHasta);
         add(Box.createVerticalStrut(10));
-        add(filtrosPanel);
+        add(panelFiltros);
     }
 
-    private void addFiltro(JPanel panel, GridBagConstraints gbc, int x, String labelText, JComponent component) {
+    private void agregarFiltro(JPanel panel, GridBagConstraints gbc, int x, String textoEtiqueta, JComponent componente) {
         gbc.gridx = x * 2;
-        JLabel label = new JLabel(labelText);
-        label.setPreferredSize(new Dimension(90, 28));
-        panel.add(label, gbc);
+        JLabel etiqueta = new JLabel(textoEtiqueta);
+        etiqueta.setPreferredSize(new Dimension(90, 28));
+        etiqueta.setFont(new Font("Roboto", Font.PLAIN, 14));
+        panel.add(etiqueta, gbc);
         gbc.gridx = x * 2 + 1;
-        panel.add(component, gbc);
+        if (componente instanceof JTextField) {
+            componente.setFont(new Font("Roboto", Font.PLAIN, 14));
+        }
+        panel.add(componente, gbc);
     }
 
-    private DatePickerSettings createDateSettings() {
-        DatePickerSettings settings = new DatePickerSettings();
-        settings.setAllowEmptyDates(true);
-        settings.setFormatForDatesCommonEra("yyyy-MM-dd");
-        settings.setFormatForDatesBeforeCommonEra("yyyy-MM-dd");
-        return settings;
+    private DatePickerSettings crearConfiguracionFecha() {
+        DatePickerSettings configuracion = new DatePickerSettings();
+        configuracion.setAllowEmptyDates(true);
+        configuracion.setFormatForDatesCommonEra("yyyy-MM-dd");
+        configuracion.setFormatForDatesBeforeCommonEra("yyyy-MM-dd");
+        return configuracion;
     }
 
     private void notificarCambio() {
-        if (onFiltrosCambiados != null) {
-            onFiltrosCambiados.run();
+        if (alCambiarFiltros != null) {
+            alCambiarFiltros.run();
         }
     }
 
-    public void setOnFiltrosCambiados(Runnable listener) {
-        this.onFiltrosCambiados = listener;
+    public void establecerAlCambiarFiltros(Runnable listener) {
+        this.alCambiarFiltros = listener;
     }
 
-    public String getEstadoSeleccionado() {
-        return (String) estadoCombo.getSelectedItem();
+    public String obtenerEstadoSeleccionado() {
+        return (String) comboEstado.getSelectedItem();
     }
 
-    public String getCategoriaSeleccionada() {
-        return (String) categoriaCombo.getSelectedItem();
+    public String obtenerCategoriaSeleccionada() {
+        return (String) comboCategoria.getSelectedItem();
     }
 
-    public String getFechaDesde() {
-        LocalDate date = fechaDesdePicker.getDate();
-        return (date != null) ? date.toString() : null;
+    public String obtenerFechaDesde() {
+        LocalDate fecha = selectorFechaDesde.getDate();
+        return (fecha != null) ? fecha.toString() : null;
     }
 
-    public String getFechaHasta() {
-        LocalDate date = fechaHastaPicker.getDate();
-        return (date != null) ? date.toString() : null;
+    public String obtenerFechaHasta() {
+        LocalDate fecha = selectorFechaHasta.getDate();
+        return (fecha != null) ? fecha.toString() : null;
     }
 
-    public void setCategorias(List<String> categorias) {
-        categoriaCombo.removeAllItems();
-        categoriaCombo.addItem("Todas");
+    public void establecerCategorias(List<String> categorias) {
+        comboCategoria.removeAllItems();
+        comboCategoria.addItem("Todas");
         for (String cat : categorias) {
-            categoriaCombo.addItem(cat);
+            comboCategoria.addItem(cat);
         }
     }
 }

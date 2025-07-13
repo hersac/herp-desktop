@@ -15,18 +15,18 @@ public class GestionInventario extends JPanel {
         setLayout(new BorderLayout());
         setOpaque(false);
         setPreferredSize(new Dimension(800, 600));
-        JPanel topPanel = new JPanel();
-        topPanel.setOpaque(false);
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        JLabel titleLabel = new JLabel("Gestión de Inventario");
-        titleLabel.setFont(new Font("Roboto", Font.BOLD, 24));
-        titleLabel.setAlignmentX(CENTER_ALIGNMENT);
-        topPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        topPanel.add(titleLabel);
-        topPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setOpaque(false);
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        JLabel etiquetaTitulo = new JLabel("Gestión de Inventario");
+        etiquetaTitulo.setFont(new Font("Roboto", Font.BOLD, 24));
+        etiquetaTitulo.setAlignmentX(CENTER_ALIGNMENT);
+        panelSuperior.add(Box.createRigidArea(new Dimension(0, 10)));
+        panelSuperior.add(etiquetaTitulo);
+        panelSuperior.add(Box.createRigidArea(new Dimension(0, 10)));
         PestanasComponent pestanas = new PestanasComponent(diContainer);
         pestanas.setAlignmentX(CENTER_ALIGNMENT);
-        topPanel.add(pestanas);
-        add(topPanel, BorderLayout.CENTER);
+        panelSuperior.add(pestanas);
+        add(panelSuperior, BorderLayout.CENTER);
     }
 }

@@ -15,13 +15,15 @@ public class itemsVentaTable extends JPanel {
         setLayout(new BorderLayout());
         modeloTabla = new DefaultTableModel(new Object[]{"ID", "Nombre", "Cantidad", "Precio Unitario", "Subtotal"}, 0);
         tablaItems = new JTable(modeloTabla);
+        tablaItems.setFont(new Font("Roboto", Font.PLAIN, 14));
+        tablaItems.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 14));
         JScrollPane scrollTabla = new JScrollPane(tablaItems);
         scrollTabla.setBorder(BorderFactory.createTitledBorder("Productos Agregados"));
         DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
         rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
-        tablaItems.getColumnModel().getColumn(2).setCellRenderer(rightRenderer); // Cantidad
-        tablaItems.getColumnModel().getColumn(3).setCellRenderer(rightRenderer); // Precio Unitario
-        tablaItems.getColumnModel().getColumn(4).setCellRenderer(rightRenderer); // Subtotal
+        tablaItems.getColumnModel().getColumn(2).setCellRenderer(rightRenderer);
+        tablaItems.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+        tablaItems.getColumnModel().getColumn(4).setCellRenderer(rightRenderer);
         DefaultTableCellRenderer monedaRenderer = new DefaultTableCellRenderer() {
             @Override
             public void setValue(Object value) {
@@ -41,6 +43,10 @@ public class itemsVentaTable extends JPanel {
         add(scrollTabla, BorderLayout.CENTER);
     }
 
+    public void setFuenteRoboto() {
+        tablaItems.setFont(new Font("Roboto", Font.PLAIN, 14));
+        tablaItems.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 14));
+    }
     public DefaultTableModel getModeloTabla() {
         return modeloTabla;
     }

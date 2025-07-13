@@ -1,11 +1,9 @@
 package com.hersac.ui.views.comercial.inventario.tablas;
 
 import com.hersac.core.modules.proveedores.entities.ProveedorEntity;
-import com.hersac.core.globals.servicios.PermissionService;
 import com.hersac.ui.views.comercial.inventario.listeners.ProveedorListeners;
 import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid;
 import org.kordamp.ikonli.swing.FontIcon;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -20,74 +18,75 @@ import java.util.List;
 public class ProveedoresTable extends JPanel {
     private final JTable tablaProveedores;
     private final DefaultTableModel modeloTabla;
-    private ProveedorListeners proveedorListeners;
-    private PermissionService permissionService;
+    private ProveedorListeners oyenteProveedor;
 
     public ProveedoresTable() {
-        this(null);
-    }
-
-    public ProveedoresTable(PermissionService permissionService) {
-        this.permissionService = permissionService;
         setLayout(new BorderLayout());
         String[] columnas = {"ID", "Nombre", "Tipo", "Estado", "Acciones"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 4;
+            public boolean isCellEditable(int fila, int columna) {
+                return columna == 4;
             }
         };
         tablaProveedores = new JTable(modeloTabla);
         tablaProveedores.setRowHeight(40);
         tablaProveedores.setShowGrid(false);
-        tablaProveedores.getColumnModel().getColumn(4).setCellRenderer(new AccionesRenderer());
+        tablaProveedores.getColumnModel().getColumn(4).setCellRenderer(new AccionesRenderizador());
         tablaProveedores.getColumnModel().getColumn(4).setCellEditor(new AccionesEditor());
         tablaProveedores.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int column = tablaProveedores.columnAtPoint(e.getPoint());
-                int row = tablaProveedores.rowAtPoint(e.getPoint());
-                if (column == 4 && row >= 0 && tablaProveedores.isCellEditable(row, column)) {
-                    tablaProveedores.editCellAt(row, column);
+                int columna = tablaProveedores.columnAtPoint(e.getPoint());
+                int fila = tablaProveedores.rowAtPoint(e.getPoint());
+                if (columna == 4 && fila >= 0 && tablaProveedores.isCellEditable(fila, columna)) {
+                    tablaProveedores.editCellAt(fila, columna);
                     tablaProveedores.getEditorComponent().requestFocusInWindow();
                 }
             }
         });
-        add(new JScrollPane(tablaProveedores), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(tablaProveedores);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setPreferredSize(new Dimension(1200, 400));
+        scrollPane.setMaximumSize(new Dimension(1200, Integer.MAX_VALUE));
+        add(scrollPane, BorderLayout.CENTER);
     }
 
-    public void setActionListener(ProveedorListeners listener) {
-        this.proveedorListeners = listener;
+    public void setProveedores(List<ProveedorEntity> proveedores) {
+        modeloTabla.setRowCount(0);
+        for (ProveedorEntity proveedor : proveedores) {
+            modeloTabla.addRow(new Object[]{
+                proveedor.getProveedorId(),
+                proveedor.getTercero() != null ? proveedor.getTercero().getNombre() : "",
+                proveedor.getTercero() != null ? proveedor.getTercero().getTipoPersona() : "",
+                proveedor.isEsta_activo() ? "Activo" : "Inactivo",
+                proveedor
+            });
+        }
     }
 
-    private class AccionesRenderer implements TableCellRenderer {
+    public void setActionListener(ProveedorListeners oyente) {
+        this.oyenteProveedor = oyente;
+    }
+
+    private class AccionesRenderizador implements TableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus,
-                int row, int column) {
-            if (value instanceof ProveedorEntity proveedor) {
+        public Component getTableCellRendererComponent(JTable tabla, Object valor, boolean seleccionado, boolean tieneFoco, int fila, int columna) {
+            if (valor instanceof ProveedorEntity proveedor) {
                 JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
                 panel.setOpaque(false);
-                boolean puedeVer = true;
-                boolean puedeEditar = true;
-                boolean puedeEliminar = true;
-                if (puedeVer) {
-                    JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver proveedor", new Color(60, 130, 200));
-                    panel.add(btnVer);
-                }
-                if (puedeEditar) {
-                    boolean activo = Boolean.TRUE.equals(proveedor.isEsta_activo());
-                    JButton btnToggle = crearIconoBoton(
-                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                        activo ? "Inactivar" : "Activar",
-                        activo ? new Color(0, 180, 0) : Color.RED);
-                    panel.add(btnToggle);
-                }
-                if (puedeEliminar) {
-                    JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar proveedor", Color.RED);
-                    panel.add(btnEliminar);
-                }
-                panel.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                JButton btnVer = crearBotonIcono(FontAwesomeSolid.EYE, "Ver proveedor", new Color(60, 130, 200));
+                panel.add(btnVer);
+                boolean activo = proveedor.isEsta_activo();
+                JButton btnToggle = crearBotonIcono(
+                    activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                    activo ? "Inactivar" : "Activar",
+                    activo ? new Color(0, 180, 0) : Color.RED);
+                panel.add(btnToggle);
+                JButton btnEliminar = crearBotonIcono(FontAwesomeSolid.TRASH_ALT, "Eliminar proveedor", Color.RED);
+                panel.add(btnEliminar);
+                panel.setBackground(seleccionado ? tabla.getSelectionBackground() : tabla.getBackground());
                 return panel;
             }
             return new JLabel("");
@@ -102,46 +101,33 @@ public class ProveedoresTable extends JPanel {
             panel.setOpaque(false);
         }
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
-            if (value instanceof ProveedorEntity) {
-                proveedor = (ProveedorEntity) value;
+        public Component getTableCellEditorComponent(JTable tabla, Object valor, boolean seleccionado, int fila, int columna) {
+            if (valor instanceof ProveedorEntity) {
+                proveedor = (ProveedorEntity) valor;
                 panel.removeAll();
-                boolean activo = Boolean.TRUE.equals(proveedor.isEsta_activo());
-                boolean puedeVer = true;
-                boolean puedeEditar = true;
-                boolean puedeEliminar = true;
-                if (puedeVer) {
-                    JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver proveedor", new Color(60, 130, 200), e -> {
-                        if (proveedorListeners != null)
-                            proveedorListeners.verProveedor(proveedor);
+                boolean activo = proveedor.isEsta_activo();
+                JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver proveedor", new Color(60, 130, 200), e -> {
+                    if (oyenteProveedor != null) oyenteProveedor.verProveedor(proveedor);
+                    fireEditingStopped();
+                });
+                panel.add(btnVer);
+                JButton btnToggle = crearBotonAccion(
+                    activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
+                    activo ? "Inactivar" : "Activar",
+                    activo ? new Color(0, 180, 0) : Color.RED,
+                    e -> {
+                        proveedor.setEsta_activo(!proveedor.isEsta_activo());
+                        modeloTabla.setValueAt(proveedor.isEsta_activo() ? "Activo" : "Inactivo", fila, 3);
+                        modeloTabla.setValueAt(proveedor, fila, 4);
+                        if (oyenteProveedor != null) oyenteProveedor.actualizarProveedor(proveedor);
                         fireEditingStopped();
                     });
-                    panel.add(btnVer);
-                }
-                if (puedeEditar) {
-                    JButton btnToggle = crearBotonAccion(
-                        activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                        activo ? "Inactivar" : "Activar",
-                        activo ? new Color(0, 180, 0) : Color.RED,
-                        e -> {
-                            proveedor.setEsta_activo(!proveedor.isEsta_activo());
-                            modeloTabla.setValueAt(proveedor.isEsta_activo() ? "Activo" : "Inactivo", row, 3);
-                            modeloTabla.setValueAt(proveedor, row, 4);
-                            if (proveedorListeners != null)
-                                proveedorListeners.actualizarProveedor(proveedor);
-                            fireEditingStopped();
-                        });
-                    panel.add(btnToggle);
-                }
-                if (puedeEliminar) {
-                    JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar proveedor", Color.RED, e -> {
-                        if (proveedorListeners != null)
-                            proveedorListeners.eliminarProveedor(proveedor);
-                        fireEditingStopped();
-                    });
-                    panel.add(btnEliminar);
-                }
+                panel.add(btnToggle);
+                JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar proveedor", Color.RED, e -> {
+                    if (oyenteProveedor != null) oyenteProveedor.eliminarProveedor(proveedor);
+                    fireEditingStopped();
+                });
+                panel.add(btnEliminar);
             }
             return panel;
         }
@@ -155,63 +141,22 @@ public class ProveedoresTable extends JPanel {
         }
     }
 
-    private JPanel crearPanelAcciones(ProveedorEntity proveedor) {
-        boolean activo = Boolean.TRUE.equals(proveedor.isEsta_activo());
-        JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver proveedor", new Color(60, 130, 200));
-        JButton btnToggle = crearIconoBoton(
-                activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                activo ? "Inactivar" : "Activar",
-                activo ? new Color(0, 180, 0) : Color.RED);
-        JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar proveedor", Color.RED);
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        panel.setOpaque(false);
-        panel.add(btnVer);
-        panel.add(btnToggle);
-        panel.add(btnEliminar);
-        return panel;
-    }
-
-    private JButton crearIconoBoton(FontAwesomeSolid icono, String tooltip, Color color) {
+    private JButton crearBotonIcono(FontAwesomeSolid icono, String tooltip, Color color) {
         FontIcon icon = FontIcon.of(icono, 18, color);
-        JButton button = new JButton(icon);
-        button.setToolTipText(tooltip);
-        button.setBorderPainted(false);
-        button.setFocusPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(false);
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(36, 36));
-        return button;
+        JButton boton = new JButton(icon);
+        boton.setToolTipText(tooltip);
+        boton.setBorderPainted(false);
+        boton.setFocusPainted(false);
+        boton.setContentAreaFilled(false);
+        boton.setOpaque(false);
+        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        boton.setPreferredSize(new Dimension(36, 36));
+        return boton;
     }
 
-    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener action) {
-        JButton button = crearIconoBoton(icono, tooltip, color);
-        button.addActionListener(action);
-        return button;
-    }
-
-    private ProveedorEntity getProveedor(int row) {
-        if (row >= 0 && row < modeloTabla.getRowCount()) {
-            Object id = modeloTabla.getValueAt(row, 0);
-            for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-                if (modeloTabla.getValueAt(i, 0).equals(id)) {
-                    return (ProveedorEntity) modeloTabla.getValueAt(i, 4);
-                }
-            }
-        }
-        return null;
-    }
-
-    public void setProveedores(List<ProveedorEntity> proveedores) {
-        modeloTabla.setRowCount(0);
-        for (ProveedorEntity proveedor : proveedores) {
-            modeloTabla.addRow(new Object[]{
-                proveedor.getProveedorId(),
-                proveedor.getTercero() != null ? proveedor.getTercero().getNombre() : "",
-                proveedor.getTercero() != null ? proveedor.getTercero().getTipoPersona() : "",
-                proveedor.isEsta_activo() ? "Activo" : "Inactivo",
-                proveedor
-            });
-        }
+    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener accion) {
+        JButton boton = crearBotonIcono(icono, tooltip, color);
+        boton.addActionListener(accion);
+        return boton;
     }
 }

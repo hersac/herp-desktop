@@ -2,42 +2,41 @@ package com.hersac.ui.views.comercial.inventario.modales;
 
 import java.awt.*;
 import javax.swing.*;
-
 import com.hersac.core.di.DIContainer;
 import com.hersac.core.modules.movimientosinventarios.entities.MovimientoInventarioEntity;
 import com.hersac.core.modules.items.entities.ItemEntity;
 import com.hersac.core.modules.bodegas.entities.BodegaEntity;
 
 public class RegistrarMovimiento extends JDialog {
-    private JComboBox<String> tipoMovimientoCombo;
-    private JTextField cantidadField;
-    private JTextField referenciaIdField;
-    private JComboBox<String> referenciaTipoCombo;
-    private JTextField itemIdField;
-    private JTextField itemNombreField;
-    private JTextField bodegaIdField;
-    private JTextField bodegaNombreField;
+    private JComboBox<String> comboTipoMovimiento;
+    private JTextField campoCantidad;
+    private JTextField campoReferenciaId;
+    private JComboBox<String> comboReferenciaTipo;
+    private JTextField campoItemId;
+    private JTextField campoItemNombre;
+    private JTextField campoBodegaId;
+    private JTextField campoBodegaNombre;
     private MovimientoInventarioEntity movimientoRegistrado;
     private final boolean esEdicion;
-    private DIContainer diContainer;
+    private DIContainer contenedorDI;
 
-    public RegistrarMovimiento(JFrame parent, MovimientoInventarioEntity movimientoParaEditar, DIContainer diContainer) {
-        super(parent, movimientoParaEditar != null ? "Actualizar Movimiento" : "Registrar Movimiento", true);
+    public RegistrarMovimiento(JFrame padre, MovimientoInventarioEntity movimientoParaEditar, DIContainer contenedorDI) {
+        super(padre, movimientoParaEditar != null ? "Actualizar Movimiento" : "Registrar Movimiento", true);
         this.movimientoRegistrado = movimientoParaEditar;
         this.esEdicion = movimientoParaEditar != null;
-        this.diContainer = diContainer;
-        initComponents();
+        this.contenedorDI = contenedorDI;
+        inicializarComponentes();
     }
 
-    private void initComponents() {
+    private void inicializarComponentes() {
         configurarVentana();
-        JPanel formPanel = crearCampos();
+        JPanel panelFormulario = crearCampos();
         if (esEdicion && movimientoRegistrado != null) {
             cargarDatosEdicion();
         }
-        JPanel buttonPanel = crearPanelBotones();
-        add(formPanel, BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
+        JPanel panelBotones = crearPanelBotones();
+        add(panelFormulario, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
         setVisible(true);
     }
 
@@ -49,39 +48,33 @@ public class RegistrarMovimiento extends JDialog {
     }
 
     private JPanel crearCampos() {
-        tipoMovimientoCombo = new JComboBox<>(new String[]{"ENTRADA", "SALIDA"});
-        cantidadField = new JTextField();
-        referenciaIdField = new JTextField();
-        referenciaTipoCombo = new JComboBox<>(new String[]{"Compra", "Venta"});
-        itemIdField = new JTextField();
-        itemNombreField = new JTextField();
-        itemNombreField.setEditable(false);
-        itemNombreField.setBackground(new Color(240,240,240));
-        bodegaIdField = new JTextField();
-        bodegaNombreField = new JTextField();
-        bodegaNombreField.setEditable(false);
-        bodegaNombreField.setBackground(new Color(240,240,240));
-
-        tipoMovimientoCombo.addActionListener(e -> {
-            String tipo = (String) tipoMovimientoCombo.getSelectedItem();
-            if ("ENTRADA".equals(tipo)) {
-                referenciaTipoCombo.setSelectedItem("Compra");
-                referenciaTipoCombo.setEnabled(false);
-            } else if ("SALIDA".equals(tipo)) {
-                referenciaTipoCombo.setSelectedItem("Venta");
-                referenciaTipoCombo.setEnabled(false);
-            }
-        });
-
-        tipoMovimientoCombo.setSelectedIndex(0);
-        referenciaTipoCombo.setSelectedItem("Compra");
-        referenciaTipoCombo.setEnabled(false);
-
-        itemIdField.addActionListener(e -> buscarItemPorCodigo());
-        bodegaIdField.addActionListener(e -> buscarBodegaPorId());
-
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new GridBagLayout());
+        comboTipoMovimiento = new JComboBox<>(new String[]{"ENTRADA", "SALIDA"});
+        comboTipoMovimiento.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoCantidad = new JTextField();
+        campoCantidad.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoReferenciaId = new JTextField();
+        campoReferenciaId.setFont(new Font("Roboto", Font.PLAIN, 14));
+        comboReferenciaTipo = new JComboBox<>(new String[]{"Compra", "Venta"});
+        comboReferenciaTipo.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoItemId = new JTextField();
+        campoItemId.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoItemNombre = new JTextField();
+        campoItemNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoItemNombre.setEditable(false);
+        campoItemNombre.setBackground(new Color(240,240,240));
+        campoBodegaId = new JTextField();
+        campoBodegaId.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBodegaNombre = new JTextField();
+        campoBodegaNombre.setFont(new Font("Roboto", Font.PLAIN, 14));
+        campoBodegaNombre.setEditable(false);
+        campoBodegaNombre.setBackground(new Color(240,240,240));
+        comboTipoMovimiento.addActionListener(e -> actualizarReferenciaTipo());
+        comboTipoMovimiento.setSelectedIndex(0);
+        comboReferenciaTipo.setSelectedItem("Compra");
+        comboReferenciaTipo.setEnabled(false);
+        campoItemId.addActionListener(e -> buscarItemPorCodigo());
+        campoBodegaId.addActionListener(e -> buscarBodegaPorId());
+        JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.EAST;
@@ -89,205 +82,147 @@ public class RegistrarMovimiento extends JDialog {
         gbc.weightx = 0;
         gbc.gridx = 0;
         gbc.gridy = 0;
-        int labelWidth = 220;
-        int inputMinWidth = 200;
-        int inputHeight = 36;
+        agregarCampo(panel, gbc, "Tipo Movimiento:", comboTipoMovimiento);
+        agregarCampo(panel, gbc, "Cantidad:", campoCantidad);
+        agregarCampo(panel, gbc, "Referencia ID:", campoReferenciaId);
+        agregarCampo(panel, gbc, "Referencia Tipo:", comboReferenciaTipo);
+        agregarCampo(panel, gbc, "Código Item:", campoItemId);
+        agregarCampo(panel, gbc, "Item Nombre:", campoItemNombre);
+        agregarCampo(panel, gbc, "Bodega ID:", campoBodegaId);
+        agregarCampo(panel, gbc, "Bodega Nombre:", campoBodegaNombre);
+        return panel;
+    }
 
-        JLabel lblTipoMovimiento = new JLabel("Tipo Movimiento:");
-        lblTipoMovimiento.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblTipoMovimiento, gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        tipoMovimientoCombo.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        tipoMovimientoCombo.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(tipoMovimientoCombo, gbc);
-        gbc.weightx = 0;
+    private void agregarCampo(JPanel panel, GridBagConstraints gbc, String texto, JComponent campo) {
+        JLabel etiqueta = new JLabel(texto);
+        etiqueta.setFont(new Font("Roboto", Font.PLAIN, 14));
+        etiqueta.setPreferredSize(new Dimension(220, 30));
         gbc.gridx = 0;
-        gbc.gridy++;
-
-        JLabel lblCantidad = new JLabel("Cantidad:");
-        lblCantidad.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblCantidad, gbc);
+        panel.add(etiqueta, gbc);
         gbc.gridx = 1;
-        gbc.weightx = 1;
-        cantidadField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        cantidadField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(cantidadField, gbc);
-        gbc.weightx = 0;
-        gbc.gridx = 0;
+        campo.setPreferredSize(new Dimension(200, 36));
+        panel.add(campo, gbc);
         gbc.gridy++;
+    }
 
-        JLabel lblReferenciaId = new JLabel("Referencia ID:");
-        lblReferenciaId.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblReferenciaId, gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        referenciaIdField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        referenciaIdField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(referenciaIdField, gbc);
-        gbc.weightx = 0;
-        gbc.gridx = 0;
-        gbc.gridy++;
-
-        JLabel lblReferenciaTipo = new JLabel("Referencia Tipo:");
-        lblReferenciaTipo.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblReferenciaTipo, gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        referenciaTipoCombo.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        referenciaTipoCombo.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(referenciaTipoCombo, gbc);
-        gbc.weightx = 0;
-        gbc.gridx = 0;
-        gbc.gridy++;
-
-        JLabel lblItemId = new JLabel("Código Item:");
-        lblItemId.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblItemId, gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        itemIdField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        itemIdField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(itemIdField, gbc);
-        gbc.weightx = 0;
-        gbc.gridx = 0;
-        gbc.gridy++;
-
-        JLabel lblItemNombre = new JLabel("Item Nombre:");
-        lblItemNombre.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblItemNombre, gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        itemNombreField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        itemNombreField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(itemNombreField, gbc);
-        gbc.weightx = 0;
-        gbc.gridx = 0;
-        gbc.gridy++;
-
-        JLabel lblBodegaId = new JLabel("Bodega ID:");
-        lblBodegaId.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblBodegaId, gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        bodegaIdField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        bodegaIdField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(bodegaIdField, gbc);
-        gbc.weightx = 0;
-        gbc.gridx = 0;
-        gbc.gridy++;
-
-        JLabel lblBodegaNombre = new JLabel("Bodega Nombre:");
-        lblBodegaNombre.setPreferredSize(new Dimension(labelWidth, 30));
-        formPanel.add(lblBodegaNombre, gbc);
-        gbc.gridx = 1;
-        gbc.weightx = 1;
-        bodegaNombreField.setMinimumSize(new Dimension(inputMinWidth, inputHeight));
-        bodegaNombreField.setPreferredSize(new Dimension(inputMinWidth, inputHeight));
-        formPanel.add(bodegaNombreField, gbc);
-        return formPanel;
+    private void actualizarReferenciaTipo() {
+        String tipo = (String) comboTipoMovimiento.getSelectedItem();
+        if ("ENTRADA".equals(tipo)) {
+            comboReferenciaTipo.setSelectedItem("Compra");
+        }
+        if ("SALIDA".equals(tipo)) {
+            comboReferenciaTipo.setSelectedItem("Venta");
+        }
+        comboReferenciaTipo.setEnabled(false);
     }
 
     private void buscarItemPorCodigo() {
-        String codigo = itemIdField.getText().trim();
-        itemNombreField.setText("");
+        String codigo = campoItemId.getText().trim();
+        campoItemNombre.setText("");
         if (!codigo.isEmpty()) {
-            com.hersac.core.modules.items.entities.ItemEntity itemEncontrado = null;
+            ItemEntity itemEncontrado = null;
             try {
-                var itemsController = diContainer.getItemsController();
+                var itemsController = contenedorDI.getItemsController();
                 itemEncontrado = itemsController.buscarPorCodigo(codigo);
             } catch (Exception ex) {
-                itemNombreField.setText("Error búsqueda");
+                campoItemNombre.setText("Error búsqueda");
             }
             if (itemEncontrado != null) {
-                itemNombreField.setText(itemEncontrado.getNombre());
+                campoItemNombre.setText(itemEncontrado.getNombre());
             } else {
-                itemNombreField.setText("No encontrado");
+                campoItemNombre.setText("No encontrado");
             }
         }
     }
 
     private void buscarBodegaPorId() {
-        String idText = bodegaIdField.getText().trim();
-        bodegaNombreField.setText("");
+        String idText = campoBodegaId.getText().trim();
+        campoBodegaNombre.setText("");
         if (!idText.isEmpty()) {
             try {
                 Long id = Long.parseLong(idText);
-                var bodegasController = diContainer.getBodegasController();
+                var bodegasController = contenedorDI.getBodegasController();
                 var bodegaEncontrada = bodegasController.buscarPorId(id);
                 if (bodegaEncontrada != null) {
-                    bodegaNombreField.setText(bodegaEncontrada.getNombre());
+                    campoBodegaNombre.setText(bodegaEncontrada.getNombre());
                 } else {
-                    bodegaNombreField.setText("No encontrada");
+                    campoBodegaNombre.setText("No encontrada");
                 }
             } catch (Exception ex) {
-                bodegaNombreField.setText("ID inválido");
+                campoBodegaNombre.setText("ID inválido");
             }
         }
     }
 
     private void cargarDatosEdicion() {
         if (movimientoRegistrado.getTipoMovimiento() != null) {
-            tipoMovimientoCombo.setSelectedItem(movimientoRegistrado.getTipoMovimiento().toUpperCase());
+            comboTipoMovimiento.setSelectedItem(movimientoRegistrado.getTipoMovimiento().toUpperCase());
         }
-        cantidadField.setText(String.valueOf(movimientoRegistrado.getCantidad()));
-        referenciaIdField.setText(String.valueOf(movimientoRegistrado.getReferenciaId()));
+        campoCantidad.setText(String.valueOf(movimientoRegistrado.getCantidad()));
+        campoReferenciaId.setText(String.valueOf(movimientoRegistrado.getReferenciaId()));
         if (movimientoRegistrado.getReferenciaTipo() == 1) {
-            referenciaTipoCombo.setSelectedItem("Compra");
-        } else if (movimientoRegistrado.getReferenciaTipo() == 2) {
-            referenciaTipoCombo.setSelectedItem("Venta");
+            comboReferenciaTipo.setSelectedItem("Compra");
         }
-        referenciaTipoCombo.setEnabled(false);
+        if (movimientoRegistrado.getReferenciaTipo() == 2) {
+            comboReferenciaTipo.setSelectedItem("Venta");
+        }
+        comboReferenciaTipo.setEnabled(false);
         if (movimientoRegistrado.getItem() != null) {
-            itemIdField.setText(movimientoRegistrado.getItem().getCodigo());
-            itemNombreField.setText(movimientoRegistrado.getItem().getNombre());
+            campoItemId.setText(movimientoRegistrado.getItem().getCodigo());
+            campoItemNombre.setText(movimientoRegistrado.getItem().getNombre());
         }
         if (movimientoRegistrado.getBodega() != null) {
-            bodegaIdField.setText(String.valueOf(movimientoRegistrado.getBodega().getBodegaId()));
-            bodegaNombreField.setText(movimientoRegistrado.getBodega().getNombre());
+            campoBodegaId.setText(String.valueOf(movimientoRegistrado.getBodega().getBodegaId()));
+            campoBodegaNombre.setText(movimientoRegistrado.getBodega().getNombre());
         }
     }
 
     private JPanel crearPanelBotones() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton guardarBtn = new JButton(esEdicion ? "Actualizar" : "Guardar");
-        JButton cancelarBtn = new JButton("Cancelar");
-        guardarBtn.addActionListener(e -> guardarMovimiento());
-        cancelarBtn.addActionListener(e -> dispose());
-        buttonPanel.add(guardarBtn);
-        buttonPanel.add(cancelarBtn);
-        return buttonPanel;
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton botonGuardar = new JButton(esEdicion ? "Actualizar" : "Guardar");
+        botonGuardar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonGuardar.setFocusPainted(false);
+        botonGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        botonGuardar.addActionListener(e -> guardarMovimiento());
+        panel.add(botonGuardar);
+        JButton botonCancelar = new JButton("Cancelar");
+        botonCancelar.setFont(new Font("Roboto", Font.PLAIN, 14));
+        botonCancelar.setFocusPainted(false);
+        botonCancelar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        botonCancelar.addActionListener(e -> dispose());
+        panel.add(botonCancelar);
+        return panel;
     }
 
     private void guardarMovimiento() {
         if (movimientoRegistrado == null) {
             movimientoRegistrado = new MovimientoInventarioEntity();
         }
-        movimientoRegistrado.setTipoMovimiento(((String) tipoMovimientoCombo.getSelectedItem()).toUpperCase());
+        movimientoRegistrado.setTipoMovimiento(((String) comboTipoMovimiento.getSelectedItem()).toUpperCase());
         try {
-            movimientoRegistrado.setCantidad(Integer.parseInt(cantidadField.getText()));
+            movimientoRegistrado.setCantidad(Integer.parseInt(campoCantidad.getText()));
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Cantidad inválida", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         try {
-            movimientoRegistrado.setReferenciaId(Long.parseLong(referenciaIdField.getText()));
+            movimientoRegistrado.setReferenciaId(Long.parseLong(campoReferenciaId.getText()));
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Referencia ID inválida", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        String tipoSeleccionado = (String) referenciaTipoCombo.getSelectedItem();
+        String tipoSeleccionado = (String) comboReferenciaTipo.getSelectedItem();
         if ("Compra".equals(tipoSeleccionado)) {
             movimientoRegistrado.setReferenciaTipo(1);
-        } else if ("Venta".equals(tipoSeleccionado)) {
+        }
+        if ("Venta".equals(tipoSeleccionado)) {
             movimientoRegistrado.setReferenciaTipo(2);
         }
-        // Buscar el item persistido
-        String itemCodigo = itemIdField.getText();
+        String codigoItem = campoItemId.getText();
         ItemEntity itemPersistido = null;
         try {
-            var itemsController = diContainer.getItemsController();
-            itemPersistido = itemsController.buscarPorCodigo(itemCodigo);
+            var itemsController = contenedorDI.getItemsController();
+            itemPersistido = itemsController.buscarPorCodigo(codigoItem);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error al buscar el Item", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -297,12 +232,12 @@ public class RegistrarMovimiento extends JDialog {
             return;
         }
         movimientoRegistrado.setItem(itemPersistido);
-        Long bodegaId = null;
+        Long idBodega = null;
         BodegaEntity bodegaPersistida = null;
         try {
-            bodegaId = Long.parseLong(bodegaIdField.getText());
-            var bodegasController = diContainer.getBodegasController();
-            bodegaPersistida = bodegasController.buscarPorId(bodegaId);
+            idBodega = Long.parseLong(campoBodegaId.getText());
+            var bodegasController = contenedorDI.getBodegasController();
+            bodegaPersistida = bodegasController.buscarPorId(idBodega);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error al buscar la Bodega", "Error", JOptionPane.ERROR_MESSAGE);
             return;

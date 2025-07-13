@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -32,130 +33,123 @@ import com.hersac.ui.globals.enums.Permiso;
 import com.hersac.ui.views.usuarios.gestion.listeners.UsuariosListeners;
 
 public class UsuariosTable extends JPanel {
-    private final JTable tablaUsuarios;
-    private final DefaultTableModel modeloTabla;
-    private UsuariosListeners usuariosListeners;
-    private final PermissionService permissionService = new PermissionService(null);
+    private final JTable tabla;
+    private final DefaultTableModel modelo;
+    private UsuariosListeners oyenteUsuarios;
+    private final PermissionService servicioPermisos = new PermissionService(null);
 
     public UsuariosTable() {
         setLayout(new BorderLayout());
-
         String[] columnas = { "ID", "Nombre", "Correo", "Departamento", "Rol", "Estado", "Acciones" };
-        modeloTabla = new DefaultTableModel(columnas, 0) {
+        modelo = new DefaultTableModel(columnas, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 6;
+            public boolean isCellEditable(int fila, int columna) {
+                return columna == 6;
             }
         };
-
-        tablaUsuarios = new JTable(modeloTabla);
-        tablaUsuarios.setRowHeight(40);
-        tablaUsuarios.setShowGrid(false);
-        tablaUsuarios.getColumnModel().getColumn(6).setCellRenderer(new AccionesRenderer());
-        tablaUsuarios.getColumnModel().getColumn(6).setCellEditor(new AccionesEditor());
-        tablaUsuarios.addMouseListener(new MouseAdapter() {
+        tabla = new JTable(modelo);
+        tabla.setRowHeight(40);
+        tabla.setShowGrid(false);
+        tabla.getColumnModel().getColumn(6).setCellRenderer(new RenderAcciones());
+        tabla.getColumnModel().getColumn(6).setCellEditor(new EditorAcciones());
+        tabla.setFont(new Font("Roboto", Font.PLAIN, 14));
+        tabla.getTableHeader().setFont(new Font("Roboto", Font.BOLD, 15));
+        tabla.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                int column = tablaUsuarios.columnAtPoint(e.getPoint());
-                int row = tablaUsuarios.rowAtPoint(e.getPoint());
-
-                if (column == 6 && row >= 0 && tablaUsuarios.isCellEditable(row, column)) {
-                    tablaUsuarios.editCellAt(row, column);
-                    tablaUsuarios.getEditorComponent().requestFocusInWindow();
+                int columna = tabla.columnAtPoint(e.getPoint());
+                int fila = tabla.rowAtPoint(e.getPoint());
+                if (columna == 6 && fila >= 0 && tabla.isCellEditable(fila, columna)) {
+                    tabla.editCellAt(fila, columna);
+                    tabla.getEditorComponent().requestFocusInWindow();
                 }
             }
         });
-
-        JScrollPane scrollPane = new JScrollPane(tablaUsuarios);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setPreferredSize(new Dimension(900, 400));
-        scrollPane.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
-        add(scrollPane, BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(tabla);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setPreferredSize(new Dimension(900, 400));
+        scroll.setMaximumSize(new Dimension(900, Integer.MAX_VALUE));
+        add(scroll, BorderLayout.CENTER);
     }
 
-    public void setUsuarios(List<UsuarioEntity> usuarios) {
+    public void establecerUsuarios(List<UsuarioEntity> usuarios) {
         usuarios.sort(Comparator.comparingLong(UsuarioEntity::getUsuarioId));
-
-        modeloTabla.setRowCount(0);
+        modelo.setRowCount(0);
         for (UsuarioEntity usuario : usuarios) {
-            String departamento = (usuario.getDepartamento() != null && usuario.getDepartamento().getNombre() != null)
-                ? usuario.getDepartamento().getNombre() : "Sin departamento";
-            String rol = (usuario.getRol() != null && usuario.getRol().getNombre() != null)
-                ? usuario.getRol().getNombre() : "Sin rol";
-            modeloTabla.addRow(new Object[] {
-                    usuario.getUsuarioId(),
-                    usuario.getNombre(),
-                    usuario.getCorreo(),
-                    departamento,
-                    rol,
-                    usuario.getEstaActivo() ? "Activo" : "Inactivo",
-                    usuario
+            String departamento = usuario.getDepartamento() != null && usuario.getDepartamento().getNombre() != null ? usuario.getDepartamento().getNombre() : "Sin departamento";
+            String rol = usuario.getRol() != null && usuario.getRol().getNombre() != null ? usuario.getRol().getNombre() : "Sin rol";
+            modelo.addRow(new Object[] {
+                usuario.getUsuarioId(),
+                usuario.getNombre(),
+                usuario.getCorreo(),
+                departamento,
+                rol,
+                usuario.getEstaActivo() ? "Activo" : "Inactivo",
+                usuario
             });
         }
     }
 
-    public void setActionListener(UsuariosListeners listener) {
-        this.usuariosListeners = listener;
+    public void establecerOyente(UsuariosListeners oyente) {
+        this.oyenteUsuarios = oyente;
     }
 
-    private class AccionesRenderer implements TableCellRenderer {
+    private class RenderAcciones implements TableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus,
-                int row, int column) {
-            if (value instanceof UsuarioEntity usuario) {
+        public Component getTableCellRendererComponent(JTable tabla, Object valor, boolean seleccionado, boolean tieneFoco, int fila, int columna) {
+            if (valor instanceof UsuarioEntity usuario) {
                 JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
                 panel.setOpaque(false);
-                boolean puedeVer = permissionService.tienePermiso((long) Permiso.VER_GESTION_USUARIO.getId());
-                boolean puedeEditar = permissionService.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
-                boolean puedeEliminar = permissionService.tienePermiso((long) Permiso.ELIMINAR_GESTION_USUARIO.getId());
+                boolean puedeVer = servicioPermisos.tienePermiso((long) Permiso.VER_GESTION_USUARIO.getId());
+                boolean puedeEditar = servicioPermisos.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
+                boolean puedeEliminar = servicioPermisos.tienePermiso((long) Permiso.ELIMINAR_GESTION_USUARIO.getId());
                 if (puedeVer) {
-                    JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver usuario", new Color(60, 130, 200));
+                    JButton btnVer = crearBotonIcono(FontAwesomeSolid.EYE, "Ver usuario", new Color(60, 130, 200));
                     panel.add(btnVer);
                 }
                 if (puedeEditar) {
                     boolean activo = Boolean.TRUE.equals(usuario.getEstaActivo());
-                    JButton btnToggle = crearIconoBoton(
+                    JButton btnToggle = crearBotonIcono(
                         activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
                         activo ? "Inactivar" : "Activar",
                         activo ? new Color(0, 180, 0) : Color.RED);
                     panel.add(btnToggle);
                 }
                 if (puedeEliminar) {
-                    JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar usuario", Color.RED);
+                    JButton btnEliminar = crearBotonIcono(FontAwesomeSolid.TRASH_ALT, "Eliminar usuario", Color.RED);
                     panel.add(btnEliminar);
                 }
-                panel.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+                panel.setBackground(seleccionado ? tabla.getSelectionBackground() : tabla.getBackground());
                 return panel;
             }
-            return new JLabel("");
+            JLabel vacio = new JLabel("");
+            vacio.setFont(new Font("Roboto", Font.PLAIN, 14));
+            return vacio;
         }
     }
 
-    private class AccionesEditor extends AbstractCellEditor implements TableCellEditor {
+    private class EditorAcciones extends AbstractCellEditor implements TableCellEditor {
         private final JPanel panel;
         private UsuarioEntity usuario;
 
-        public AccionesEditor() {
+        public EditorAcciones() {
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
             panel.setOpaque(false);
         }
 
         @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
-            if (value instanceof UsuarioEntity) {
-                usuario = (UsuarioEntity) value;
+        public Component getTableCellEditorComponent(JTable tabla, Object valor, boolean seleccionado, int fila, int columna) {
+            if (valor instanceof UsuarioEntity) {
+                usuario = (UsuarioEntity) valor;
                 panel.removeAll();
                 boolean activo = Boolean.TRUE.equals(usuario.getEstaActivo());
-                boolean puedeVer = permissionService.tienePermiso((long) Permiso.VER_GESTION_USUARIO.getId());
-                boolean puedeEditar = permissionService.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
-                boolean puedeEliminar = permissionService.tienePermiso((long) Permiso.ELIMINAR_GESTION_USUARIO.getId());
+                boolean puedeVer = servicioPermisos.tienePermiso((long) Permiso.VER_GESTION_USUARIO.getId());
+                boolean puedeEditar = servicioPermisos.tienePermiso((long) Permiso.EDITAR_GESTION_USUARIO.getId());
+                boolean puedeEliminar = servicioPermisos.tienePermiso((long) Permiso.ELIMINAR_GESTION_USUARIO.getId());
                 if (puedeVer) {
                     JButton btnVer = crearBotonAccion(FontAwesomeSolid.EYE, "Ver usuario", new Color(60, 130, 200), e -> {
-                        if (usuariosListeners != null)
-                            usuariosListeners.verUsuario(usuario);
+                        if (oyenteUsuarios != null) oyenteUsuarios.verUsuario(usuario);
                         fireEditingStopped();
                     });
                     panel.add(btnVer);
@@ -167,18 +161,16 @@ public class UsuariosTable extends JPanel {
                         activo ? new Color(0, 180, 0) : Color.RED,
                         e -> {
                             usuario.setEstaActivo(!usuario.getEstaActivo());
-                            modeloTabla.setValueAt(usuario.getEstaActivo() ? "Activo" : "Inactivo", row, 3);
-                            modeloTabla.setValueAt(usuario, row, 4);
-                            if (usuariosListeners != null)
-                                usuariosListeners.actualizarUsuario(usuario);
+                            modelo.setValueAt(usuario.getEstaActivo() ? "Activo" : "Inactivo", fila, 5);
+                            modelo.setValueAt(usuario, fila, 6);
+                            if (oyenteUsuarios != null) oyenteUsuarios.actualizarUsuario(usuario);
                             fireEditingStopped();
                         });
                     panel.add(btnToggle);
                 }
                 if (puedeEliminar) {
                     JButton btnEliminar = crearBotonAccion(FontAwesomeSolid.TRASH_ALT, "Eliminar usuario", Color.RED, e -> {
-                        if (usuariosListeners != null)
-                            usuariosListeners.eliminarUsuario(usuario);
+                        if (oyenteUsuarios != null) oyenteUsuarios.eliminarUsuario(usuario);
                         fireEditingStopped();
                     });
                     panel.add(btnEliminar);
@@ -198,48 +190,30 @@ public class UsuariosTable extends JPanel {
         }
     }
 
-    private JPanel crearPanelAcciones(UsuarioEntity usuario) {
-        boolean activo = Boolean.TRUE.equals(usuario.getEstaActivo());
-
-        JButton btnVer = crearIconoBoton(FontAwesomeSolid.EYE, "Ver usuario", new Color(60, 130, 200));
-        JButton btnToggle = crearIconoBoton(
-                activo ? FontAwesomeSolid.TOGGLE_ON : FontAwesomeSolid.TOGGLE_OFF,
-                activo ? "Inactivar" : "Activar",
-                activo ? new Color(0, 180, 0) : Color.RED);
-        JButton btnEliminar = crearIconoBoton(FontAwesomeSolid.TRASH_ALT, "Eliminar usuario", Color.RED);
-
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-        panel.setOpaque(false);
-        panel.add(btnVer);
-        panel.add(btnToggle);
-        panel.add(btnEliminar);
-        return panel;
-    }
-
-    private JButton crearIconoBoton(FontAwesomeSolid icono, String tooltip, Color color) {
+    private JButton crearBotonIcono(FontAwesomeSolid icono, String tooltip, Color color) {
         FontIcon icon = FontIcon.of(icono, 18, color);
-        JButton button = new JButton(icon);
-        button.setToolTipText(tooltip);
-        button.setBorderPainted(false);
-        button.setFocusPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(false);
-        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(36, 36));
-        return button;
+        JButton boton = new JButton(icon);
+        boton.setToolTipText(tooltip);
+        boton.setBorderPainted(false);
+        boton.setFocusPainted(false);
+        boton.setContentAreaFilled(false);
+        boton.setOpaque(false);
+        boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        boton.setPreferredSize(new Dimension(36, 36));
+        return boton;
     }
 
-    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener action) {
-        JButton button = crearIconoBoton(icono, tooltip, color);
-        button.addActionListener(action);
-        return button;
+    private JButton crearBotonAccion(FontAwesomeSolid icono, String tooltip, Color color, ActionListener accion) {
+        JButton boton = crearBotonIcono(icono, tooltip, color);
+        boton.addActionListener(accion);
+        return boton;
     }
 
-    public JTable getTablaUsuarios() {
-        return tablaUsuarios;
+    public JTable obtenerTabla() {
+        return tabla;
     }
 
-    public DefaultTableModel getModeloTabla() {
-        return modeloTabla;
+    public DefaultTableModel obtenerModelo() {
+        return modelo;
     }
 }
