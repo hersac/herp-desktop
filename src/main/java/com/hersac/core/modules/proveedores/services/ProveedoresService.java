@@ -11,4 +11,5 @@ public interface ProveedoresService {
     void actualizar(Long proveedorId, ProveedorEntity proveedor);
     void eliminar(Long proveedorId);
     ProveedorEntity buscarPorCodigo(String codigo);
+    ProveedorEntity buscarPorTerceroId(String terceroId);
 }

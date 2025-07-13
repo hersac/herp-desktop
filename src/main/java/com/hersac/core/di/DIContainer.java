@@ -10,6 +10,14 @@ import com.hersac.core.modules.clientes.entities.repositories.ClienteRepository;
 import com.hersac.core.modules.clientes.entities.repositories.impl.ClienteRepositoryImpl;
 import com.hersac.core.modules.clientes.services.ClientesService;
 import com.hersac.core.modules.clientes.services.impl.ClientesServiceImpl;
+import com.hersac.core.modules.compras.entities.repositories.CompraRepository;
+import com.hersac.core.modules.compras.entities.repositories.impl.CompraRepositoryImpl;
+import com.hersac.core.modules.compras.services.ComprasService;
+import com.hersac.core.modules.compras.services.impl.ComprasServiceImpl;
+import com.hersac.core.modules.comprasdetalles.entities.repositories.CompraDetalleRepository;
+import com.hersac.core.modules.comprasdetalles.entities.repositories.impl.CompraDetalleRepositoryImpl;
+import com.hersac.core.modules.comprasdetalles.services.ComprasDetallesService;
+import com.hersac.core.modules.comprasdetalles.services.impl.ComprasDetallesServiceImpl;
 import com.hersac.core.modules.departamentos.entities.repositories.DepartamentoRepository;
 import com.hersac.core.modules.departamentos.entities.repositories.impl.DepartamentoRepositoryImpl;
 import com.hersac.core.modules.departamentos.services.DepartamentosServices;
@@ -18,6 +26,10 @@ import com.hersac.core.modules.items.entities.repositories.ItemRepository;
 import com.hersac.core.modules.items.entities.repositories.impl.ItemRepositoryImpl;
 import com.hersac.core.modules.items.services.ItemsService;
 import com.hersac.core.modules.items.services.impl.ItemsServiceImpl;
+import com.hersac.core.modules.movimientosinventarios.entities.repositories.MovimientoInventarioRepository;
+import com.hersac.core.modules.movimientosinventarios.entities.repositories.impl.MovimientoInventarioRepositoryImpl;
+import com.hersac.core.modules.movimientosinventarios.services.MovimientosInventariosService;
+import com.hersac.core.modules.movimientosinventarios.services.impl.MovimientosInventariosServiceImpl;
 import com.hersac.core.modules.permisos.entities.repositories.PermisoRepository;
 import com.hersac.core.modules.permisos.entities.repositories.impl.PermisoRepositoryImpl;
 import com.hersac.core.modules.permisos.services.PermisosService;
@@ -49,8 +61,11 @@ import com.hersac.core.modules.usuarios.services.impl.UsuariosServicesImpl;
 import com.hersac.ui.controllers.authentication.AuthenticationController;
 import com.hersac.ui.controllers.bodegas.BodegasController;
 import com.hersac.ui.controllers.clientes.ClientesController;
+import com.hersac.ui.controllers.compras.ComprasController;
+import com.hersac.ui.controllers.comprasdetalles.ComprasDetallesController;
 import com.hersac.ui.controllers.departamentos.DepartamentosController;
 import com.hersac.ui.controllers.items.ItemsController;
+import com.hersac.ui.controllers.movimientosinventarios.MovimientosInventariosController;
 import com.hersac.ui.controllers.permisos.PermisosController;
 import com.hersac.ui.controllers.productos.ProductosController;
 import com.hersac.ui.controllers.proveedores.ProveedoresController;
@@ -164,5 +179,23 @@ public class DIContainer {
         BodegaRepository bodegaRepository = new BodegaRepositoryImpl(entityManager);
         BodegasServices bodegasServices = new BodegasServicesImpl(bodegaRepository);
         return new BodegasController(bodegasServices);
+    }
+
+    public ComprasController getComprasController() {
+        CompraRepository compraRepository = new CompraRepositoryImpl(entityManager);
+        ComprasService comprasService = new ComprasServiceImpl(compraRepository);
+        return new ComprasController(comprasService);
+    }
+
+    public ComprasDetallesController getComprasDetallesController() {
+        CompraDetalleRepository compraRepository = new CompraDetalleRepositoryImpl(entityManager);
+        ComprasDetallesService comprasDetallesService = new ComprasDetallesServiceImpl(compraRepository);
+        return new ComprasDetallesController(comprasDetallesService);
+    }
+
+    public MovimientosInventariosController getMovimientosInventariosController() {
+        MovimientoInventarioRepository movimientoInventarioRepository = new MovimientoInventarioRepositoryImpl(entityManager);
+        MovimientosInventariosService movimientosInventariosService = new MovimientosInventariosServiceImpl(movimientoInventarioRepository);
+        return new MovimientosInventariosController(movimientosInventariosService);
     }
 }

@@ -55,4 +55,13 @@ public class ProveedorRepositoryImpl implements ProveedorRepository {
             .getResultList();
         return resultados.isEmpty() ? null : resultados.get(0);
     }
+
+    @Override
+    public ProveedorEntity buscarPorTerceroId(String terceroId) {
+        List<ProveedorEntity> resultados = entityManager.createQuery(
+                "SELECT p FROM ProveedorEntity p WHERE p.tercero.terceroId = :terceroId", ProveedorEntity.class)
+            .setParameter("terceroId", terceroId)
+            .getResultList();
+        return resultados.isEmpty() ? null : resultados.get(0);
+    }
 }

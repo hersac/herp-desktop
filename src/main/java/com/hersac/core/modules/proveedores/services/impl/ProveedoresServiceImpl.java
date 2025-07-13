@@ -52,4 +52,9 @@ public class ProveedoresServiceImpl implements ProveedoresService {
     public ProveedorEntity buscarPorCodigo(String codigo) {
         return proveedorRepository.buscarPorCodigo(codigo);
     }
+
+    @Override
+    public ProveedorEntity buscarPorTerceroId(String terceroId) {
+        return proveedorRepository.buscarPorTerceroId(terceroId);
+    }
 }

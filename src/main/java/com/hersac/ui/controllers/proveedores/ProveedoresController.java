@@ -35,4 +35,8 @@ public class ProveedoresController {
     public ProveedorEntity buscarPorCodigo(String codigo) {
         return proveedoresService.buscarPorCodigo(codigo);
     }
+
+    public ProveedorEntity buscarPorTerceroId(String terceroId) {
+        return proveedoresService.buscarPorTerceroId(terceroId);
+    }
 }

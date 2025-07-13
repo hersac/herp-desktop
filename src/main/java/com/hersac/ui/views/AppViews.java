@@ -5,6 +5,7 @@ import com.hersac.ui.views.authentication.login.LoginView;
 import com.hersac.ui.components.NavbarComponent;
 import com.hersac.ui.components.SidebarComponent;
 import com.hersac.ui.views.comercial.clientes.GestionClientes;
+import com.hersac.ui.views.comercial.compras.GestionCompras;
 import com.hersac.ui.views.comercial.inventario.GestionInventario;
 import com.hersac.ui.views.terceros.GestionTerceros;
 import com.hersac.ui.views.usuarios.auditorias.Auditorias;
@@ -52,6 +53,7 @@ public class AppViews extends JFrame {
 
                     switch (destino) {
                         case "gestion-clientes" -> contenido.add(new GestionClientes(container), BorderLayout.CENTER);
+                        case "gestion-compras" -> contenido.add(new GestionCompras(container), BorderLayout.CENTER); // Placeholder for GestionCompras
                         case "gestion-inventario" -> contenido.add(new GestionInventario(container), BorderLayout.CENTER); // Placeholder for GestionInventario
                         case "gestion-terceros" -> contenido.add(new GestionTerceros(container), BorderLayout.CENTER);
                         case "gestion-usuarios" -> contenido.add(new GestionUsuarios(container), BorderLayout.CENTER);
